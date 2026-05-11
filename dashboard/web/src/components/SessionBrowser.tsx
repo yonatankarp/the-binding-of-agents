@@ -37,7 +37,7 @@ const scanlineStyle = {
   pointerEvents: 'none' as const,
   background: SCANLINE_BG,
 }
-const BESTIARY_SPRITE_SCALE = 2
+const BESTIARY_SPRITE_SCALE = 0.7
 const BESTIARY_LABEL_ROOM_PX = 18
 
 function BestiarySprite({ sprite, alt = '', scale = BESTIARY_SPRITE_SCALE, shiftY = 0 }: {
