@@ -129,10 +129,6 @@ end tell`, createTab, cmd)
 	return exec.Command("osascript", "-e", script).Run()
 }
 
-func shellQuote(s string) string {
-	return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
-}
-
 func (t *ITerm2Terminal) ResumeSession(profile, sessionID, compact string) error {
 	return t.ResumePokegent(profile, sessionID, "", compact)
 }
