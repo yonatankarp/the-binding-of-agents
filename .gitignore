@@ -1,0 +1,37 @@
+# OS files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Local env/secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+dashboard/config/
+*.sqlite3
+*.sqlite3-*
+*.old
+*.log
+
+# Build artifacts
+bin/
+dashboard/pokegents-dashboard
+dashboard/web/node_modules/
+dashboard/web/dist/
+dashboard/web/public/sprites/
+dashboard/acp-fork/node_modules/
+mcp/node_modules/
+dashboard/vendor/
+*.db
+
+# Never commit user data (lives in ~/.ccsession/)
+
+dashboard/dashboard
+
+# Claude Code agent worktree scratch
+.claude/
+
+# Local Go binary build alongside the running one
+dashboard/pokegents-dashboard.new
