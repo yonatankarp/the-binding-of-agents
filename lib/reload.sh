@@ -1,5 +1,5 @@
 _pokegent_reload() {
-  local RUNNING_DIR="$POKEGENTS_DATA/running"
+  local RUNNING_DIR="$BOA_DATA/running"
   local my_tty=$(tty 2>/dev/null)
 
   echo "=== Pokegents Reload ==="
@@ -29,7 +29,7 @@ _pokegent_reload() {
   fi
 
   # ── 2. Save snapshot to file for safety ───────────────────────────────
-  local snapshot_file="$POKEGENTS_DATA/reload-snapshot.json"
+  local snapshot_file="$BOA_DATA/reload-snapshot.json"
   local entries="[]"
   for ((i=1; i<=total; i++)); do
     entries=$(echo "$entries" | jq \
@@ -132,7 +132,7 @@ end tell" &>/dev/null
   # ── 6. Rebuild dashboard ──────────────────────────────────────────────
   echo ""
   echo "Rebuilding dashboard..."
-  if (cd "$POKEGENTS_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o pokegents-dashboard . 2>&1); then
+  if (cd "$BOA_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o pokegents-dashboard . 2>&1); then
     echo "  Build successful"
   else
     echo "  Build FAILED — using existing binary"
@@ -142,11 +142,11 @@ end tell" &>/dev/null
   echo "Restarting dashboard..."
   _pokegent_kill_dashboard
   sleep 0.5
-  local dashboard_bin="$POKEGENTS_ROOT/dashboard/pokegents-dashboard"
+  local dashboard_bin="$BOA_ROOT/dashboard/pokegents-dashboard"
   if [[ -f "$dashboard_bin" ]]; then
     "$dashboard_bin" serve &>/dev/null &
     disown
-    echo "  Dashboard running at http://localhost:$POKEGENTS_PORT"
+    echo "  Dashboard running at http://localhost:$BOA_PORT"
   else
     echo "  WARNING: Dashboard binary not found"
   fi

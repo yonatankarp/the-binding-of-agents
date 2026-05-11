@@ -4,8 +4,8 @@
 # `pokegents` shim rather than sourcing this file from a shell profile.
 
 # Resolve install directory at source time
-POKEGENTS_ROOT="${${(%):-%x}:A:h}"
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
+BOA_ROOT="${${(%):-%x}:A:h}"
+BOA_DATA="${BOA_DATA:-$HOME/.the-binding-of-agents}"
 
 # Platform detection — iTerm2 features are optional
 POKEGENTS_HAS_ITERM=false
@@ -51,25 +51,25 @@ _pokegent_run_open_command() {
 }
 
 # Source helper modules
-for _lib in "$POKEGENTS_ROOT"/lib/*.sh; do
+for _lib in "$BOA_ROOT"/lib/*.sh; do
   [[ -f "$_lib" ]] && source "$_lib"
 done
 
 pokegent() {
-  local PROFILES_DIR="$POKEGENTS_DATA/profiles"
-  local PROJECTS_DIR="$POKEGENTS_DATA/projects"
-  local ROLES_DIR="$POKEGENTS_DATA/roles"
-  local HISTORY_DIR="$POKEGENTS_DATA/history"
-  local RUNNING_DIR="$POKEGENTS_DATA/running"
-  local POKEGENTS_CONFIG="$POKEGENTS_DATA/config.json"
+  local PROFILES_DIR="$BOA_DATA/profiles"
+  local PROJECTS_DIR="$BOA_DATA/projects"
+  local ROLES_DIR="$BOA_DATA/roles"
+  local HISTORY_DIR="$BOA_DATA/history"
+  local RUNNING_DIR="$BOA_DATA/running"
+  local POKEGENTS_CONFIG="$BOA_DATA/config.json"
   mkdir -p "$HISTORY_DIR" "$RUNNING_DIR"
 
   # Load config (single source of truth for port, defaults, etc.)
-  local POKEGENTS_PORT=$(jq -r '.port // 7834' "$POKEGENTS_CONFIG" 2>/dev/null || echo "7834")
+  local BOA_PORT=$(jq -r '.port // 7834' "$POKEGENTS_CONFIG" 2>/dev/null || echo "7834")
   local POKEGENTS_DEFAULT_PROFILE=$(jq -r '.default_profile // "personal"' "$POKEGENTS_CONFIG" 2>/dev/null || echo "personal")
   local POKEGENTS_SKIP_PERMISSIONS=$(jq -r '.skip_permissions // false' "$POKEGENTS_CONFIG" 2>/dev/null || echo "false")
   local POKEGENTS_ITERM_RESTORE=$(jq -r '.iterm2_restore_profile // "Default"' "$POKEGENTS_CONFIG" 2>/dev/null || echo "Default")
-  export POKEGENTS_DASHBOARD_URL="http://localhost:$POKEGENTS_PORT"
+  export POKEGENTS_DASHBOARD_URL="http://localhost:$BOA_PORT"
 
   # Resolve a project name by alias. Checks each project's "aliases" array.
   # Prints the canonical project filename (without .json) if found, empty otherwise.
@@ -121,7 +121,7 @@ for d in sys.argv[2:]:
     local _term="$1" _cwd="$2"
 
     # 1. Search name-overrides.json (dashboard renames — highest priority)
-    local _overrides_file="$POKEGENTS_DATA/name-overrides.json"
+    local _overrides_file="$BOA_DATA/name-overrides.json"
     if [[ -f "$_overrides_file" ]]; then
       local _override_results=$(jq -r --arg term "$_term" '
         to_entries[] | select(.value | test($term; "i")) | "\(.key)\t\(.value)"
@@ -275,15 +275,15 @@ HELP
 
   # dashboard
   if [[ "$1" == "dashboard" ]]; then
-    local dashboard_bin="$POKEGENTS_ROOT/dashboard/the-binding-of-agents-dashboard"
+    local dashboard_bin="$BOA_ROOT/dashboard/the-binding-of-agents-dashboard"
     case "${2:-open}" in
       start)
         if [[ ! -f "$dashboard_bin" ]]; then
           echo "Dashboard not built. Run: pokegent dashboard build"
           return 1
         fi
-        POKEGENTS_DATA="$POKEGENTS_DATA" "$dashboard_bin" serve &
-        echo "Dashboard started at http://localhost:$POKEGENTS_PORT"
+        BOA_DATA="$BOA_DATA" "$dashboard_bin" serve &
+        echo "Dashboard started at http://localhost:$BOA_PORT"
         ;;
       stop)
         _pokegent_kill_dashboard
@@ -292,16 +292,16 @@ HELP
       restart)
         _pokegent_kill_dashboard
         sleep 0.5
-        POKEGENTS_DATA="$POKEGENTS_DATA" "$dashboard_bin" serve &>/dev/null &
+        BOA_DATA="$BOA_DATA" "$dashboard_bin" serve &>/dev/null &
         disown
-        echo "Dashboard restarted at http://localhost:$POKEGENTS_PORT"
+        echo "Dashboard restarted at http://localhost:$BOA_PORT"
         ;;
       build)
         echo "=== Dashboard Build ==="
         echo ""
         # Build Go server
         echo "Building server..."
-        if (cd "$POKEGENTS_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o the-binding-of-agents-dashboard . 2>&1); then
+        if (cd "$BOA_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o the-binding-of-agents-dashboard . 2>&1); then
           echo "  ✓ Server built"
         else
           echo "  ✗ Server build FAILED"
@@ -309,7 +309,7 @@ HELP
         fi
         # Build frontend
         echo "Building frontend..."
-        if (cd "$POKEGENTS_ROOT/dashboard/web" && npm run build 2>&1 | tail -3); then
+        if (cd "$BOA_ROOT/dashboard/web" && npm run build 2>&1 | tail -3); then
           echo "  ✓ Frontend built"
         else
           echo "  ✗ Frontend build FAILED"
@@ -320,14 +320,14 @@ HELP
         echo "Restarting dashboard..."
         _pokegent_kill_dashboard
         sleep 0.5
-        POKEGENTS_DATA="$POKEGENTS_DATA" "$dashboard_bin" serve &>/dev/null &
+        BOA_DATA="$BOA_DATA" "$dashboard_bin" serve &>/dev/null &
         disown
-        echo "  ✓ Dashboard running at http://localhost:$POKEGENTS_PORT"
+        echo "  ✓ Dashboard running at http://localhost:$BOA_PORT"
         echo ""
         echo "=== Build complete ==="
         ;;
       open|"")
-        local url="http://localhost:$POKEGENTS_PORT"
+        local url="http://localhost:$BOA_PORT"
         local browser_open_command
         browser_open_command="$(_pokegent_config_string "$POKEGENTS_CONFIG" browser_open_command "")"
         if [[ -n "$browser_open_command" ]]; then
@@ -627,7 +627,7 @@ ${_role_prompt}"
   local display_name="$title"
   if [[ "$continue_mode" == "true" && -n "$resume_session_id" ]]; then
     # Check name overrides first (prefix match)
-    local _overrides_file="$POKEGENTS_DATA/name-overrides.json"
+    local _overrides_file="$BOA_DATA/name-overrides.json"
     if [[ -f "$_overrides_file" ]]; then
       local _override=$(jq -r --arg sid "$resume_session_id" '
         to_entries[] | select(.key | startswith($sid)) | .value
@@ -707,13 +707,13 @@ if last_title: print(last_title)
   local pokegent_id="${inherited_pokegent_id:-$session_id}"
 
   # Set tab icon to the agent's Pokemon sprite via a per-session dynamic profile (iTerm2 only)
-  local sprite_dir="$POKEGENTS_ROOT/dashboard/web/public/sprites"
+  local sprite_dir="$BOA_ROOT/dashboard/web/public/sprites"
   local sprite=""
 
   # For resume/fork, inherit sprite from identity file or running file
   if [[ "$continue_mode" == "true" && -n "$resume_session_id" ]]; then
     # Check identity files first (persistent, source of truth)
-    for af in "$POKEGENTS_DATA/agents"/*.json(N); do
+    for af in "$BOA_DATA/agents"/*.json(N); do
       local _af_pgid=$(jq -r '.pokegent_id // empty' "$af" 2>/dev/null)
       if [[ "$_af_pgid" == "$resume_session_id"* ]]; then
         sprite=$(jq -r '.sprite // empty' "$af" 2>/dev/null)
@@ -728,7 +728,7 @@ if last_title: print(last_title)
         local _rf_pgid=$(jq -r '.pokegent_id // empty' "$rf" 2>/dev/null)
         if [[ "$_rf_sid" == "$resume_session_id"* || "$_rf_pgid" == "$resume_session_id"* ]]; then
           # Get sprite from identity file if available
-          local _id_file="$POKEGENTS_DATA/agents/${_rf_pgid}.json"
+          local _id_file="$BOA_DATA/agents/${_rf_pgid}.json"
           if [[ -f "$_id_file" ]]; then
             sprite=$(jq -r '.sprite // empty' "$_id_file" 2>/dev/null)
           fi
@@ -740,7 +740,7 @@ if last_title: print(last_title)
     fi
     # Last resort: check dashboard API (search index cache)
     if [[ -z "$sprite" ]]; then
-      local _port=$(jq -r '.port // 7834' "$POKEGENTS_DATA/config.json" 2>/dev/null || echo "7834")
+      local _port=$(jq -r '.port // 7834' "$BOA_DATA/config.json" 2>/dev/null || echo "7834")
       sprite=$(curl -s --max-time 2 "http://localhost:${_port}/api/sessions/${resume_session_id}/meta" 2>/dev/null | jq -r '.sprite // empty' 2>/dev/null || echo "")
     fi
   fi
@@ -790,7 +790,7 @@ if last_title: print(last_title)
   fi
 
   # Reset status file to idle (clear stale state from previous run)
-  local status_file="$POKEGENTS_DATA/status/${pokegent_id}.json"
+  local status_file="$BOA_DATA/status/${pokegent_id}.json"
   jq -n \
     --arg session_id "$session_id" \
     --arg state "idle" \
@@ -817,7 +817,7 @@ if last_title: print(last_title)
   local created_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
   # Write persistent agent identity (never deleted — survives session end)
-  local agents_dir="$POKEGENTS_DATA/agents"
+  local agents_dir="$BOA_DATA/agents"
   mkdir -p "$agents_dir"
   local identity_file="$agents_dir/${pokegent_id}.json"
   if [[ -f "$identity_file" ]]; then
@@ -971,11 +971,11 @@ if last_title: print(last_title)
       fi
       # Fall back to search DB if no running file matched (dead agent case)
       if [[ -z "$orig_pgid" ]]; then
-        local _port=$(jq -r '.port // 7834' "$POKEGENTS_DATA/config.json" 2>/dev/null || echo "7834")
+        local _port=$(jq -r '.port // 7834' "$BOA_DATA/config.json" 2>/dev/null || echo "7834")
         local _meta=$(curl -s --max-time 2 "http://localhost:${_port}/api/sessions/${matches[1]}/meta" 2>/dev/null)
         orig_pgid=$(echo "$_meta" | jq -r '.pokegent_id // empty' 2>/dev/null)
       fi
-      local orig_identity="$POKEGENTS_DATA/agents/${orig_pgid}.json"
+      local orig_identity="$BOA_DATA/agents/${orig_pgid}.json"
       if [[ -n "$orig_pgid" && -f "$orig_identity" ]]; then
         [[ -z "$task_group" ]] && task_group=$(jq -r '.task_group // empty' "$orig_identity" 2>/dev/null)
         [[ -z "$sprite" ]] && sprite=$(jq -r '.sprite // empty' "$orig_identity" 2>/dev/null)
@@ -994,8 +994,8 @@ if last_title: print(last_title)
       pokegent_id="${inherited_pokegent_id:-$fresh_pokegent_id}"
 
       # Write persistent identity file
-      local identity_file="$POKEGENTS_DATA/agents/${pokegent_id}.json"
-      mkdir -p "$POKEGENTS_DATA/agents"
+      local identity_file="$BOA_DATA/agents/${pokegent_id}.json"
+      mkdir -p "$BOA_DATA/agents"
       if [[ -f "$identity_file" ]]; then
         jq \
           --arg name "$display_name" \
@@ -1078,8 +1078,8 @@ Keep messages concise and actionable. Include file paths, specific line numbers,
 
   # Shared base prompt — prepended to every agent's system prompt
   local shared_prompt=""
-  if [[ -f "$POKEGENTS_DATA/system-prompt.md" ]]; then
-    shared_prompt=$(<"$POKEGENTS_DATA/system-prompt.md")
+  if [[ -f "$BOA_DATA/system-prompt.md" ]]; then
+    shared_prompt=$(<"$BOA_DATA/system-prompt.md")
   fi
 
   local full_prompt="${shared_prompt:+$shared_prompt
@@ -1132,7 +1132,7 @@ ${handoff_context}"
   fi
   trap "rm -f '$dyn_profile_cleanup'" EXIT INT TERM HUP
 
-  POKEGENTS_ROOT="$POKEGENTS_ROOT" POKEGENTS_DATA="$POKEGENTS_DATA" POKEGENTS_PROFILE_NAME="$profile_name" \
+  BOA_ROOT="$BOA_ROOT" BOA_DATA="$BOA_DATA" POKEGENTS_PROFILE_NAME="$profile_name" \
     POKEGENTS_SESSION_ID="${pokegent_id:-$session_id}" \
     POKEGENT_ID="$pokegent_id" \
     CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1 claude "${claude_args[@]}"

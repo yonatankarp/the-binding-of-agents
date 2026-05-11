@@ -880,7 +880,7 @@ func detectLaunchAgent(root string, paths PathService) checkStatus {
 
 func repairClaudeHooks(root string, paths PathService) (map[string]any, error) {
 	if root == "" {
-		return nil, fmt.Errorf("could not resolve POKEGENTS_ROOT")
+		return nil, fmt.Errorf("could not resolve BOA_ROOT")
 	}
 	settingsPath := paths.ClaudeSettingsPath()
 	if err := os.MkdirAll(filepath.Dir(settingsPath), 0o755); err != nil {
@@ -984,7 +984,7 @@ func countCommand(v any, cmd string) int {
 
 func repairMCPRegistration(ctx context.Context, root string) (map[string]any, error) {
 	if root == "" {
-		return nil, fmt.Errorf("could not resolve POKEGENTS_ROOT")
+		return nil, fmt.Errorf("could not resolve BOA_ROOT")
 	}
 	serverPath := filepath.Join(root, "mcp", "server.js")
 	if !fileExists(serverPath) {
@@ -1008,7 +1008,7 @@ func installDashboardLaunchAgent(root string, paths PathService, port int, runAt
 		return "", fmt.Errorf("LaunchAgent install is only supported on macOS")
 	}
 	if root == "" {
-		return "", fmt.Errorf("could not resolve POKEGENTS_ROOT")
+		return "", fmt.Errorf("could not resolve BOA_ROOT")
 	}
 	bin := filepath.Join(root, "dashboard", "pokegents-dashboard")
 	if !fileExists(bin) {
@@ -1024,7 +1024,7 @@ func installDashboardLaunchAgent(root string, paths PathService, port int, runAt
 <plist version="1.0"><dict>
   <key>Label</key><string>com.pokegents.dashboard</string>
   <key>ProgramArguments</key><array><string>%s</string><string>serve</string><string>--port</string><string>%d</string></array>
-  <key>EnvironmentVariables</key><dict><key>POKEGENTS_ROOT</key><string>%s</string><key>POKEGENTS_DATA</key><string>%s</string></dict>
+  <key>EnvironmentVariables</key><dict><key>BOA_ROOT</key><string>%s</string><key>BOA_DATA</key><string>%s</string></dict>
   <key>RunAtLoad</key><%s/>
   <key>KeepAlive</key><true/>
   <key>StandardOutPath</key><string>%s</string>

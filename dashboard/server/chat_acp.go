@@ -1255,7 +1255,7 @@ func (m *ChatManager) pokegentsMCPServers(opts ChatLaunchOptions) []any {
 		"command": "node",
 		"args":    []string{serverPath},
 		"env": []map[string]string{
-			{"name": "POKEGENTS_DATA", "value": m.dataDir},
+			{"name": "BOA_DATA", "value": m.dataDir},
 			{"name": "POKEGENTS_SESSION_ID", "value": opts.RunID},
 			{"name": "POKEGENT_ID", "value": opts.RunID},
 			{"name": "POKEGENTS_PROFILE_NAME", "value": opts.Profile},
@@ -1264,7 +1264,7 @@ func (m *ChatManager) pokegentsMCPServers(opts ChatLaunchOptions) []any {
 }
 
 func resolvePokegentsRoot() string {
-	if root := os.Getenv("POKEGENTS_ROOT"); root != "" {
+	if root := os.Getenv("BOA_ROOT"); root != "" {
 		return root
 	}
 	candidates := []string{}

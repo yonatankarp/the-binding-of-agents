@@ -3,8 +3,8 @@
 DASHBOARD_DIR="$(cd "$(dirname "$0")" && pwd)"
 BINARY="$DASHBOARD_DIR/pokegents-dashboard"
 LOG="/tmp/pokegents-dashboard.log"
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.ccsession}"
-PORT=$(jq -r '.port // 7834' "$POKEGENTS_DATA/config.json" 2>/dev/null || echo "7834")
+BOA_DATA="${BOA_DATA:-$HOME/.ccsession}"
+PORT=$(jq -r '.port // 7834' "$BOA_DATA/config.json" 2>/dev/null || echo "7834")
 
 # Kill existing
 kill $(lsof -ti :$PORT) 2>/dev/null

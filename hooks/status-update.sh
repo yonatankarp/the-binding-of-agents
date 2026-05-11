@@ -1,5 +1,5 @@
 #!/bin/bash
-# pokegents status hook — writes structured status to $POKEGENTS_DATA/status/
+# pokegents status hook — writes structured status to $BOA_DATA/status/
 #
 # State machine:
 #   idle        — just started/resumed, no work yet (grey)
@@ -14,8 +14,8 @@
 # the process group and would kill this hook before it can write the status file.
 trap '' INT
 
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
-STATUS_DIR="$POKEGENTS_DATA/status"
+BOA_DATA="${BOA_DATA:-$HOME/.the-binding-of-agents}"
+STATUS_DIR="$BOA_DATA/status"
 mkdir -p "$STATUS_DIR"
 
 INPUT=$(cat)
@@ -39,8 +39,8 @@ fi
 # messages). The chat backend's translateUpdate handles status writes for
 # chat agents; this script is for iterm2 agents only.
 _RT_LOOKUP="${POKEGENT_ID:-${POKEGENTS_SESSION_ID:-$SESSION_ID}}"
-if [ -d "$POKEGENTS_DATA/running" ] && [ -n "$_RT_LOOKUP" ]; then
-  for _rt_rf in "$POKEGENTS_DATA/running"/*.json; do
+if [ -d "$BOA_DATA/running" ] && [ -n "$_RT_LOOKUP" ]; then
+  for _rt_rf in "$BOA_DATA/running"/*.json; do
     [ -f "$_rt_rf" ] || continue
     _RT_PGID=$(jq -r '.pokegent_id // empty' "$_rt_rf" 2>/dev/null)
     if [ "$_RT_PGID" = "$_RT_LOOKUP" ]; then
@@ -64,7 +64,7 @@ CLEAR_OUTPUT=false
 # Quick reconciliation: ensure the running file's claude_session_id (session_id field)
 # matches Claude's actual SESSION_ID. Files are keyed by pokegent_id (no renames needed).
 # Match by POKEGENT_ID env var first (new system), fall back to POKEGENTS_SESSION_ID (legacy).
-RUNNING_DIR_CHECK="$POKEGENTS_DATA/running"
+RUNNING_DIR_CHECK="$BOA_DATA/running"
 POKEGENT_ID_CHECK="${POKEGENT_ID:-${POKEGENTS_SESSION_ID:-}}"
 if [ -d "$RUNNING_DIR_CHECK" ] && [ "$EVENT" != "SessionStart" ] && [ "$EVENT" != "SessionEnd" ] && [ -n "$POKEGENT_ID_CHECK" ]; then
   for _rf in "$RUNNING_DIR_CHECK"/*.json; do
@@ -115,8 +115,8 @@ case "$EVENT" in
     # pokegent_id (stable across resume/migration). Fall back to legacy IDs
     # only for old running files that pre-date the pokegent_id refactor.
     BUDGET_LOOKUP="${POKEGENT_ID:-${POKEGENTS_SESSION_ID:-$SESSION_ID}}"
-    BUDGET_FILE="$POKEGENTS_DATA/messages/${BUDGET_LOOKUP}/_msg_budget"
-    mkdir -p "$POKEGENTS_DATA/messages/${BUDGET_LOOKUP}" 2>/dev/null
+    BUDGET_FILE="$BOA_DATA/messages/${BUDGET_LOOKUP}/_msg_budget"
+    mkdir -p "$BOA_DATA/messages/${BUDGET_LOOKUP}" 2>/dev/null
     echo "0" > "$BUDGET_FILE" 2>/dev/null
     ;;
   "PreToolUse")
@@ -225,7 +225,7 @@ case "$EVENT" in
     # Disable errexit for the reconciliation block — individual jq failures
     # shouldn't abort the whole hook
     set +e
-    RUNNING_DIR="$POKEGENTS_DATA/running"
+    RUNNING_DIR="$BOA_DATA/running"
     # Use POKEGENT_ID (new stable ID) with fallback to POKEGENTS_SESSION_ID (legacy)
     PGID="${POKEGENT_ID:-${POKEGENTS_SESSION_ID:-}}"
 
@@ -299,7 +299,7 @@ case "$EVENT" in
       fi
     fi
     rm -f "$STATUS_DIR/${SESSION_ID}.json"
-    RUNNING_DIR="$POKEGENTS_DATA/running"
+    RUNNING_DIR="$BOA_DATA/running"
     # Clean running files — but ONLY if WE still own them. If a dashboard
     # interface migration flipped the file to interface=chat, the chat
     # backend owns it now and we must not delete (otherwise the agent
@@ -409,8 +409,8 @@ fi
 # ── Activity log ──────────────────────────────────────────────────────────
 # Shared append-only log so agents know what others changed.
 # Stored per-project at ~/.the-binding-of-agents/activity/{project_hash}.log
-ACTIVITY_DIR="$POKEGENTS_DATA/activity"
-LASTREAD_DIR="$POKEGENTS_DATA/activity-lastread"
+ACTIVITY_DIR="$BOA_DATA/activity"
+LASTREAD_DIR="$BOA_DATA/activity-lastread"
 PROJECT_HASH=""
 if [ -n "$CWD" ]; then
   PROJECT_HASH=$(echo "$CWD" | sed 's|/|-|g; s|^-||' 2>/dev/null || echo "default")
@@ -432,7 +432,7 @@ if [ "$EVENT" = "Stop" ] && [ -n "$PROJECT_HASH" ]; then
   fi
   # Get display name from running file
   AGENT_NAME=""
-  for _rf in "$POKEGENTS_DATA/running"/*-"${SESSION_ID}".json; do
+  for _rf in "$BOA_DATA/running"/*-"${SESSION_ID}".json; do
     [ -f "$_rf" ] && AGENT_NAME=$(jq -r '.display_name // empty' "$_rf" 2>/dev/null) && break
   done
   [ -z "$AGENT_NAME" ] && AGENT_NAME="${POKEGENTS_PROFILE_NAME:-unknown}"

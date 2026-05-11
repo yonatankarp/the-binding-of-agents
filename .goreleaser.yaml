@@ -36,6 +36,7 @@ archives:
       - DISCLAIMER.md
       - THIRD_PARTY_NOTICES.md
       - README.md
+      - install.sh
       - dashboard/web/dist
 
 checksum:

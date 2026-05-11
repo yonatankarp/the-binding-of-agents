@@ -45,7 +45,7 @@ func runServe(args []string) {
 		log.Fatalf("failed to parse serve flags: %v", err)
 	}
 	// Override from environment
-	if v := os.Getenv("POKEGENTS_DATA"); v != "" {
+	if v := os.Getenv("BOA_DATA"); v != "" {
 		cfg.DataDir = v
 		cfg.SearchDBPath = filepath.Join(v, "search.db")
 	}
@@ -64,11 +64,29 @@ func runServe(args []string) {
 		cfg.BindHost = *bindHost
 	}
 
-	// Find web directory: check relative to binary, then cwd
-	for _, candidate := range []string{
-		filepath.Join(filepath.Dir(os.Args[0]), "web", "dist"),
+	// Find web directory. Resolution order:
+	//   1. BOA_ROOT env (set by the installed shim) — covers both source
+	//      checkouts and binary archives extracted anywhere on disk.
+	//   2. Directory next to the binary — the source build layout where
+	//      the binary lives at <repo>/dashboard/.
+	//   3. Binary dir + dashboard/web/dist — the goreleaser archive layout
+	//      where the binary is at the archive root and dist is bundled
+	//      under dashboard/.
+	//   4. cwd-relative — last-ditch fallback for `go run` from dashboard/.
+	binDir := filepath.Dir(os.Args[0])
+	candidates := []string{}
+	if root := os.Getenv("BOA_ROOT"); root != "" {
+		candidates = append(candidates,
+			filepath.Join(root, "dashboard", "web", "dist"),
+			filepath.Join(root, "web", "dist"),
+		)
+	}
+	candidates = append(candidates,
+		filepath.Join(binDir, "web", "dist"),
+		filepath.Join(binDir, "dashboard", "web", "dist"),
 		filepath.Join("web", "dist"),
-	} {
+	)
+	for _, candidate := range candidates {
 		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
 			cfg.WebDir = candidate
 			break
@@ -107,7 +125,7 @@ func runServe(args []string) {
 
 func runIndex() {
 	cfg := server.DefaultConfig()
-	if v := os.Getenv("POKEGENTS_DATA"); v != "" {
+	if v := os.Getenv("BOA_DATA"); v != "" {
 		cfg.DataDir = v
 		cfg.SearchDBPath = filepath.Join(v, "search.db")
 	}

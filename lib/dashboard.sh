@@ -1,6 +1,6 @@
 _pokegent_kill_dashboard() {
   # Kill only the LISTENING server process, not browser clients connected to the port
-  local port=${POKEGENTS_PORT:-7834}
+  local port=${BOA_PORT:-7834}
   local pids=$(lsof -ti :${port} -sTCP:LISTEN 2>/dev/null)
   if [[ -n "$pids" ]]; then
     echo "$pids" | xargs kill 2>/dev/null
@@ -16,14 +16,14 @@ _pokegent_kill_dashboard() {
 _pokegent_list_profiles() {
   echo "Compatibility profiles:"
   local _found=false
-  for f in "$POKEGENTS_DATA/profiles"/*.json(N); do
+  for f in "$BOA_DATA/profiles"/*.json(N); do
     _found=true
     local pname=$(basename "$f" .json)
     local emoji=$(jq -r '.emoji' "$f")
     local title=$(jq -r '.title' "$f")
     local cwd=$(jq -r '.cwd' "$f")
     local _shadow=""
-    [[ -f "$POKEGENTS_DATA/projects/${pname}.json" ]] && _shadow=" (shadowed by project)"
+    [[ -f "$BOA_DATA/projects/${pname}.json" ]] && _shadow=" (shadowed by project)"
     printf "  %s %-12s %s  (%s)%s\n" "$emoji" "$pname" "$title" "$cwd" "$_shadow"
   done
   [[ "$_found" == "false" ]] && echo "  (none)"
@@ -32,7 +32,7 @@ _pokegent_list_profiles() {
 _pokegent_list_projects() {
   echo "Projects:"
   local _found=false
-  for f in "$POKEGENTS_DATA/projects"/*.json(N); do
+  for f in "$BOA_DATA/projects"/*.json(N); do
     _found=true
     local pname=$(basename "$f" .json)
     local title=$(jq -r '.title' "$f")
@@ -51,7 +51,7 @@ _pokegent_list_projects() {
 _pokegent_list_roles() {
   echo "Roles:"
   local _found=false
-  for f in "$POKEGENTS_DATA/roles"/*.json(N); do
+  for f in "$BOA_DATA/roles"/*.json(N); do
     _found=true
     local rname=$(basename "$f" .json)
     local emoji=$(jq -r '.emoji' "$f")

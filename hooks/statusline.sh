@@ -4,10 +4,10 @@
 
 input=$(cat)
 
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
+BOA_DATA="${BOA_DATA:-$HOME/.the-binding-of-agents}"
 
 if [[ -n "$POKEGENTS_PROFILE_NAME" ]]; then
-  profile_file="$POKEGENTS_DATA/profiles/${POKEGENTS_PROFILE_NAME}.json"
+  profile_file="$BOA_DATA/profiles/${POKEGENTS_PROFILE_NAME}.json"
 
   if [[ -f "$profile_file" ]]; then
     emoji=$(jq -r '.emoji // ""' "$profile_file" 2>/dev/null || echo "")

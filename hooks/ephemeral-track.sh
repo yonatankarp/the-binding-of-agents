@@ -10,9 +10,9 @@
 # NOTE: No set -e! Hooks must NEVER crash.
 trap '' INT  # Ignore SIGINT so Ctrl+C doesn't kill the hook mid-write
 
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
-EPHEMERAL_DIR="$POKEGENTS_DATA/ephemeral"
-PENDING_DIR="$POKEGENTS_DATA/ephemeral-pending"
+BOA_DATA="${BOA_DATA:-$HOME/.the-binding-of-agents}"
+EPHEMERAL_DIR="$BOA_DATA/ephemeral"
+PENDING_DIR="$BOA_DATA/ephemeral-pending"
 mkdir -p "$EPHEMERAL_DIR" "$PENDING_DIR"
 
 INPUT=$(cat)
@@ -27,8 +27,8 @@ if [ -z "$SESSION_ID" ]; then
 fi
 
 # Resolve dashboard URL from config
-POKEGENTS_PORT=$(jq -r '.port // 7834' "$POKEGENTS_DATA/config.json" 2>/dev/null || echo "7834")
-DASHBOARD_URL="${POKEGENTS_DASHBOARD_URL:-http://localhost:$POKEGENTS_PORT}"
+BOA_PORT=$(jq -r '.port // 7834' "$BOA_DATA/config.json" 2>/dev/null || echo "7834")
+DASHBOARD_URL="${POKEGENTS_DASHBOARD_URL:-http://localhost:$BOA_PORT}"
 
 # Resolve parent session ID (prefer stable pokegent_id)
 PARENT_SID="${POKEGENT_ID:-${POKEGENTS_SESSION_ID:-$SESSION_ID}}"

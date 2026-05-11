@@ -77,7 +77,7 @@ func TestRealACPRoundTripMigration(t *testing.T) {
 	}
 	t.Setenv("HOME", home)
 	t.Setenv("CODEX_HOME", codexHome)
-	t.Setenv("POKEGENTS_ROOT", repoRoot)
+	t.Setenv("BOA_ROOT", repoRoot)
 	t.Setenv("POKEGENTS_CLAUDE_ACP_PATH", acpPath)
 	if sourceClaudeConfig != "" && os.Getenv("ANTHROPIC_API_KEY") == "" {
 		// Usually unset is best for subscription auth (the CLI uses HOME and

@@ -12,7 +12,7 @@ FAIL=0
 
 # Create temp dirs
 TMPDIR=$(mktemp -d)
-export POKEGENTS_DATA="$TMPDIR"
+export BOA_DATA="$TMPDIR"
 mkdir -p "$TMPDIR/status" "$TMPDIR/running" "$TMPDIR/messages"
 trap "rm -rf $TMPDIR" EXIT
 

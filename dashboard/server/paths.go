@@ -17,7 +17,7 @@ type PathService struct {
 func NewPathService(dataDir string) PathService {
 	home, _ := os.UserHomeDir()
 	if dataDir == "" {
-		dataDir = os.Getenv("POKEGENTS_DATA")
+		dataDir = os.Getenv("BOA_DATA")
 	}
 	if dataDir == "" {
 		dataDir = filepath.Join(home, ".the-binding-of-agents")

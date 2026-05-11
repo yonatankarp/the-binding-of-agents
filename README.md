@@ -19,20 +19,22 @@ A TBOI-themed dashboard for managing Claude Code and Codex AI agent sessions.
 
 ### Pre-built binary (recommended)
 
-Download the archive for your platform from the [Releases](https://github.com/yonatankarp/the-binding-of-agents/releases) page, extract it, then run the installer to register the `boa` CLI shim and storage directory:
+Download the archive for your platform from the [Releases](https://github.com/yonatankarp/the-binding-of-agents/releases) page, extract it, then run the installer in binary mode to register the `boa` CLI shim and storage directory:
 
 ```sh
-./install.sh
-boa dashboard start
-boa dashboard open
+./install.sh --binary
+boa serve
+# then open http://localhost:7834 in your browser
 ```
+
+The `--binary` flag tells the installer the directory it's running from already contains the pre-built `boa` binary and `dashboard/web/dist/` bundle, so no Go or Node toolchain is required.
 
 The dashboard binds to `http://localhost:7834` by default (configurable in `~/.the-binding-of-agents/config.json`).
 
 Supported platforms (v0.1):
 - macOS (Apple Silicon and Intel)
 
-Linux and Windows builds are deferred for v0.1 due to upstream portability work that's required first. See `.goreleaser.yaml` for details. Source builds work on Linux today (with `POKEGENTS_DEV_BUILD=1 ./install.sh`); Windows source builds are not currently supported.
+Linux and Windows builds are deferred for v0.1 due to upstream portability work that's required first. See `.goreleaser.yaml` for details. Source builds work on Linux today (with `BOA_DEV_BUILD=1 ./install.sh`); Windows source builds are not currently supported.
 
 ### Build from source
 
@@ -41,10 +43,10 @@ Requirements: Go 1.22+, Node 18+, npm, python3.
 ```sh
 git clone https://github.com/yonatankarp/the-binding-of-agents.git
 cd the-binding-of-agents
-POKEGENTS_DEV_BUILD=1 ./install.sh
+BOA_DEV_BUILD=1 ./install.sh
 ```
 
-The install script creates the storage directory at `~/.the-binding-of-agents/` with default config, roles, and project, then installs a `boa` CLI shim at `~/.local/bin/boa`. When `POKEGENTS_DEV_BUILD=1` is set, it also builds the Go dashboard server, the React web bundle, and the ACP adapter. Without that flag the script expects pre-built binaries from a release artifact.
+The install script creates the storage directory at `~/.the-binding-of-agents/` with default config, roles, and project, then installs a `boa` CLI shim at `~/.local/bin/boa`. When `BOA_DEV_BUILD=1` is set, it also builds the Go dashboard server, the React web bundle, and the ACP adapter. Without that flag the script expects pre-built binaries from a release artifact.
 
 ## Architecture
 
