@@ -6,7 +6,7 @@ import "strings"
 // Implemented by store.RunningSession and server.AgentState.
 type Agent interface {
 	GetSessionID() string
-	GetPokegentID() string
+	GetRunID() string
 	GetDisplayName() string
 	GetTTY() string
 }
@@ -24,7 +24,7 @@ func ResolveToSessionID(agents []Agent, id string) string {
 	}
 	// Pass 2: exact or prefix match on pokegent_id (skip if same as session_id)
 	for _, a := range agents {
-		pgid := a.GetPokegentID()
+		pgid := a.GetRunID()
 		if pgid != "" && pgid != a.GetSessionID() {
 			if pgid == id || strings.HasPrefix(pgid, id) {
 				return a.GetSessionID()
@@ -34,11 +34,11 @@ func ResolveToSessionID(agents []Agent, id string) string {
 	return id
 }
 
-// ResolveToPokegentID finds the stable pokegent ID for a given ID.
-func ResolveToPokegentID(agents []Agent, id string) string {
+// ResolveToRunID finds the stable pokegent ID for a given ID.
+func ResolveToRunID(agents []Agent, id string) string {
 	// Pass 1: match on pokegent_id
 	for _, a := range agents {
-		pgid := a.GetPokegentID()
+		pgid := a.GetRunID()
 		if pgid != "" && (pgid == id || strings.HasPrefix(pgid, id)) {
 			return pgid
 		}
@@ -47,7 +47,7 @@ func ResolveToPokegentID(agents []Agent, id string) string {
 	for _, a := range agents {
 		sid := a.GetSessionID()
 		if sid == id || strings.HasPrefix(sid, id) {
-			if pgid := a.GetPokegentID(); pgid != "" {
+			if pgid := a.GetRunID(); pgid != "" {
 				return pgid
 			}
 			return sid
@@ -67,7 +67,7 @@ func ResolveAgent(agents []Agent, id string) Agent {
 	}
 	// Pass 2: pokegent_id
 	for _, a := range agents {
-		pgid := a.GetPokegentID()
+		pgid := a.GetRunID()
 		if pgid != "" && (pgid == id || strings.HasPrefix(pgid, id)) {
 			return a
 		}

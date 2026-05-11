@@ -157,8 +157,8 @@ func (n *Notifier) MaybeNotify(evt HookEvent, agent *AgentState) {
 	}
 	if spritePath == "" {
 		spriteIDs := []string{evt.SessionID}
-		if agent.PokegentID != "" {
-			spriteIDs = []string{agent.PokegentID, evt.SessionID}
+		if agent.RunID != "" {
+			spriteIDs = []string{agent.RunID, evt.SessionID}
 		}
 		spritePath = n.spritePathForSession(spriteIDs...)
 	}
@@ -168,7 +168,7 @@ func (n *Notifier) MaybeNotify(evt HookEvent, agent *AgentState) {
 func (MacNotificationSink) Send(title, body, iconPath string) {
 	// Prefer terminal-notifier (supports custom icons), fall back to osascript
 	if tn, err := exec.LookPath("terminal-notifier"); err == nil {
-		args := []string{"-title", title, "-message", body, "-group", "pokegents"}
+		args := []string{"-title", title, "-message", body, "-group", "boa"}
 		if iconPath != "" {
 			scaled := scaleSprite(iconPath)
 			args = append(args, "-appIcon", scaled, "-contentImage", scaled)
@@ -184,7 +184,7 @@ func (MacNotificationSink) Send(title, body, iconPath string) {
 }
 
 func scaleSprite(path string) string {
-	tmp := filepath.Join(os.TempDir(), "pokegents-notif-sprite.png")
+	tmp := filepath.Join(os.TempDir(), "boa-notif-sprite.png")
 	err := exec.Command("python3", "-c", fmt.Sprintf(`
 from PIL import Image
 img = Image.open(%q).convert("RGBA")

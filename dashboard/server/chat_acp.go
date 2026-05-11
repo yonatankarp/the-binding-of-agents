@@ -260,7 +260,7 @@ type ChatSessionEvent struct {
 }
 
 type ChatSession struct {
-	PokegentID   string
+	RunID        string
 	ACPID        string // ACP server's session ID (different from pokegent_id; opaque)
 	Profile      string
 	Cwd          string
@@ -363,7 +363,7 @@ func (s *ChatSession) addWSClient(c *wsClient) {
 	s.wsClients[c] = struct{}{}
 	n := len(s.wsClients)
 	s.wsMu.Unlock()
-	log.Printf("chat-ws[%s]: client connected (now %d)", shortChat(s.PokegentID), n)
+	log.Printf("chat-ws[%s]: client connected (now %d)", shortChat(s.RunID), n)
 }
 
 func (s *ChatSession) removeWSClient(c *wsClient) {
@@ -371,7 +371,7 @@ func (s *ChatSession) removeWSClient(c *wsClient) {
 	delete(s.wsClients, c)
 	n := len(s.wsClients)
 	s.wsMu.Unlock()
-	log.Printf("chat-ws[%s]: client disconnected (now %d)", shortChat(s.PokegentID), n)
+	log.Printf("chat-ws[%s]: client disconnected (now %d)", shortChat(s.RunID), n)
 }
 
 func (s *ChatSession) broadcastWSRaw(line []byte) {
@@ -379,7 +379,7 @@ func (s *ChatSession) broadcastWSRaw(line []byte) {
 	defer s.wsMu.RUnlock()
 	for c := range s.wsClients {
 		if err := c.writeRaw(line); err != nil {
-			log.Printf("chat-ws[%s]: write error: %v", shortChat(s.PokegentID), err)
+			log.Printf("chat-ws[%s]: write error: %v", shortChat(s.RunID), err)
 		}
 	}
 }
@@ -447,7 +447,7 @@ func (s *ChatSession) completeBrowserPrompt(id int64, errResp *chatJSONRPCError)
 	}
 	if refetch, err := json.Marshal(map[string]any{
 		"jsonrpc": "2.0",
-		"method":  "pokegents/refetch_transcript",
+		"method":  "boa/refetch_transcript",
 	}); err == nil {
 		s.broadcastWSRaw(refetch)
 	}
@@ -586,7 +586,7 @@ func (s *ChatSession) handleNotification(method string, params json.RawMessage) 
 		}
 
 		if method == "claude/result_meta" && s.usageLog != nil {
-			s.usageLog.LogResultMeta(s.PokegentID, "", params)
+			s.usageLog.LogResultMeta(s.RunID, "", params)
 		}
 
 		return
@@ -699,7 +699,7 @@ func (s *ChatSession) translateUpdate(params json.RawMessage) {
 					if json.Unmarshal(meta.RawInput, &inp) == nil {
 						target = inp.To
 					}
-					s.usageLog.LogMCPCall(s.PokegentID, "", meta.Meta.ClaudeCode.ToolName, target)
+					s.usageLog.LogMCPCall(s.RunID, "", meta.Meta.ClaudeCode.ToolName, target)
 				}
 			}
 		}
@@ -765,7 +765,7 @@ func (s *ChatSession) translateUpdate(params json.RawMessage) {
 			s.contextWindow = u.Size
 		}
 		if s.usageLog != nil && u.Used > 0 {
-			s.usageLog.LogUsageUpdate(s.PokegentID, "", u.Used, u.Size, u.Cost.Amount)
+			s.usageLog.LogUsageUpdate(s.RunID, "", u.Used, u.Size, u.Cost.Amount)
 		}
 	}
 	s.debouncedStatusWrite()
@@ -810,7 +810,7 @@ func (s *ChatSession) publishAgentStatePatchWith(state string, busySince time.Ti
 	}
 	previewAgent := AgentState{
 		SessionID:       s.ACPID,
-		PokegentID:      s.PokegentID,
+		RunID:           s.RunID,
 		State:           state,
 		Detail:          s.currentDetail,
 		CWD:             s.Cwd,
@@ -830,11 +830,11 @@ func (s *ChatSession) publishAgentStatePatchWith(state string, busySince time.Ti
 	previewAgent.CardPreview = buildCardPreview(previewAgent)
 
 	if s.notifyFn != nil && (state == "done" || state == "idle") {
-		s.notifyFn(s.PokegentID, state, "", summary)
+		s.notifyFn(s.RunID, state, "", summary)
 	}
 
 	s.dashboardBus.Publish("agent_state_patch", map[string]any{
-		"pokegent_id":      s.PokegentID,
+		"run_id":           s.RunID,
 		"state":            state,
 		"detail":           previewAgent.Detail,
 		"busy_since":       busySinceStr,
@@ -872,7 +872,7 @@ func (s *ChatSession) writeStatusFileLocked() {
 	} else if s.lastSummaryStaging != "" {
 		summary = s.lastSummaryStaging
 	}
-	_ = writeStatusFile(s.dataDir, s.PokegentID, store.StatusFile{
+	_ = writeStatusFile(s.dataDir, s.RunID, store.StatusFile{
 		SessionID:     s.ACPID,
 		State:         state,
 		Detail:        s.currentDetail,
@@ -964,7 +964,7 @@ func (s *ChatSession) requestPermission(params json.RawMessage) (any, *chatJSONR
 // echoes to WebSocket clients, and sends session/prompt to ACP in a goroutine.
 func (s *ChatSession) SendPrompt(text string) error {
 	// Reset message budget for this agent's new turn.
-	budgetDir := filepath.Join(s.dataDir, "messages", s.PokegentID)
+	budgetDir := filepath.Join(s.dataDir, "messages", s.RunID)
 	os.MkdirAll(budgetDir, 0755)
 	os.WriteFile(filepath.Join(budgetDir, "_msg_budget"), []byte("0"), 0644)
 
@@ -1034,14 +1034,14 @@ func (s *ChatSession) SendPrompt(text string) error {
 			"prompt":    prompt,
 		})
 		if sendErr != nil {
-			log.Printf("chat prompt error (%s): %v", shortChat(s.PokegentID), sendErr)
+			log.Printf("chat prompt error (%s): %v", shortChat(s.RunID), sendErr)
 		}
 		// Log turn completion
 		if s.usageLog != nil {
 			s.stateMu.Lock()
 			tokensAfter := s.contextTokens
 			s.stateMu.Unlock()
-			s.usageLog.LogTurnEnd(s.PokegentID, "", s.Profile, "", text, 0,
+			s.usageLog.LogTurnEnd(s.RunID, "", s.Profile, "", text, 0,
 				tokensBefore, tokensAfter, time.Since(turnStart), sendErr)
 		}
 		// On error, transition to "error" so the card shows something went wrong.
@@ -1202,7 +1202,7 @@ func (m *ChatManager) All() []*ChatSession {
 
 // ChatLaunchOptions describes a chat-mode launch invocation.
 type ChatLaunchOptions struct {
-	PokegentID           string
+	RunID                string
 	Profile              string
 	Cwd                  string
 	SystemPromptAppend   string
@@ -1247,17 +1247,17 @@ func (m *ChatManager) pokegentsMCPServers(opts ChatLaunchOptions) []any {
 	root := resolvePokegentsRoot()
 	serverPath := filepath.Join(root, "mcp", "server.js")
 	if root == "" || !fileExists(serverPath) {
-		log.Printf("chat[%s]: pokegents MCP server not found; tried %q", shortChat(opts.PokegentID), serverPath)
+		log.Printf("chat[%s]: pokegents MCP server not found; tried %q", shortChat(opts.RunID), serverPath)
 		return []any{}
 	}
 	return []any{map[string]any{
-		"name":    "pokegents-messaging",
+		"name":    "boa-messaging",
 		"command": "node",
 		"args":    []string{serverPath},
 		"env": []map[string]string{
 			{"name": "POKEGENTS_DATA", "value": m.dataDir},
-			{"name": "POKEGENTS_SESSION_ID", "value": opts.PokegentID},
-			{"name": "POKEGENT_ID", "value": opts.PokegentID},
+			{"name": "POKEGENTS_SESSION_ID", "value": opts.RunID},
+			{"name": "POKEGENT_ID", "value": opts.RunID},
 			{"name": "POKEGENTS_PROFILE_NAME", "value": opts.Profile},
 		},
 	}}
@@ -1292,8 +1292,8 @@ func fileExists(path string) bool {
 }
 
 func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*ChatSession, error) {
-	if opts.PokegentID == "" {
-		return nil, fmt.Errorf("pokegent_id required")
+	if opts.RunID == "" {
+		return nil, fmt.Errorf("run_id required")
 	}
 	if opts.Cwd == "" {
 		home, _ := os.UserHomeDir()
@@ -1305,10 +1305,10 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 	if opts.AgentBackend != "" && opts.AgentBackend != "claude-acp" && opts.ExistingTranscriptPath != "" {
 		if repaired, err := repairCodexTranscriptMissingCustomToolOutputs(opts.ExistingTranscriptPath); err != nil {
 			log.Printf("chat[%s]: codex transcript repair skipped for %s: %v",
-				shortChat(opts.PokegentID), opts.ExistingTranscriptPath, err)
+				shortChat(opts.RunID), opts.ExistingTranscriptPath, err)
 		} else if repaired > 0 {
 			log.Printf("chat[%s]: repaired %d missing custom tool output(s) in codex transcript %s",
-				shortChat(opts.PokegentID), repaired, opts.ExistingTranscriptPath)
+				shortChat(opts.RunID), repaired, opts.ExistingTranscriptPath)
 		}
 	}
 
@@ -1323,7 +1323,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 			args = append(args, "-c", "model_reasoning_effort="+strconv.Quote(opts.Effort))
 		}
 		if opts.SystemPromptAppend != "" {
-			instructionsPath, err := writeCodexInstructionsFile(m.dataDir, opts.PokegentID, opts.SystemPromptAppend)
+			instructionsPath, err := writeCodexInstructionsFile(m.dataDir, opts.RunID, opts.SystemPromptAppend)
 			if err != nil {
 				return nil, err
 			}
@@ -1339,7 +1339,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 			args = append(args, "-c", "model_reasoning_effort="+strconv.Quote(opts.Effort))
 		}
 		if opts.SystemPromptAppend != "" {
-			instructionsPath, err := writeCodexInstructionsFile(m.dataDir, opts.PokegentID, opts.SystemPromptAppend)
+			instructionsPath, err := writeCodexInstructionsFile(m.dataDir, opts.RunID, opts.SystemPromptAppend)
 			if err != nil {
 				return nil, err
 			}
@@ -1352,8 +1352,8 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 	}
 	cmd.Dir = opts.Cwd
 	overrides := map[string]string{
-		"POKEGENT_ID":            opts.PokegentID,
-		"POKEGENTS_SESSION_ID":   opts.PokegentID,
+		"POKEGENT_ID":            opts.RunID,
+		"POKEGENTS_SESSION_ID":   opts.RunID,
 		"POKEGENTS_PROFILE_NAME": opts.Profile,
 	}
 	for k, v := range opts.BackendEnv {
@@ -1396,7 +1396,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 	}
 
 	sess := &ChatSession{
-		PokegentID:           opts.PokegentID,
+		RunID:                opts.RunID,
 		Profile:              opts.Profile,
 		Cwd:                  opts.Cwd,
 		Created:              time.Now(),
@@ -1421,7 +1421,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 		sc.Buffer(make([]byte, 0, 16*1024), 1024*1024)
 		for sc.Scan() {
 			line := sc.Text()
-			log.Printf("chat[%s/%d]: %s", shortChat(opts.PokegentID), cmd.Process.Pid, line)
+			log.Printf("chat[%s/%d]: %s", shortChat(opts.RunID), cmd.Process.Pid, line)
 			sess.stderrMu.Lock()
 			sess.stderrTail = append(sess.stderrTail, line)
 			if len(sess.stderrTail) > chatStderrTailLines {
@@ -1434,7 +1434,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 			if strings.Contains(clean, "ERROR") || strings.Contains(clean, "Reconnecting") {
 				if msg, err := json.Marshal(map[string]any{
 					"jsonrpc": "2.0",
-					"method":  "pokegents/system_message",
+					"method":  "boa/system_message",
 					"params":  map[string]any{"text": formatACPStderrSystemMessage(clean)},
 				}); err == nil {
 					sess.broadcastWSRaw(msg)
@@ -1480,18 +1480,18 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 		err := cmd.Wait()
 		intentional := sess.intentionalClose.Load()
 		log.Printf("chat[%s]: process exited (intentional=%v, err=%v)",
-			shortChat(opts.PokegentID), intentional, err)
+			shortChat(opts.RunID), intentional, err)
 		if !intentional {
 			sess.stderrMu.Lock()
 			tail := append([]string(nil), sess.stderrTail...)
 			sess.stderrMu.Unlock()
 			if len(tail) == 0 {
 				log.Printf("chat[%s]: no stderr captured before exit — likely the subprocess died before writing anything (npx fetch error? auth?). exit err: %v",
-					shortChat(opts.PokegentID), err)
+					shortChat(opts.RunID), err)
 			} else {
-				log.Printf("chat[%s]: last %d stderr line(s) before exit:", shortChat(opts.PokegentID), len(tail))
+				log.Printf("chat[%s]: last %d stderr line(s) before exit:", shortChat(opts.RunID), len(tail))
 				for _, line := range tail {
-					log.Printf("chat[%s]:   %s", shortChat(opts.PokegentID), line)
+					log.Printf("chat[%s]:   %s", shortChat(opts.RunID), line)
 				}
 			}
 		}
@@ -1509,7 +1509,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 			sess.publishAgentStatePatchWith("error", time.Time{})
 		}
 		m.mu.Lock()
-		delete(m.sessions, opts.PokegentID)
+		delete(m.sessions, opts.RunID)
 		m.mu.Unlock()
 		if m.onChange != nil {
 			m.onChange()
@@ -1522,7 +1522,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 			"fs":       map[string]any{"readTextFile": true, "writeTextFile": true},
 			"terminal": true,
 		},
-		"clientInfo": map[string]any{"name": "pokegents-dashboard", "version": "0.1.0"},
+		"clientInfo": map[string]any{"name": "the-binding-of-agents", "version": "0.1.0"},
 	}); err != nil {
 		sess.intentionalClose.Store(true)
 		_ = cmd.Process.Kill()
@@ -1558,7 +1558,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 			pathSessionID := sessionIDFromTranscriptPath(opts.ExistingTranscriptPath)
 			if pathSessionID != "" && resumeSessionID != "" && store.FindTranscriptPath(resumeSessionID, "") == "" {
 				log.Printf("chat[%s]: resume session %s has no transcript; preferring verified transcript session %s",
-					shortChat(opts.PokegentID), shortChat(resumeSessionID), shortChat(pathSessionID))
+					shortChat(opts.RunID), shortChat(resumeSessionID), shortChat(pathSessionID))
 				resumeSessionID = pathSessionID
 			}
 		}
@@ -1578,7 +1578,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 			if _, statErr := os.Stat(opts.ExistingTranscriptPath); statErr == nil {
 				if pathSessionID := sessionIDFromTranscriptPath(opts.ExistingTranscriptPath); pathSessionID != "" && pathSessionID != resumeSessionID {
 					log.Printf("chat[%s]: session/load %s failed (%v), trying verified transcript session %s",
-						shortChat(opts.PokegentID), shortChat(resumeSessionID), err, shortChat(pathSessionID))
+						shortChat(opts.RunID), shortChat(resumeSessionID), err, shortChat(pathSessionID))
 					params["sessionId"] = pathSessionID
 					resp, err = cli.sendRequest(ctx, "session/load", params)
 				}
@@ -1589,7 +1589,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 				return nil, fmt.Errorf("acp session/load failed for verified transcript %s: %w", opts.ExistingTranscriptPath, err)
 			}
 		} else {
-			log.Printf("chat[%s]: session/load failed (%v), trying session/list", shortChat(opts.PokegentID), err)
+			log.Printf("chat[%s]: session/load failed (%v), trying session/list", shortChat(opts.RunID), err)
 			if listResp, listErr := cli.sendRequest(ctx, "session/list", map[string]any{}); listErr == nil {
 				var listResult struct {
 					Sessions []struct {
@@ -1609,14 +1609,14 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 					if picked == "" {
 						picked = listResult.Sessions[0].SessionID
 					}
-					log.Printf("chat[%s]: found %d sessions via list, loading %s", shortChat(opts.PokegentID), len(listResult.Sessions), shortChat(picked))
+					log.Printf("chat[%s]: found %d sessions via list, loading %s", shortChat(opts.RunID), len(listResult.Sessions), shortChat(picked))
 					params["sessionId"] = picked
 					resp, err = cli.sendRequest(ctx, "session/load", params)
 				}
 			}
 			// Final fallback: start fresh
 			if err != nil {
-				log.Printf("chat[%s]: all session/load attempts failed, starting fresh", shortChat(opts.PokegentID))
+				log.Printf("chat[%s]: all session/load attempts failed, starting fresh", shortChat(opts.RunID))
 				delete(params, "sessionId")
 				resp, err = cli.sendRequest(ctx, "session/new", params)
 				method = "session/new"
@@ -1657,7 +1657,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 	if backendForFile == "" {
 		backendForFile = opts.AgentBackend
 	}
-	patchRunningFileChat(m.dataDir, opts.PokegentID, opts.Profile, cmd.Process.Pid, result.SessionID, opts.Cwd, "", backendForFile)
+	patchRunningFileChat(m.dataDir, opts.RunID, opts.Profile, cmd.Process.Pid, result.SessionID, opts.Cwd, "", backendForFile)
 
 	// For non-Claude backends, discover the transcript path in the background.
 	// The file may not exist immediately after session/new.
@@ -1667,7 +1667,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 				time.Sleep(2 * time.Second)
 				path := store.FindTranscriptPath(result.SessionID, "")
 				if path != "" {
-					patchTranscriptPath(m.dataDir, opts.PokegentID, opts.Profile, path)
+					patchTranscriptPath(m.dataDir, opts.RunID, opts.Profile, path)
 					return
 				}
 			}
@@ -1676,7 +1676,7 @@ func (m *ChatManager) Launch(ctx context.Context, opts ChatLaunchOptions) (*Chat
 
 	// Register the session BEFORE the initial status write.
 	m.mu.Lock()
-	m.sessions[opts.PokegentID] = sess
+	m.sessions[opts.RunID] = sess
 	m.mu.Unlock()
 
 	// Initial "idle" status write so the dashboard sees us immediately.
@@ -1708,7 +1708,7 @@ func resolveClaudeACPPath() string {
 
 func writeCodexInstructionsFile(dataDir, pokegentID, instructions string) (string, error) {
 	if pokegentID == "" {
-		return "", fmt.Errorf("pokegent_id required for Codex instructions")
+		return "", fmt.Errorf("run_id required for Codex instructions")
 	}
 	dir := filepath.Join(dataDir, "codex-instructions")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -1918,7 +1918,7 @@ func patchRunningFileChat(dataDir, pokegentID, profile string, claudePID int, cl
 		}
 	}
 	rs["session_id"] = claudeSessionID
-	rs["pokegent_id"] = pokegentID
+	rs["run_id"] = pokegentID
 	if cwd != "" {
 		rs["cwd"] = cwd
 	}

@@ -38,7 +38,7 @@ type SearchResult struct {
 	Project     string `json:"project,omitempty"`
 	TaskGroup   string `json:"task_group,omitempty"`
 	Sprite      string `json:"sprite,omitempty"`
-	PokegentID  string `json:"pokegent_id,omitempty"`
+	RunID       string `json:"run_id,omitempty"`
 	Snippet     string `json:"snippet"`
 	CWD         string `json:"cwd"`
 	GitBranch   string `json:"git_branch"`
@@ -63,9 +63,9 @@ type TranscriptSummary struct {
 	Snippet      string  `json:"snippet,omitempty"`
 }
 
-// PokegentSummary is one row in the PC box — an agent (pokegent_id) with its latest transcript.
-type PokegentSummary struct {
-	PokegentID        string              `json:"pokegent_id"`
+// RunSummary is one row in the PC box — an agent (pokegent_id) with its latest transcript.
+type RunSummary struct {
+	RunID             string              `json:"run_id"`
 	DisplayName       string              `json:"display_name"`
 	Sprite            string              `json:"sprite"`
 	Role              string              `json:"role,omitempty"`
@@ -248,7 +248,7 @@ func codexSessionRoots() []string {
 		return nil
 	}
 	roots := []string{filepath.Join(home, ".codex", "sessions")}
-	codexHomes, _ := filepath.Glob(filepath.Join(home, ".pokegents", "codex-homes", "*", "sessions"))
+	codexHomes, _ := filepath.Glob(filepath.Join(home, ".the-binding-of-agents", "codex-homes", "*", "sessions"))
 	roots = append(roots, codexHomes...)
 	out := roots[:0]
 	seen := map[string]bool{}
@@ -278,14 +278,14 @@ func (ss *SearchService) indexFileIfNeeded(path, projectDir string) bool {
 	}
 
 	var (
-		customTitle        string
-		firstUserMessage   string
-		userMessages       strings.Builder
-		assistantMsgs      strings.Builder
-		cwd                string
-		gitBranch          string
-		startedAt          string
-		embeddedPokegentID string
+		customTitle      string
+		firstUserMessage string
+		userMessages     strings.Builder
+		assistantMsgs    strings.Builder
+		cwd              string
+		gitBranch        string
+		startedAt        string
+		embeddedRunID    string
 	)
 
 	for _, line := range strings.Split(string(data), "\n") {
@@ -334,8 +334,8 @@ func (ss *SearchService) indexFileIfNeeded(path, projectDir string) bool {
 				}
 			}
 		case "pokegent-id":
-			if p, ok := entry["pokegent_id"].(string); ok {
-				embeddedPokegentID = p
+			if p, ok := entry["run_id"].(string); ok {
+				embeddedRunID = p
 			}
 		case "custom-title":
 			if t, ok := entry["customTitle"].(string); ok {
@@ -441,7 +441,7 @@ func (ss *SearchService) indexFileIfNeeded(path, projectDir string) bool {
 
 	// Attribute transcript to a pokegent_id (preferred: embedded marker;
 	// fallback: resolver callback supplied by the state manager)
-	pgid := embeddedPokegentID
+	pgid := embeddedRunID
 	if pgid == "" && ss.pokegentResolver != nil {
 		pgid = ss.pokegentResolver(sessionID)
 	}
@@ -527,7 +527,7 @@ func (ss *SearchService) Search(query string, limit, offset int) ([]SearchResult
 	for rows.Next() {
 		var r SearchResult
 		var rank float64
-		if err := rows.Scan(&r.SessionID, &r.ProjectDir, &r.CustomTitle, &r.ProfileName, &r.Snippet, &r.CWD, &r.GitBranch, &rank, &r.Role, &r.Project, &r.TaskGroup, &r.Sprite, &r.PokegentID); err != nil {
+		if err := rows.Scan(&r.SessionID, &r.ProjectDir, &r.CustomTitle, &r.ProfileName, &r.Snippet, &r.CWD, &r.GitBranch, &rank, &r.Role, &r.Project, &r.TaskGroup, &r.Sprite, &r.RunID); err != nil {
 			continue
 		}
 		results = append(results, r)
@@ -564,7 +564,7 @@ func (ss *SearchService) RecentSessions(limit int) ([]SearchResult, error) {
 	var results []SearchResult
 	for rows.Next() {
 		var r SearchResult
-		if err := rows.Scan(&r.SessionID, &r.ProjectDir, &r.CustomTitle, &r.ProfileName, &r.Snippet, &r.CWD, &r.GitBranch, &r.Role, &r.Project, &r.TaskGroup, &r.Sprite, &r.PokegentID); err != nil {
+		if err := rows.Scan(&r.SessionID, &r.ProjectDir, &r.CustomTitle, &r.ProfileName, &r.Snippet, &r.CWD, &r.GitBranch, &r.Role, &r.Project, &r.TaskGroup, &r.Sprite, &r.RunID); err != nil {
 			continue
 		}
 		results = append(results, r)
@@ -596,7 +596,7 @@ func (ss *SearchService) SessionsByTaskGroup(taskGroup string) ([]SearchResult, 
 	var results []SearchResult
 	for rows.Next() {
 		var r SearchResult
-		if err := rows.Scan(&r.SessionID, &r.ProjectDir, &r.CustomTitle, &r.ProfileName, &r.Snippet, &r.CWD, &r.GitBranch, &r.Role, &r.Project, &r.TaskGroup, &r.Sprite, &r.PokegentID); err != nil {
+		if err := rows.Scan(&r.SessionID, &r.ProjectDir, &r.CustomTitle, &r.ProfileName, &r.Snippet, &r.CWD, &r.GitBranch, &r.Role, &r.Project, &r.TaskGroup, &r.Sprite, &r.RunID); err != nil {
 			continue
 		}
 		results = append(results, r)
@@ -675,7 +675,7 @@ func (ss *SearchService) GetProfileName(sessionID string) string {
 // IdentitySnapshot is a minimal view of an agent identity, supplied by the
 // caller so this package doesn't reach into the identity store directly.
 type IdentitySnapshot struct {
-	PokegentID  string
+	RunID       string
 	DisplayName string
 	Sprite      string
 	Role        string
@@ -699,7 +699,7 @@ func (ss *SearchService) UpsertPokegentsMeta(identities []IdentitySnapshot) {
 	}
 	defer tx.Rollback()
 	for _, id := range identities {
-		if id.PokegentID == "" {
+		if id.RunID == "" {
 			continue
 		}
 		_, _ = tx.Exec(`
@@ -714,7 +714,7 @@ func (ss *SearchService) UpsertPokegentsMeta(identities []IdentitySnapshot) {
 				task_group   = excluded.task_group,
 				profile_name = excluded.profile_name,
 				created_at   = COALESCE(excluded.created_at, pokegents_meta.created_at)
-		`, id.PokegentID, id.DisplayName, id.Sprite, id.Role, id.Project, id.TaskGroup, id.ProfileName, id.CreatedAt)
+		`, id.RunID, id.DisplayName, id.Sprite, id.Role, id.Project, id.TaskGroup, id.ProfileName, id.CreatedAt)
 	}
 	// Recompute last_active_at from transcripts
 	_, _ = tx.Exec(`
@@ -756,8 +756,8 @@ func (ss *SearchService) UpsertTranscript(t TranscriptSummary, pokegentID string
 	`, pokegentID, pokegentID)
 }
 
-// GetPokegentIDForSession looks up the pokegent that owns a Claude session_id.
-func (ss *SearchService) GetPokegentIDForSession(sessionID string) string {
+// GetRunIDForSession looks up the pokegent that owns a Claude session_id.
+func (ss *SearchService) GetRunIDForSession(sessionID string) string {
 	ss.mu.Lock()
 	defer ss.mu.Unlock()
 	var pgid string
@@ -766,7 +766,7 @@ func (ss *SearchService) GetPokegentIDForSession(sessionID string) string {
 }
 
 // ListPokegents returns all pokegents with their latest transcript, sorted by recency.
-func (ss *SearchService) ListPokegents(limit int) ([]PokegentSummary, error) {
+func (ss *SearchService) ListPokegents(limit int) ([]RunSummary, error) {
 	if limit <= 0 {
 		limit = 100
 	}
@@ -814,12 +814,12 @@ func (ss *SearchService) ListPokegents(limit int) ([]PokegentSummary, error) {
 	}
 	defer rows.Close()
 
-	var out []PokegentSummary
+	var out []RunSummary
 	for rows.Next() {
-		var p PokegentSummary
+		var p RunSummary
 		var t TranscriptSummary
 		if err := rows.Scan(
-			&p.PokegentID, &p.DisplayName, &p.Sprite, &p.Role, &p.Project, &p.TaskGroup,
+			&p.RunID, &p.DisplayName, &p.Sprite, &p.Role, &p.Project, &p.TaskGroup,
 			&p.ProfileName, &p.CreatedAt, &p.LastActiveAt, &p.ConversationCount,
 			&t.SessionID, &t.StartedAt, &t.LastModified, &t.CustomTitle, &t.FirstUserMsg,
 			&t.ProjectDir, &t.GitBranch, &t.CWD,
@@ -880,22 +880,22 @@ func (ss *SearchService) TranscriptsForPokegent(pgid string) ([]TranscriptSummar
 	return out, nil
 }
 
-// GetPokegentSummary returns a single pokegent's summary with its transcripts populated.
-func (ss *SearchService) GetPokegentSummary(pgid string) (*PokegentSummary, error) {
+// GetRunSummary returns a single pokegent's summary with its transcripts populated.
+func (ss *SearchService) GetRunSummary(pgid string) (*RunSummary, error) {
 	ss.mu.Lock()
 	defer ss.mu.Unlock()
-	return ss.getPokegentSummaryLocked(pgid)
+	return ss.getRunSummaryLocked(pgid)
 }
 
-// getPokegentSummaryLocked is the internal implementation — caller must hold ss.mu.
-func (ss *SearchService) getPokegentSummaryLocked(pgid string) (*PokegentSummary, error) {
-	var p PokegentSummary
+// getRunSummaryLocked is the internal implementation — caller must hold ss.mu.
+func (ss *SearchService) getRunSummaryLocked(pgid string) (*RunSummary, error) {
+	var p RunSummary
 	err := ss.db.QueryRow(`
 		SELECT pokegent_id, COALESCE(display_name,''), COALESCE(sprite,''),
 		       COALESCE(role,''), COALESCE(project,''), COALESCE(task_group,''),
 		       COALESCE(profile_name,''), COALESCE(created_at,''), COALESCE(last_active_at,0)
 		FROM pokegents_meta WHERE pokegent_id = ?
-	`, pgid).Scan(&p.PokegentID, &p.DisplayName, &p.Sprite, &p.Role, &p.Project, &p.TaskGroup,
+	`, pgid).Scan(&p.RunID, &p.DisplayName, &p.Sprite, &p.Role, &p.Project, &p.TaskGroup,
 		&p.ProfileName, &p.CreatedAt, &p.LastActiveAt)
 	if err != nil {
 		return nil, err
@@ -936,7 +936,7 @@ func (ss *SearchService) transcriptsForPokegentLocked(pgid string) []TranscriptS
 
 // SearchPokegents runs a keyword query across transcripts, groups matches by
 // pokegent_id, and returns summaries with matching transcripts populated.
-func (ss *SearchService) SearchPokegents(query string, limit int) ([]PokegentSummary, int, error) {
+func (ss *SearchService) SearchPokegents(query string, limit int) ([]RunSummary, int, error) {
 	ss.mu.Lock()
 	defer ss.mu.Unlock()
 	if limit <= 0 {
@@ -988,12 +988,12 @@ func (ss *SearchService) SearchPokegents(query string, limit int) ([]PokegentSum
 		byPgid[pgid] = append(byPgid[pgid], hit{sid, snippet})
 	}
 
-	out := make([]PokegentSummary, 0, len(order))
+	out := make([]RunSummary, 0, len(order))
 	for _, pgid := range order {
 		if len(out) >= limit {
 			break
 		}
-		summary, err := ss.getPokegentSummaryLocked(pgid)
+		summary, err := ss.getRunSummaryLocked(pgid)
 		if err != nil {
 			continue
 		}

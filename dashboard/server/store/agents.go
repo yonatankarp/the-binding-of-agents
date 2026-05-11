@@ -9,7 +9,7 @@ import (
 )
 
 // FileAgentIdentityStore manages persistent agent identity files.
-// Files live at ~/.pokegents/agents/{pokegent_id}.json and are never deleted automatically.
+// Files live at ~/.the-binding-of-agents/agents/{pokegent_id}.json and are never deleted automatically.
 type FileAgentIdentityStore struct {
 	mu  sync.Mutex
 	dir string
@@ -69,7 +69,7 @@ func (s *FileAgentIdentityStore) Save(identity AgentIdentity) error {
 	if err != nil {
 		return err
 	}
-	return atomicWrite(s.path(identity.PokegentID), data, 0o644)
+	return atomicWrite(s.path(identity.RunID), data, 0o644)
 }
 
 func (s *FileAgentIdentityStore) Update(pokegentID string, fn func(*AgentIdentity)) error {

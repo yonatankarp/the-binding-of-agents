@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// FileEphemeralStore manages ephemeral agent files in ~/.pokegents/ephemeral/.
+// FileEphemeralStore manages ephemeral agent files in ~/.the-binding-of-agents/ephemeral/.
 type FileEphemeralStore struct {
 	mu  sync.Mutex
 	dir string

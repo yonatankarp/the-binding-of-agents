@@ -19,7 +19,7 @@ func TestFileRunningStore(t *testing.T) {
 	rs := RunningSession{
 		Profile:     "test",
 		SessionID:   "abc-123",
-		PokegentID:  "def-456",
+		RunID:       "def-456",
 		DisplayName: "Test Agent",
 		PID:         1234,
 		TTY:         "/dev/ttys001",
@@ -37,10 +37,10 @@ func TestFileRunningStore(t *testing.T) {
 		t.Errorf("DisplayName = %q, want %q", got.DisplayName, "Test Agent")
 	}
 
-	// GetByPokegentID
-	got, err = s.GetByPokegentID("def-456")
+	// GetByRunID
+	got, err = s.GetByRunID("def-456")
 	if err != nil {
-		t.Fatalf("GetByPokegentID: %v", err)
+		t.Fatalf("GetByRunID: %v", err)
 	}
 	if got.SessionID != "abc-123" {
 		t.Errorf("SessionID = %q, want %q", got.SessionID, "abc-123")

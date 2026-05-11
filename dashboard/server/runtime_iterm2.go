@@ -7,7 +7,7 @@ import (
 )
 
 // iterm2Runtime implements the Runtime interface for agents running in an
-// iTerm2 tab via pokegent.sh. Operations are AppleScript / TTY-injection
+// iTerm2 tab via boa.sh. Operations are AppleScript / TTY-injection
 // based — the actual Claude CLI is the agent process; this runtime just
 // addresses it through its terminal session.
 //

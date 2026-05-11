@@ -72,7 +72,7 @@ func fixupStatusFiles(dataDir string) {
 	}
 }
 
-// writeStatusFile is the canonical Go-side writer for ~/.pokegents/status/{key}.json.
+// writeStatusFile is the canonical Go-side writer for ~/.the-binding-of-agents/status/{key}.json.
 // Both runtime backends emit the same StatusFile shape so dashboard state.go
 // and the frontend never need to branch on which runtime produced the agent.
 // (The bash hooks' jq-based writer in hooks/status-update.sh emits the same

@@ -12,7 +12,7 @@ func TestConversationSnapshotWriteRead(t *testing.T) {
 	s := &Server{dataDir: dataDir}
 	want := ConversationSnapshot{
 		SchemaVersion:        conversationSnapshotSchemaVersion,
-		PokegentID:           "pg-123",
+		RunID:                "pg-123",
 		SourceProvider:       "claude",
 		SourceBackendKey:     "claude",
 		SourceSessionID:      "session-123",
@@ -37,7 +37,7 @@ func TestConversationSnapshotWriteRead(t *testing.T) {
 	if err != nil {
 		t.Fatalf("readConversationSnapshot: %v", err)
 	}
-	if got.PokegentID != want.PokegentID ||
+	if got.RunID != want.RunID ||
 		got.SourceProvider != want.SourceProvider ||
 		got.SourceSessionID != want.SourceSessionID ||
 		got.RecentTurns[0].Text != want.RecentTurns[0].Text {
@@ -97,7 +97,7 @@ func TestBuildConversationSnapshotFromClaudeTranscript(t *testing.T) {
 
 func TestBuildConversationSnapshotFromCodexTranscript(t *testing.T) {
 	dataDir := t.TempDir()
-	codexDir := filepath.Join(dataDir, ".pokegents", "codex-homes", "custom-codex-model", "sessions", "2026", "05", "06")
+	codexDir := filepath.Join(dataDir, ".the-binding-of-agents", "codex-homes", "custom-codex-model", "sessions", "2026", "05", "06")
 	if err := os.MkdirAll(codexDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func TestProviderFromBackendTypePrefersConcreteBackendType(t *testing.T) {
 
 func TestRenderSnapshotContextForCodexAlsoInjectsInitialPrompt(t *testing.T) {
 	snapshot := ConversationSnapshot{
-		PokegentID:           "pg-1",
+		RunID:                "pg-1",
 		SourceProvider:       "claude",
 		SourceTranscriptPath: "/tmp/claude.jsonl",
 		CWD:                  "/tmp/work",
@@ -184,7 +184,7 @@ func TestRenderSnapshotContextForCodexAlsoInjectsInitialPrompt(t *testing.T) {
 
 func TestRenderSnapshotContextTruncatesOldestTurnsFirst(t *testing.T) {
 	snapshot := ConversationSnapshot{
-		PokegentID:     "pg-big",
+		RunID:          "pg-big",
 		SourceProvider: "claude",
 		CWD:            "/tmp/work",
 	}

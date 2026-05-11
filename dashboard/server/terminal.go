@@ -1,14 +1,14 @@
 package server
 
 // LaunchOptions describes a fresh pokegent launch request from the dashboard.
-// The unified launch endpoint mints `PokegentID` server-side and pre-writes
+// The unified launch endpoint mints `RunID` server-side and pre-writes
 // the running file before invoking the terminal adapter, so the dashboard
 // always has a record even if the spawned shell fails to start.
 type LaunchOptions struct {
 	Profile            string // role@project or legacy profile name
 	ITermProfile       string // iTerm2 profile name for tab coloring (optional)
 	TaskGroup          string // organizational tag, passed via --group
-	PokegentID         string // pre-minted, passed via --pokegent-id (required for new launches)
+	RunID              string // pre-minted, passed via --pokegent-id (required for new launches)
 	HandoffContextPath string // optional file appended to Claude's system prompt
 }
 

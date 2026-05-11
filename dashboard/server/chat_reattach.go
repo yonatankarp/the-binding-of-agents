@@ -56,12 +56,12 @@ func (s *Server) reattachChatSessions() {
 		if rs.Interface != "chat" {
 			continue
 		}
-		if rs.PokegentID == "" || rs.SessionID == "" {
+		if rs.RunID == "" || rs.SessionID == "" {
 			continue
 		}
 		// Already in our session map → nothing to reattach (was migrated
 		// during a launch flow that survived this restart).
-		if s.chatMgr.Get(rs.PokegentID) != nil {
+		if s.chatMgr.Get(rs.RunID) != nil {
 			continue
 		}
 		pending = append(pending, todo{rs: rs, jsonPath: f})
@@ -91,27 +91,27 @@ func (s *Server) reattachChatSessions() {
 		// If the status file says "busy" but the ACP subprocess is dead
 		// (it's being respawned), overwrite state to idle so the agent
 		// doesn't appear permanently stuck in busy state during recovery.
-		sf, err := s.state.store.Status.Get(t.rs.PokegentID)
+		sf, err := s.state.store.Status.Get(t.rs.RunID)
 		if err == nil && sf != nil && sf.State == "busy" {
 			sf.State = "idle"
 			sf.Detail = "recovered after restart"
 			sf.BusySince = ""
 			s.state.store.Status.Upsert(*sf)
 			log.Printf("chat-reattach[%s]: status was busy-but-dead, reset to idle",
-				shortChat(t.rs.PokegentID))
+				shortChat(t.rs.RunID))
 		}
 
 		// Re-touch before each spawn — the 30s grace period may have
 		// expired if earlier spawns took a while.
 		os.Chtimes(t.jsonPath, time.Now(), time.Now())
 		if err := s.relaunchChatSession(t.rs); err != nil {
-			log.Printf("chat-reattach[%s]: relaunch failed: %v", shortChat(t.rs.PokegentID), err)
+			log.Printf("chat-reattach[%s]: relaunch failed: %v", shortChat(t.rs.RunID), err)
 			continue
 		}
 		// Touch again after spawn so CleanStale sees a fresh mtime
 		os.Chtimes(t.jsonPath, time.Now(), time.Now())
 		log.Printf("chat-reattach[%s]: re-spawned chat backend (resumed session %s)",
-			shortChat(t.rs.PokegentID), shortChat(t.rs.SessionID))
+			shortChat(t.rs.RunID), shortChat(t.rs.SessionID))
 	}
 	s.eventBus.Publish("state_update", s.state.GetAgents())
 }
@@ -242,7 +242,7 @@ func waitForOrphansGone(claudeSessionID string, timeout time.Duration) {
 	}
 }
 
-// resolveModelEffort follows the same precedence pokegent.sh uses for
+// resolveModelEffort follows the same precedence boa.sh uses for
 // iterm2 launches: running-file (launch-time snapshot) wins, then role
 // config, then project config. Either field may end up empty if no
 // config in the chain provides one. UI display falls back to an explicit
@@ -449,7 +449,7 @@ func (s *Server) relaunchChatSession(rs store.RunningSession) error {
 			cwd = rs.CWD
 		}
 	}
-	ident, _ := s.fileStore.Agents.Get(rs.PokegentID)
+	ident, _ := s.fileStore.Agents.Get(rs.RunID)
 	role, project := "", ""
 	if ident != nil {
 		role = ident.Role
@@ -458,18 +458,18 @@ func (s *Server) relaunchChatSession(rs store.RunningSession) error {
 	systemPrompt := s.composeSystemPrompt(LaunchRequest{Role: role, Project: project})
 	var handoffContext ProviderContext
 	migrationSourcePath := rs.SourceTranscriptPath
-	if migrationSourcePath == "" && rs.PokegentID != "" && isNonClaude {
+	if migrationSourcePath == "" && rs.RunID != "" && isNonClaude {
 		// Compatibility for agents that were already switched before
 		// source_transcript_path existed. Claude transcripts are named by the
 		// stable pokegent id, so this recovers the pre-switch history.
-		if p := store.FindTranscriptPath(rs.PokegentID, s.state.claudeProjectDir); p != "" && !isNonClaudeTranscriptPath(p) {
+		if p := store.FindTranscriptPath(rs.RunID, s.state.claudeProjectDir); p != "" && !isNonClaudeTranscriptPath(p) {
 			migrationSourcePath = p
 		}
 	}
 	if migrationSourcePath != "" && migrationSourcePath != rs.TranscriptPath {
-		snapshot, err := s.readConversationSnapshot(rs.PokegentID)
+		snapshot, err := s.readConversationSnapshot(rs.RunID)
 		if err != nil || snapshot.SourceTranscriptPath != migrationSourcePath {
-			snapshot, err = s.buildConversationSnapshotFromTranscript(rs.PokegentID, rs.AgentBackend, rs.SessionID, migrationSourcePath, cwd)
+			snapshot, err = s.buildConversationSnapshotFromTranscript(rs.RunID, rs.AgentBackend, rs.SessionID, migrationSourcePath, cwd)
 			if err == nil {
 				_ = s.writeConversationSnapshot(snapshot)
 			}
@@ -485,7 +485,7 @@ func (s *Server) relaunchChatSession(rs store.RunningSession) error {
 
 	// Resolve model/effort from running-file → role config → project
 	// config (mirrors state.go's rebuildAgents enrichment) so the chat
-	// backend gets the same values pokegent.sh resolves for iterm2.
+	// backend gets the same values boa.sh resolves for iterm2.
 	model, effort := s.resolveModelEffortForBackend(rs.Model, rs.Effort, role, project, rs.AgentBackend)
 
 	// Merge per-model env overrides now that the model is resolved.
@@ -501,7 +501,7 @@ func (s *Server) relaunchChatSession(rs store.RunningSession) error {
 		rs.Model = model
 		rs.Effort = effort
 		rs.AgentBackend = canonicalBackendKey
-		runningGlob := filepath.Join(s.dataDir, "running", "*-"+rs.PokegentID+".json")
+		runningGlob := filepath.Join(s.dataDir, "running", "*-"+rs.RunID+".json")
 		if rfMatches, _ := filepath.Glob(runningGlob); len(rfMatches) > 0 {
 			if out, err := json.MarshalIndent(rs, "", "  "); err == nil {
 				_ = os.WriteFile(rfMatches[0], out, 0o644)
@@ -522,7 +522,7 @@ func (s *Server) relaunchChatSession(rs store.RunningSession) error {
 	if isNonClaude && existingTranscriptPath != "" && resumeID != "" && store.FindTranscriptPath(resumeID, "") == "" {
 		if pathSessionID := sessionIDFromTranscriptPath(existingTranscriptPath); pathSessionID != "" {
 			log.Printf("chat-reattach[%s]: session %s has no transcript; using verified transcript session %s",
-				shortChat(rs.PokegentID), shortChat(resumeID), shortChat(pathSessionID))
+				shortChat(rs.RunID), shortChat(resumeID), shortChat(pathSessionID))
 			resumeID = pathSessionID
 		}
 	}
@@ -544,7 +544,7 @@ func (s *Server) relaunchChatSession(rs store.RunningSession) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 	_, err := s.chatMgr.Launch(ctx, ChatLaunchOptions{
-		PokegentID:             rs.PokegentID,
+		RunID:                  rs.RunID,
 		Profile:                rs.Profile,
 		Cwd:                    cwd,
 		SystemPromptAppend:     systemPrompt,

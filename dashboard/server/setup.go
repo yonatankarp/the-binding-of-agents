@@ -785,8 +785,8 @@ func detectMCP(ctx context.Context, root string) checkStatus {
 	if err != nil {
 		return checkStatus{State: "unknown", Message: strings.TrimSpace(out)}
 	}
-	if !strings.Contains(out, "pokegents-messaging") {
-		return checkStatus{State: "missing", Message: "pokegents-messaging is not registered"}
+	if !strings.Contains(out, "boa-messaging") {
+		return checkStatus{State: "missing", Message: "boa-messaging is not registered"}
 	}
 	serverPath := filepath.Join(root, "mcp", "server.js")
 	if root != "" && !strings.Contains(out, serverPath) {
@@ -996,7 +996,7 @@ func repairMCPRegistration(ctx context.Context, root string) (map[string]any, er
 	if _, err := exec.LookPath("claude"); err != nil {
 		return nil, fmt.Errorf("claude not found on PATH")
 	}
-	out, err := runShort(ctx, 15*time.Second, "claude", "mcp", "add", "-s", "user", "pokegents-messaging", "--", "node", serverPath)
+	out, err := runShort(ctx, 15*time.Second, "claude", "mcp", "add", "-s", "user", "boa-messaging", "--", "node", serverPath)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", err, strings.TrimSpace(out))
 	}

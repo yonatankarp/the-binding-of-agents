@@ -76,13 +76,13 @@ func (s *FileRunningStore) findRunningFile(id string) (string, error) {
 			continue
 		}
 		var rf struct {
-			SessionID  string `json:"session_id"`
-			PokegentID string `json:"pokegent_id"`
+			SessionID string `json:"session_id"`
+			RunID     string `json:"run_id"`
 		}
 		if json.Unmarshal(data, &rf) != nil {
 			continue
 		}
-		if rf.PokegentID == id || rf.SessionID == id {
+		if rf.RunID == id || rf.SessionID == id {
 			return path, nil
 		}
 	}
@@ -99,7 +99,7 @@ func (s *FileRunningStore) Get(sessionID string) (*RunningSession, error) {
 	return s.readFile(path)
 }
 
-func (s *FileRunningStore) GetByPokegentID(pokegentID string) (*RunningSession, error) {
+func (s *FileRunningStore) GetByRunID(pokegentID string) (*RunningSession, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	entries, err := os.ReadDir(s.dir)
@@ -114,7 +114,7 @@ func (s *FileRunningStore) GetByPokegentID(pokegentID string) (*RunningSession, 
 		if err != nil {
 			continue
 		}
-		if rs.PokegentID == pokegentID {
+		if rs.RunID == pokegentID {
 			return rs, nil
 		}
 	}
@@ -150,7 +150,7 @@ func (s *FileRunningStore) Create(rs RunningSession) error {
 		return err
 	}
 	// Use pokegent_id for filename if available (stable, never renamed), fall back to session_id
-	fileKey := rs.PokegentID
+	fileKey := rs.RunID
 	if fileKey == "" {
 		fileKey = rs.SessionID
 	}

@@ -10,7 +10,7 @@
 # NOTE: No set -e! Hooks must NEVER crash.
 trap '' INT  # Ignore SIGINT so Ctrl+C doesn't kill the hook mid-write
 
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.pokegents}"
+POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
 EPHEMERAL_DIR="$POKEGENTS_DATA/ephemeral"
 PENDING_DIR="$POKEGENTS_DATA/ephemeral-pending"
 mkdir -p "$EPHEMERAL_DIR" "$PENDING_DIR"

@@ -104,7 +104,7 @@ func FindTranscriptPathWithDataDir(sessionID string, claudeProjectDir string, da
 	if path := findClaudeJSONL(sessionID, claudeProjectDir); path != "" {
 		return path
 	}
-	// Try Codex: ~/.codex/sessions/ and ~/.pokegents/codex-homes/*/sessions/
+	// Try Codex: ~/.codex/sessions/ and ~/.the-binding-of-agents/codex-homes/*/sessions/
 	if path := findCodexJSONL(sessionID, dataDir); path != "" {
 		return path
 	}
@@ -148,7 +148,7 @@ func findCodexJSONL(sessionID string, dataDir string) string {
 		dataDir = os.Getenv("POKEGENTS_DATA")
 	}
 	if dataDir == "" {
-		dataDir = filepath.Join(home, ".pokegents")
+		dataDir = filepath.Join(home, ".the-binding-of-agents")
 	}
 	codexHomes, _ := filepath.Glob(filepath.Join(dataDir, "codex-homes", "*", "sessions"))
 	searchDirs = append(searchDirs, codexHomes...)

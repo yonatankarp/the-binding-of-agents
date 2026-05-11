@@ -4,7 +4,7 @@
 
 input=$(cat)
 
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.pokegents}"
+POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
 
 if [[ -n "$POKEGENTS_PROFILE_NAME" ]]; then
   profile_file="$POKEGENTS_DATA/profiles/${POKEGENTS_PROFILE_NAME}.json"

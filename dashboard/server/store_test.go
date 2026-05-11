@@ -110,10 +110,10 @@ func TestRunningGetBySessionIDNotFilename(t *testing.T) {
 	runDir := filepath.Join(dir, "running")
 
 	writeTestJSON(t, filepath.Join(runDir, "personal-old-uuid.json"), RunningSession{
-		Profile:    "personal",
-		SessionID:  "new-claude-uuid",
-		PokegentID: "old-uuid",
-		PID:        1234,
+		Profile:   "personal",
+		SessionID: "new-claude-uuid",
+		RunID:     "old-uuid",
+		PID:       1234,
 	})
 
 	entries, _ := os.ReadDir(runDir)
@@ -193,7 +193,7 @@ func TestRunningCloneCollision(t *testing.T) {
 	// Clone tries to reconcile to same session_id
 	clonePath := filepath.Join(runDir, "personal-pokegent-uuid.json")
 	writeTestJSON(t, clonePath, RunningSession{
-		Profile: "personal", SessionID: "pokegent-uuid", PokegentID: "pokegent-uuid", PID: 200,
+		Profile: "personal", SessionID: "pokegent-uuid", RunID: "pokegent-uuid", PID: 200,
 	})
 
 	// Simulate reconciliation: clone wants to rename to personal-sid-1.json

@@ -5,7 +5,7 @@
 
 # Resolve install directory at source time
 POKEGENTS_ROOT="${${(%):-%x}:A:h}"
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.pokegents}"
+POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
 
 # Platform detection — iTerm2 features are optional
 POKEGENTS_HAS_ITERM=false
@@ -333,7 +333,7 @@ HELP
         if [[ -n "$browser_open_command" ]]; then
           _pokegent_run_open_command "$browser_open_command" "$url" || echo "$url"
         elif [[ "$OSTYPE" == darwin* ]]; then
-          local chrome_profile="$HOME/.pokegents-dashboard-chrome"
+          local chrome_profile="$HOME/.the-binding-of-agents-dashboard-chrome"
           if [[ -d "/Applications/Google Chrome.app" || -d "$HOME/Applications/Google Chrome.app" ]]; then
             open -na "Google Chrome" --args --app="$url" --user-data-dir="$chrome_profile"
           else

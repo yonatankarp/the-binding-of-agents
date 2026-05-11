@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# pokegents installer — browser dashboard, no shell rc mutation.
+# the-binding-of-agents installer — browser dashboard, no shell rc mutation.
 set -euo pipefail
 
 POKEGENTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.pokegents}"
+POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
 INSTALL_CWD="${POKEGENTS_INSTALL_CWD:-$PWD}"
 SHIM_DIR="${POKEGENTS_SHIM_DIR:-$HOME/.local/bin}"
-SHIM_PATH="$SHIM_DIR/pokegents"
-COMPAT_SHIM_PATH="$SHIM_DIR/pokegent"
+SHIM_PATH="$SHIM_DIR/boa"
+COMPAT_SHIM_PATH="$SHIM_DIR/the-binding-of-agents"
 
 log() { printf '%s\n' "$*"; }
 warn() { printf '⚠ %s\n' "$*" >&2; }
@@ -16,7 +16,7 @@ json_escape() {
   python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1"
 }
 
-log "Installing pokegents from $POKEGENTS_ROOT"
+log "Installing the-binding-of-agents from $POKEGENTS_ROOT"
 log "Data directory: $POKEGENTS_DATA"
 log "Default project cwd: $INSTALL_CWD"
 log ""
@@ -125,18 +125,18 @@ cat > "$SHIM_PATH" <<SHIM
 set -e
 export POKEGENTS_ROOT=$(printf '%q' "$POKEGENTS_ROOT")
 export POKEGENTS_DATA=\${POKEGENTS_DATA:-$(printf '%q' "$POKEGENTS_DATA")}
-if [[ ! -f "\$POKEGENTS_ROOT/pokegent.sh" ]]; then
-  echo "pokegents install is missing pokegent.sh at \$POKEGENTS_ROOT" >&2
+if [[ ! -f "\$POKEGENTS_ROOT/boa.sh" ]]; then
+  echo "the-binding-of-agents install is missing boa.sh at \$POKEGENTS_ROOT" >&2
   exit 1
 fi
-source "\$POKEGENTS_ROOT/pokegent.sh"
+source "\$POKEGENTS_ROOT/boa.sh"
 if [[ \$# -eq 0 ]]; then
-  pokegent dashboard open
+  boa dashboard open
 elif [[ "\$1" == "launch" ]]; then
   shift
-  pokegent "\$@"
+  boa "\$@"
 else
-  pokegent "\$@"
+  boa "\$@"
 fi
 SHIM
 chmod +x "$SHIM_PATH"
@@ -145,11 +145,11 @@ log "✓ CLI shim installed: $SHIM_PATH"
 log "✓ Compatibility alias installed: $COMPAT_SHIM_PATH"
 
 # Developer/source fallback: build dashboard only when explicitly requested.
-if [[ ! -x "$POKEGENTS_ROOT/dashboard/pokegents-dashboard" || ! -d "$POKEGENTS_ROOT/dashboard/web/dist" || ! -d "$POKEGENTS_ROOT/dashboard/acp-fork/dist" ]]; then
+if [[ ! -x "$POKEGENTS_ROOT/dashboard/the-binding-of-agents-dashboard" || ! -d "$POKEGENTS_ROOT/dashboard/web/dist" || ! -d "$POKEGENTS_ROOT/dashboard/acp-fork/dist" ]]; then
   if [[ "${POKEGENTS_DEV_BUILD:-}" == "1" ]] && have go && have npm; then
     log ""
     log "Building dashboard for source checkout..."
-    (cd "$POKEGENTS_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o pokegents-dashboard .) && log "✓ Dashboard server built"
+    (cd "$POKEGENTS_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o the-binding-of-agents-dashboard .) && log "✓ Dashboard server built"
     "$POKEGENTS_ROOT/scripts/fetch-pokesprite-assets.sh" && (cd "$POKEGENTS_ROOT/dashboard/web" && npm ci --silent && npm run build) && log "✓ Dashboard web built"
     (cd "$POKEGENTS_ROOT/dashboard/acp-fork" && npm ci --silent && if [[ -f tsconfig.json ]]; then npm run build; else test -f dist/index.js; fi) && log "✓ ACP adapter ready"
   else

@@ -14,7 +14,7 @@
 # the process group and would kill this hook before it can write the status file.
 trap '' INT
 
-POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.pokegents}"
+POKEGENTS_DATA="${POKEGENTS_DATA:-$HOME/.the-binding-of-agents}"
 STATUS_DIR="$POKEGENTS_DATA/status"
 mkdir -p "$STATUS_DIR"
 
@@ -304,7 +304,7 @@ case "$EVENT" in
     # interface migration flipped the file to interface=chat, the chat
     # backend owns it now and we must not delete (otherwise the agent
     # vanishes from the dashboard mid-migration). Same idea as
-    # pokegent.sh's ownership check at the shell-exit level.
+    # boa.sh's ownership check at the shell-exit level.
     if [ -n "$_PGID_END" ]; then
       for rf in "$RUNNING_DIR"/*.json; do
         [ -f "$rf" ] || continue
@@ -408,7 +408,7 @@ fi
 
 # ── Activity log ──────────────────────────────────────────────────────────
 # Shared append-only log so agents know what others changed.
-# Stored per-project at ~/.pokegents/activity/{project_hash}.log
+# Stored per-project at ~/.the-binding-of-agents/activity/{project_hash}.log
 ACTIVITY_DIR="$POKEGENTS_DATA/activity"
 LASTREAD_DIR="$POKEGENTS_DATA/activity-lastread"
 PROJECT_HASH=""

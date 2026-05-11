@@ -193,10 +193,10 @@ func syntheticCodexCustomToolOutputLine(info codexCustomToolCallLine) (string, e
 		ts = time.Now().UTC().Format(time.RFC3339Nano)
 	}
 	output, err := json.Marshal(map[string]any{
-		"output": fmt.Sprintf("[pokegents repaired transcript: output for %s was missing after an interrupted backend/tool turn; original result unavailable]", info.Name),
+		"output": fmt.Sprintf("[boa repaired transcript: output for %s was missing after an interrupted backend/tool turn; original result unavailable]", info.Name),
 		"metadata": map[string]any{
 			"repaired": true,
-			"source":   "pokegents",
+			"source":   "boa",
 		},
 	})
 	if err != nil {

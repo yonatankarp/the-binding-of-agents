@@ -17,7 +17,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: pokegents-dashboard <command>")
+		fmt.Println("Usage: boa <command>")
 		fmt.Println("Commands:")
 		fmt.Println("  serve    Start the dashboard server")
 		fmt.Println("  index    Build the search index and exit")

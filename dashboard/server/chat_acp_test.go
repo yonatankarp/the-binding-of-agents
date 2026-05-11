@@ -240,7 +240,7 @@ func TestCompactSessionUpdateFrame_OmitsCodexExecOutput(t *testing.T) {
 
 func TestPatchRunningFileChatPreservesVerifiedTranscriptAsLastGood(t *testing.T) {
 	dir := t.TempDir()
-	dataDir := filepath.Join(dir, ".pokegents")
+	dataDir := filepath.Join(dir, ".the-binding-of-agents")
 	runningDir := filepath.Join(dataDir, "running")
 	if err := os.MkdirAll(runningDir, 0o755); err != nil {
 		t.Fatal(err)
@@ -252,7 +252,7 @@ func TestPatchRunningFileChatPreservesVerifiedTranscriptAsLastGood(t *testing.T)
 	runningPath := filepath.Join(runningDir, "engineer@general-pg-1.json")
 	initial := map[string]any{
 		"profile":         "engineer@general",
-		"pokegent_id":     "pg-1",
+		"run_id":          "pg-1",
 		"session_id":      "019dffbd-c486-7910-a997-1248f16b1f59",
 		"transcript_path": transcript,
 		"interface":       "chat",
@@ -288,7 +288,7 @@ func TestPatchRunningFileChatPreservesVerifiedTranscriptAsLastGood(t *testing.T)
 }
 
 func TestSessionIDFromTranscriptPath(t *testing.T) {
-	path := "/home/user/.pokegents/codex-homes/custom-codex-model/sessions/2026/05/06/rollout-2026-05-06T17-01-59-019dffbd-c486-7910-a997-1248f16b1f59.jsonl"
+	path := "/home/user/.the-binding-of-agents/codex-homes/custom-codex-model/sessions/2026/05/06/rollout-2026-05-06T17-01-59-019dffbd-c486-7910-a997-1248f16b1f59.jsonl"
 	want := "019dffbd-c486-7910-a997-1248f16b1f59"
 	if got := sessionIDFromTranscriptPath(path); got != want {
 		t.Fatalf("got %q, want %q", got, want)
@@ -321,7 +321,7 @@ func TestCompleteBrowserPrompt_IgnoresUntrackedResponses(t *testing.T) {
 func TestCompleteBrowserPrompt_ErrorMarksError(t *testing.T) {
 	dir := t.TempDir()
 	sess := &ChatSession{
-		PokegentID:         "agent-1",
+		RunID:              "agent-1",
 		ACPID:              "session-1",
 		dataDir:            dir,
 		smState:            "busy",

@@ -186,7 +186,7 @@ func (sm *StateManager) GetAgents() []AgentState {
 		// Inherit parent's task group, or auto-create one if parent has none
 		if ea.ParentSessionID != "" {
 			for pgid, parent := range sm.agents {
-				if parent.SessionID == ea.ParentSessionID || parent.PokegentID == ea.ParentSessionID {
+				if parent.SessionID == ea.ParentSessionID || parent.RunID == ea.ParentSessionID {
 					a.Project = parent.Project
 					a.ProjectColor = parent.ProjectColor
 					if parent.TaskGroup != "" {
@@ -197,7 +197,7 @@ func (sm *StateManager) GetAgents() []AgentState {
 						a.TaskGroup = groupName
 						// Also tag the parent in the result slice so it ends up in the same group
 						for i := range result {
-							if result[i].PokegentID == pgid {
+							if result[i].RunID == pgid {
 								result[i].TaskGroup = groupName
 								break
 							}
@@ -217,7 +217,7 @@ func (sm *StateManager) GetAgents() []AgentState {
 		orderIndex[pgid] = i + 1 // 1-based so 0 means "not in list"
 	}
 	sort.SliceStable(result, func(i, j int) bool {
-		oi, oj := orderIndex[result[i].PokegentID], orderIndex[result[j].PokegentID]
+		oi, oj := orderIndex[result[i].RunID], orderIndex[result[j].RunID]
 		if oi != 0 && oj != 0 {
 			return oi < oj
 		}
@@ -420,7 +420,7 @@ func (sm *StateManager) RenameAgent(pokegentID, newName string) {
 	// Store name override and persist to identity store
 	sm.nameOverrides[pokegentID] = newName
 	if rs, ok := sm.running[pokegentID]; ok {
-		if pgid := rs.GetPokegentID(); pgid != "" && sm.store.Agents != nil {
+		if pgid := rs.GetRunID(); pgid != "" && sm.store.Agents != nil {
 			sm.store.Agents.Update(pgid, func(id *AgentIdentity) {
 				id.DisplayName = newName
 			})
@@ -446,7 +446,7 @@ func (sm *StateManager) SetAgentRole(pokegentID, role string) {
 			r.Profile = rs.Profile
 		})
 		// Also persist to identity store
-		if pgid := rs.GetPokegentID(); pgid != "" && sm.store.Agents != nil {
+		if pgid := rs.GetRunID(); pgid != "" && sm.store.Agents != nil {
 			sm.store.Agents.Update(pgid, func(id *AgentIdentity) {
 				id.Role = role
 			})
@@ -472,7 +472,7 @@ func (sm *StateManager) SetAgentProject(pokegentID, project string) {
 			r.Profile = rs.Profile
 		})
 		// Also persist to identity store
-		if pgid := rs.GetPokegentID(); pgid != "" && sm.store.Agents != nil {
+		if pgid := rs.GetRunID(); pgid != "" && sm.store.Agents != nil {
 			sm.store.Agents.Update(pgid, func(id *AgentIdentity) {
 				id.Project = project
 			})
@@ -500,7 +500,7 @@ func (sm *StateManager) SetAgentTaskGroup(pokegentID, taskGroup string) error {
 		r.TaskGroup = taskGroup
 	})
 	// Also persist to identity store
-	if pgid := rs.GetPokegentID(); pgid != "" && sm.store.Agents != nil {
+	if pgid := rs.GetRunID(); pgid != "" && sm.store.Agents != nil {
 		sm.store.Agents.Update(pgid, func(id *AgentIdentity) {
 			id.TaskGroup = taskGroup
 		})
@@ -527,7 +527,7 @@ func (sm *StateManager) SetAgentSprite(pokegentID, sprite string) error {
 		r.Sprite = sprite
 	})
 	// Also persist to identity store
-	if pgid := rs.GetPokegentID(); pgid != "" && sm.store.Agents != nil {
+	if pgid := rs.GetRunID(); pgid != "" && sm.store.Agents != nil {
 		sm.store.Agents.Update(pgid, func(id *AgentIdentity) {
 			id.Sprite = sprite
 		})
@@ -539,10 +539,10 @@ func (sm *StateManager) SetAgentSprite(pokegentID, sprite string) error {
 	return nil
 }
 
-// getPokegentID returns the pokegent_id for a running session keyed by pokegentID.
-func (sm *StateManager) getPokegentID(pokegentID string) string {
+// getRunID returns the pokegent_id for a running session keyed by pokegentID.
+func (sm *StateManager) getRunID(pokegentID string) string {
 	if rs, ok := sm.running[pokegentID]; ok {
-		return rs.GetPokegentID()
+		return rs.GetRunID()
 	}
 	return ""
 }
@@ -579,7 +579,7 @@ func (sm *StateManager) SaveIdentity(identity AgentIdentity) error {
 		return err
 	}
 	cp := identity
-	sm.identities[identity.PokegentID] = &cp
+	sm.identities[identity.RunID] = &cp
 	return nil
 }
 
@@ -1063,7 +1063,7 @@ func (sm *StateManager) runningSessionForIDLocked(id string) (string, RunningSes
 		return id, rs, true
 	}
 	for pgid, rs := range sm.running {
-		if rs.PokegentID == id || rs.SessionID == id {
+		if rs.RunID == id || rs.SessionID == id {
 			return pgid, rs, true
 		}
 	}
@@ -1089,7 +1089,7 @@ func (sm *StateManager) explicitRunningTranscriptPathLocked(id string) string {
 		}
 	}
 	for _, rs := range sm.running {
-		if rs.PokegentID == id || rs.SessionID == id {
+		if rs.RunID == id || rs.SessionID == id {
 			if rs.TranscriptPath != "" {
 				if _, err := os.Stat(rs.TranscriptPath); err == nil {
 					return rs.TranscriptPath
@@ -1117,7 +1117,7 @@ func (sm *StateManager) findTranscriptPathLocked(pokegentID string) string {
 		}
 	}
 	for pgid, rs := range sm.running {
-		if pgid == pokegentID || rs.PokegentID == pokegentID || rs.SessionID == pokegentID {
+		if pgid == pokegentID || rs.RunID == pokegentID || rs.SessionID == pokegentID {
 			if rs.TranscriptPath != "" {
 				if _, err := os.Stat(rs.TranscriptPath); err == nil {
 					return rs.TranscriptPath
@@ -1426,7 +1426,7 @@ func (sm *StateManager) loadRunning() error {
 	}
 	sm.running = make(map[string]RunningSession, len(sessions))
 	for _, rs := range sessions {
-		pgid := rs.PokegentID
+		pgid := rs.RunID
 		if pgid == "" {
 			pgid = rs.SessionID // last resort fallback
 		}
@@ -1480,7 +1480,7 @@ func (sm *StateManager) loadIdentities() error {
 		return err
 	}
 	for i := range agents {
-		sm.identities[agents[i].PokegentID] = &agents[i]
+		sm.identities[agents[i].RunID] = &agents[i]
 	}
 	return nil
 }
@@ -1602,7 +1602,7 @@ func (sm *StateManager) rebuildAgents() {
 	if sm.store.Agents != nil {
 		if loaded, err := sm.store.Agents.List(); err == nil {
 			for i := range loaded {
-				sm.identities[loaded[i].PokegentID] = &loaded[i]
+				sm.identities[loaded[i].RunID] = &loaded[i]
 			}
 		}
 	}
@@ -1626,7 +1626,7 @@ func (sm *StateManager) rebuildAgents() {
 	for pgid, rs := range sm.running {
 		a := &AgentState{
 			SessionID:      rs.SessionID,
-			PokegentID:     pgid,
+			RunID:          pgid,
 			ProfileName:    rs.Profile,
 			Role:           rs.Role,
 			Project:        rs.Project,
@@ -1776,8 +1776,8 @@ func (sm *StateManager) rebuildAgents() {
 		a, exists := agents[pgid]
 		if !exists {
 			a = &AgentState{
-				SessionID:  sf.SessionID,
-				PokegentID: pgid,
+				SessionID: sf.SessionID,
+				RunID:     pgid,
 			}
 			// Try to match profile by CWD
 			a.ProfileName, a.Emoji, a.Color = sm.matchProfileLocked(sf.CWD)

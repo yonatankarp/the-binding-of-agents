@@ -20,7 +20,7 @@ func NewPathService(dataDir string) PathService {
 		dataDir = os.Getenv("POKEGENTS_DATA")
 	}
 	if dataDir == "" {
-		dataDir = filepath.Join(home, ".pokegents")
+		dataDir = filepath.Join(home, ".the-binding-of-agents")
 	}
 	return PathService{HomeDir: home, DataDir: dataDir}
 }

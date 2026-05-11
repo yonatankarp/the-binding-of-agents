@@ -11,7 +11,7 @@ type mockAgent struct {
 }
 
 func (a *mockAgent) GetSessionID() string   { return a.sessionID }
-func (a *mockAgent) GetPokegentID() string  { return a.pokegentSessionID }
+func (a *mockAgent) GetRunID() string       { return a.pokegentSessionID }
 func (a *mockAgent) GetDisplayName() string { return a.displayName }
 func (a *mockAgent) GetTTY() string         { return a.tty }
 
@@ -47,7 +47,7 @@ func TestResolveToSessionID(t *testing.T) {
 	}
 }
 
-func TestResolveToPokegentID(t *testing.T) {
+func TestResolveToRunID(t *testing.T) {
 	a := agents()
 	tests := []struct {
 		name, input, want string
@@ -59,9 +59,9 @@ func TestResolveToPokegentID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ResolveToPokegentID(a, tt.input)
+			got := ResolveToRunID(a, tt.input)
 			if got != tt.want {
-				t.Errorf("ResolveToPokegentID(%q) = %q, want %q", tt.input, got, tt.want)
+				t.Errorf("ResolveToRunID(%q) = %q, want %q", tt.input, got, tt.want)
 			}
 		})
 	}
@@ -93,12 +93,12 @@ func TestCloneSafety(t *testing.T) {
 		&mockAgent{"shared-id", "clone-pokegent", "Clone", ""},
 	}
 
-	// ResolveToPokegentID should find the right one
-	got := ResolveToPokegentID(cloneAgents, "original-pokegent")
+	// ResolveToRunID should find the right one
+	got := ResolveToRunID(cloneAgents, "original-pokegent")
 	if got != "original-pokegent" {
 		t.Errorf("expected original-pokegent, got %s", got)
 	}
-	got = ResolveToPokegentID(cloneAgents, "clone-pokegent")
+	got = ResolveToRunID(cloneAgents, "clone-pokegent")
 	if got != "clone-pokegent" {
 		t.Errorf("expected clone-pokegent, got %s", got)
 	}

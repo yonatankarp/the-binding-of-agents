@@ -72,7 +72,7 @@ func (s *Server) handleSetRuntimeConfig(w http.ResponseWriter, r *http.Request) 
 	if done {
 		return
 	}
-	pgid := agent.PokegentID
+	pgid := agent.RunID
 	if pgid == "" {
 		http.Error(w, "agent has no pokegent_id", http.StatusBadRequest)
 		return

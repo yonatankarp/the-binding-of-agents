@@ -59,8 +59,8 @@ type TranscriptEntry struct {
 	UUID      string         `json:"uuid"`
 	Type      string         `json:"type"` // "user", "assistant", "tool_result", "system"
 	Timestamp string         `json:"timestamp"`
-	Content   string         `json:"content,omitempty"`    // for user messages (plain text)
-	Blocks    []ContentBlock `json:"blocks,omitempty"`     // for assistant messages
+	Content   string         `json:"content,omitempty"`     // for user messages (plain text)
+	Blocks    []ContentBlock `json:"blocks,omitempty"`      // for assistant messages
 	ToolUseID string         `json:"tool_use_id,omitempty"` // for tool_result
 	Truncated bool           `json:"truncated,omitempty"`
 	FullSize  int            `json:"full_size,omitempty"`

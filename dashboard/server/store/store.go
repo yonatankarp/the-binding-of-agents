@@ -37,7 +37,7 @@ type Store struct {
 	Agents    AgentIdentityStore
 }
 
-// ProjectStore manages project configuration files (~/.pokegents/projects/*.json).
+// ProjectStore manages project configuration files (~/.the-binding-of-agents/projects/*.json).
 type ProjectStore interface {
 	// Get returns a project by name.
 	Get(name string) (*ProjectConfig, error)
@@ -45,7 +45,7 @@ type ProjectStore interface {
 	List() ([]ProjectConfig, error)
 }
 
-// RoleStore manages role configuration files (~/.pokegents/roles/*.json).
+// RoleStore manages role configuration files (~/.the-binding-of-agents/roles/*.json).
 type RoleStore interface {
 	// Get returns a role by name.
 	Get(name string) (*RoleConfig, error)
@@ -53,7 +53,7 @@ type RoleStore interface {
 	List() ([]RoleConfig, error)
 }
 
-// EphemeralStore manages ephemeral subagent files (~/.pokegents/ephemeral/*.json).
+// EphemeralStore manages ephemeral subagent files (~/.the-binding-of-agents/ephemeral/*.json).
 type EphemeralStore interface {
 	// Get returns an ephemeral agent by agent_id.
 	Get(agentID string) (*EphemeralAgent, error)
@@ -69,7 +69,7 @@ type EphemeralStore interface {
 	Cleanup(maxAge time.Duration) (int, error)
 }
 
-// AgentIdentityStore manages persistent agent identity files (~/.pokegents/agents/*.json).
+// AgentIdentityStore manages persistent agent identity files (~/.the-binding-of-agents/agents/*.json).
 type AgentIdentityStore interface {
 	// Get returns an agent identity by pokegent_id.
 	Get(pokegentID string) (*AgentIdentity, error)
@@ -89,12 +89,12 @@ type MetadataStore interface {
 	SaveJSON(filename string, data any) error
 }
 
-// RunningStore manages active session registry files (~/.pokegents/running/*.json).
+// RunningStore manages active session registry files (~/.the-binding-of-agents/running/*.json).
 type RunningStore interface {
 	// Get returns a single running session by Claude session ID.
 	Get(sessionID string) (*RunningSession, error)
-	// GetByPokegentID returns a running session by stable pokegent ID.
-	GetByPokegentID(pokegentID string) (*RunningSession, error)
+	// GetByRunID returns a running session by stable pokegent ID.
+	GetByRunID(pokegentID string) (*RunningSession, error)
 	// List returns all running sessions.
 	List() ([]RunningSession, error)
 	// Create writes a new running session file.
@@ -107,7 +107,7 @@ type RunningStore interface {
 	Watch() <-chan FileEvent
 }
 
-// StatusStore manages agent status files (~/.pokegents/status/*.json).
+// StatusStore manages agent status files (~/.the-binding-of-agents/status/*.json).
 type StatusStore interface {
 	// Get returns a single status file by session ID.
 	Get(sessionID string) (*StatusFile, error)
@@ -121,7 +121,7 @@ type StatusStore interface {
 	Watch() <-chan FileEvent
 }
 
-// ProfileStore manages profile configuration files (~/.pokegents/profiles/*.json).
+// ProfileStore manages profile configuration files (~/.the-binding-of-agents/profiles/*.json).
 type ProfileStore interface {
 	// Get returns a profile by name.
 	Get(name string) (*Profile, error)
@@ -129,13 +129,13 @@ type ProfileStore interface {
 	List() ([]Profile, error)
 }
 
-// ConfigStore manages the global config file (~/.pokegents/config.json).
+// ConfigStore manages the global config file (~/.the-binding-of-agents/config.json).
 type ConfigStore interface {
 	// Get returns the current configuration.
 	Get() (*AppConfig, error)
 }
 
-// MessageStore manages inter-agent message files (~/.pokegents/messages/).
+// MessageStore manages inter-agent message files (~/.the-binding-of-agents/messages/).
 type MessageStore interface {
 	// Send stores a new message in the recipient's mailbox.
 	Send(from, fromName, to, toName, content string) (*Message, error)
@@ -157,7 +157,7 @@ type MessageStore interface {
 	GetConnections() ([]Connection, error)
 }
 
-// ActivityStore manages the shared activity log (~/.pokegents/activity/).
+// ActivityStore manages the shared activity log (~/.the-binding-of-agents/activity/).
 type ActivityStore interface {
 	// Append adds an entry to a project's activity log.
 	Append(projectHash string, entry ActivityEntry) error

@@ -103,9 +103,9 @@ func (t *ITerm2Terminal) LaunchProfile(opts LaunchOptions) error {
 	}
 	cmd := fmt.Sprintf("pokegent %s", safeProfile)
 	// --pokegent-id pins the identity (so dashboard's pre-written running file
-	// and pokegent.sh's later writes agree on the same pokegent_id).
-	if opts.PokegentID != "" {
-		safePGID := strings.ReplaceAll(opts.PokegentID, `"`, `\"`)
+	// and boa.sh's later writes agree on the same pokegent_id).
+	if opts.RunID != "" {
+		safePGID := strings.ReplaceAll(opts.RunID, `"`, `\"`)
 		cmd = fmt.Sprintf("%s --pokegent-id %s", cmd, safePGID)
 	}
 	if opts.TaskGroup != "" {
@@ -137,7 +137,7 @@ func (t *ITerm2Terminal) ResumeSession(profile, sessionID, compact string) error
 	return t.ResumePokegent(profile, sessionID, "", compact)
 }
 
-// ResumePokegent resumes a Claude session while forcing pokegent.sh to reuse the
+// ResumePokegent resumes a Claude session while forcing boa.sh to reuse the
 // given pokegent_id — this prevents a new identity file from being minted.
 func (t *ITerm2Terminal) ResumePokegent(profile, sessionID, pokegentID, compact string) error {
 	safeProfile := strings.ReplaceAll(profile, `"`, `\"`)

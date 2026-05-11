@@ -42,13 +42,13 @@ type MessagingService struct {
 	isSessionFocused IsSessionFocusedFunc
 
 	// Nudger state
-	mu           sync.Mutex
-	pending      map[string]*time.Timer // session_id → scheduled nudge
-	lastNudge    map[string]time.Time   // session_id → last nudge time
-	focusRetries map[string]int         // session_id → focus-defer retry count
-	debounce     time.Duration
-	batchDelay   time.Duration
-	minIdle      time.Duration
+	mu              sync.Mutex
+	pending         map[string]*time.Timer // session_id → scheduled nudge
+	lastNudge       map[string]time.Time   // session_id → last nudge time
+	focusRetries    map[string]int         // session_id → focus-defer retry count
+	debounce        time.Duration
+	batchDelay      time.Duration
+	minIdle         time.Duration
 	maxFocusRetries int
 }
 

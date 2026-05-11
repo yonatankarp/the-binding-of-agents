@@ -23,7 +23,7 @@ func mockACPSession(t *testing.T) (*ChatSession, *ChatManager) {
 	mgr := NewChatManager(t.TempDir(), func() {}, bus, nil)
 
 	sess := &ChatSession{
-		PokegentID:   "test-pgid-12345678",
+		RunID:        "test-pgid-12345678",
 		ACPID:        "test-acp-session-id",
 		Profile:      "test",
 		smState:      "idle",

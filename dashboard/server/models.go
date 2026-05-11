@@ -17,7 +17,7 @@ type AgentIdentity = store.AgentIdentity
 // This is server-only (not in store) because it combines data from multiple sources.
 type AgentState struct {
 	SessionID       string         `json:"session_id"`
-	PokegentID      string         `json:"pokegent_id,omitempty"`
+	RunID           string         `json:"run_id,omitempty"`
 	ProfileName     string         `json:"profile_name"`
 	Role            string         `json:"role,omitempty"`
 	Project         string         `json:"project,omitempty"`

@@ -73,7 +73,7 @@ func TestBeginPromptClearsStaleActivityFeed(t *testing.T) {
 	sm.activityFeeds[pgid] = []ActivityItem{{Time: "12:00:00", Type: "tool", Text: "Read: stale.py"}}
 	sm.agents[pgid] = &AgentState{
 		SessionID:     "session-1",
-		PokegentID:    pgid,
+		RunID:         pgid,
 		State:         "idle",
 		LastSummary:   "previous response",
 		RecentActions: []string{"Read: stale.py"},

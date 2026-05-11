@@ -213,14 +213,14 @@ func TestCloneRouting(t *testing.T) {
 	writeTestJSON(t, filepath.Join(runDir, "client-"+pokegentA+".json"), RunningSession{
 		Profile:     "client",
 		SessionID:   sharedSessionID,
-		PokegentID:  pokegentA,
+		RunID:       pokegentA,
 		PID:         1001,
 		DisplayName: "Original",
 	})
 	writeTestJSON(t, filepath.Join(runDir, "client-"+pokegentB+".json"), RunningSession{
 		Profile:     "client",
 		SessionID:   sharedSessionID,
-		PokegentID:  pokegentB,
+		RunID:       pokegentB,
 		PID:         1002,
 		DisplayName: "Clone",
 	})

@@ -24,18 +24,18 @@ import (
 	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
-// LaunchRequest is the body of POST /api/pokegents/launch.
+// LaunchRequest is the body of POST /api/runs/launch.
 type LaunchRequest struct {
 	// Either Profile (legacy "role@project" string) or Role/Project must be set.
-	Profile          string `json:"profile,omitempty"`
-	Role             string `json:"role,omitempty"`
-	Project          string `json:"project,omitempty"`
-	Name             string `json:"name,omitempty"`
-	Sprite           string `json:"sprite,omitempty"`
-	Model            string `json:"model,omitempty"`
-	Effort           string `json:"effort,omitempty"`
-	TaskGroup        string `json:"task_group,omitempty"`
-	ParentPokegentID string `json:"parent_pokegent_id,omitempty"`
+	Profile     string `json:"profile,omitempty"`
+	Role        string `json:"role,omitempty"`
+	Project     string `json:"project,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Sprite      string `json:"sprite,omitempty"`
+	Model       string `json:"model,omitempty"`
+	Effort      string `json:"effort,omitempty"`
+	TaskGroup   string `json:"task_group,omitempty"`
+	ParentRunID string `json:"parent_pokegent_id,omitempty"`
 	// Interface picks the UI surface. "chat" or "terminal" ("iterm2" is
 	// accepted as a legacy terminal alias).
 	Interface string `json:"interface,omitempty"`
@@ -45,9 +45,9 @@ type LaunchRequest struct {
 
 // LaunchResponse is what the dashboard returns to the frontend.
 type LaunchResponse struct {
-	PokegentID string `json:"pokegent_id"`
-	Profile    string `json:"profile"`
-	Interface  string `json:"interface"`
+	RunID     string `json:"run_id"`
+	Profile   string `json:"profile"`
+	Interface string `json:"interface"`
 }
 
 func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +76,7 @@ func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pgid, err := newPokegentID()
+	pgid, err := newRunID()
 	if err != nil {
 		http.Error(w, "failed to mint pokegent_id: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -96,11 +96,11 @@ func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Principle 6: pre-write the running file before any subprocess runs.
-	// Real `pid`/`tty`/`iterm_session_id` get patched in by `pokegent.sh` and
+	// Real `pid`/`tty`/`iterm_session_id` get patched in by `boa.sh` and
 	// then the SessionStart hook (iterm2), or by the ChatManager directly (chat).
 	rs := store.RunningSession{
 		Profile:      profile,
-		PokegentID:   pgid,
+		RunID:        pgid,
 		DisplayName:  displayName,
 		TaskGroup:    body.TaskGroup,
 		Sprite:       body.Sprite,
@@ -135,7 +135,7 @@ func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
 		}
 		canonicalBackendKey := s.backendStore.CanonicalID(backendKey)
 		// Resolve model/effort from request → role config → project config
-		// (same precedence pokegent.sh uses for iterm2 launches). Non-Claude
+		// (same precedence boa.sh uses for iterm2 launches). Non-Claude
 		// ACP backends should not inherit Claude's default model label.
 		model, effort := s.resolveModelEffortForBackend(body.Model, body.Effort, body.Role, body.Project, backendKey)
 		// Merge per-model env overrides (e.g. different API keys/endpoints
@@ -146,7 +146,7 @@ func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 90*time.Second)
 		defer cancel()
 		if _, err := s.chatMgr.Launch(ctx, ChatLaunchOptions{
-			PokegentID:         pgid,
+			RunID:              pgid,
 			Profile:            profile,
 			Cwd:                cwd,
 			SystemPromptAppend: systemPrompt,
@@ -163,7 +163,7 @@ func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
 		// Persist identity now that the supervisor confirmed the agent is alive.
 		s.persistChatIdentity(pgid, profile, body, displayName)
 		s.eventBus.Publish("state_update", s.state.GetAgents())
-		writeJSON(w, LaunchResponse{PokegentID: pgid, Profile: profile, Interface: iface})
+		writeJSON(w, LaunchResponse{RunID: pgid, Profile: profile, Interface: iface})
 		return
 	}
 
@@ -177,7 +177,7 @@ func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
 		Profile:      profile,
 		ITermProfile: itermProfile,
 		TaskGroup:    body.TaskGroup,
-		PokegentID:   pgid,
+		RunID:        pgid,
 	}); err != nil {
 		_ = os.Remove(runningPath)
 		http.Error(w, "launch failed: "+err.Error(), http.StatusInternalServerError)
@@ -185,11 +185,11 @@ func (s *Server) handleUnifiedLaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.eventBus.Publish("state_update", s.state.GetAgents())
-	writeJSON(w, LaunchResponse{PokegentID: pgid, Profile: profile, Interface: iface})
+	writeJSON(w, LaunchResponse{RunID: pgid, Profile: profile, Interface: iface})
 }
 
 // resolveCwd derives the working directory for a chat launch from project
-// config (with fallback to home). For iterm2 launches pokegent.sh handles
+// config (with fallback to home). For iterm2 launches boa.sh handles
 // this internally; chat launches need the cwd up-front for the subprocess.
 // Expands a leading `~` since project configs store the user-friendly form.
 func (s *Server) resolveCwd(body LaunchRequest, profile string) string {
@@ -227,7 +227,7 @@ func expandTilde(p string) string {
 }
 
 // composeSystemPrompt builds the shared pokegents prompt plus role/project
-// prompt to append to the agent preset. Mirrors what pokegent.sh assembles for
+// prompt to append to the agent preset. Mirrors what boa.sh assembles for
 // iterm2 launches so chat-mode agents get the same mailbox instructions.
 // Empty string → use SDK default (Claude Code preset alone).
 func (s *Server) composeSystemPrompt(body LaunchRequest) string {
@@ -279,14 +279,14 @@ Keep messages concise and actionable. Include file paths, specific line numbers,
 
 // persistChatIdentity writes a permanent identity file for a chat-backed
 // pokegent so it shows up in PC box, search, and survives restart. iterm2
-// launches do this from inside pokegent.sh; chat does it server-side.
+// launches do this from inside boa.sh; chat does it server-side.
 func (s *Server) persistChatIdentity(pgid, profile string, body LaunchRequest, displayName string) {
 	sprite := body.Sprite
 	if sprite == "" {
 		sprite = pickDefaultSprite(pgid)
 	}
 	id := store.AgentIdentity{
-		PokegentID:   pgid,
+		RunID:        pgid,
 		DisplayName:  displayName,
 		Sprite:       sprite,
 		Role:         body.Role,
@@ -304,7 +304,7 @@ func (s *Server) persistChatIdentity(pgid, profile string, body LaunchRequest, d
 	}
 }
 
-// composeProfile picks the correct profile string for pokegent.sh from a
+// composeProfile picks the correct profile string for boa.sh from a
 // LaunchRequest. Direct `Profile` wins; otherwise `role@project` is assembled
 // from the parts.
 func composeProfile(body LaunchRequest) (string, error) {
@@ -326,7 +326,7 @@ func writePlaceholderRunningFile(runningDir string, rs store.RunningSession) (st
 	if err := os.MkdirAll(runningDir, 0o755); err != nil {
 		return "", err
 	}
-	path := filepath.Join(runningDir, fmt.Sprintf("%s-%s.json", rs.Profile, rs.PokegentID))
+	path := filepath.Join(runningDir, fmt.Sprintf("%s-%s.json", rs.Profile, rs.RunID))
 	data, err := json.MarshalIndent(rs, "", "  ")
 	if err != nil {
 		return "", err
@@ -337,8 +337,8 @@ func writePlaceholderRunningFile(runningDir string, rs store.RunningSession) (st
 	return path, nil
 }
 
-// newPokegentID returns a lowercase RFC 4122 v4 UUID.
-func newPokegentID() (string, error) {
+// newRunID returns a lowercase RFC 4122 v4 UUID.
+func newRunID() (string, error) {
 	var b [16]byte
 	if _, err := rand.Read(b[:]); err != nil {
 		return "", err
@@ -349,7 +349,7 @@ func newPokegentID() (string, error) {
 }
 
 // pickDefaultSprite picks a sprite using the same int32-overflow hash as
-// pokegent.sh and the dashboard's notifier — keeps sprite assignment stable
+// boa.sh and the dashboard's notifier — keeps sprite assignment stable
 // across processes and matches what iterm2 launches see.
 func pickDefaultSprite(id string) string {
 	sprites := defaultSpriteList()

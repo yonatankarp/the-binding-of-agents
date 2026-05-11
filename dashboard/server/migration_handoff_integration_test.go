@@ -22,7 +22,7 @@ func TestMigrateNonClaudeChatToITermUsesRealStateHandoff(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 
-	dataDir := filepath.Join(home, ".pokegents")
+	dataDir := filepath.Join(home, ".the-binding-of-agents")
 	claudeProjectDir := filepath.Join(home, ".claude", "projects")
 	for _, dir := range []string{
 		filepath.Join(dataDir, "running"),
@@ -53,7 +53,7 @@ func TestMigrateNonClaudeChatToITermUsesRealStateHandoff(t *testing.T) {
 
 	fileStore := store.NewFileStore(dataDir)
 	if err := fileStore.Agents.Save(store.AgentIdentity{
-		PokegentID:   pgid,
+		RunID:        pgid,
 		DisplayName:  "Codex Agent",
 		Profile:      "reviewer",
 		Interface:    "chat",
@@ -65,7 +65,7 @@ func TestMigrateNonClaudeChatToITermUsesRealStateHandoff(t *testing.T) {
 	runningPath := filepath.Join(dataDir, "running", "reviewer-"+pgid+".json")
 	writeTestJSON(t, runningPath, store.RunningSession{
 		Profile:        "reviewer",
-		PokegentID:     pgid,
+		RunID:          pgid,
 		SessionID:      codexSessionID,
 		DisplayName:    "Codex Agent",
 		Interface:      "chat",
@@ -109,8 +109,8 @@ func TestMigrateNonClaudeChatToITermUsesRealStateHandoff(t *testing.T) {
 		t.Fatalf("LaunchProfile calls = %d, want 1", len(terminal.launches))
 	}
 	launch := terminal.launches[0]
-	if launch.PokegentID != pgid {
-		t.Fatalf("launch pokegent_id = %q, want %q", launch.PokegentID, pgid)
+	if launch.RunID != pgid {
+		t.Fatalf("launch pokegent_id = %q, want %q", launch.RunID, pgid)
 	}
 	if launch.Profile != "reviewer" {
 		t.Fatalf("launch profile = %q, want reviewer", launch.Profile)
@@ -143,7 +143,7 @@ func TestMigrateNonClaudeChatToITermUsesRealStateHandoff(t *testing.T) {
 	if err := json.Unmarshal(rawSnapshot, &snapshot); err != nil {
 		t.Fatalf("unmarshal snapshot: %v", err)
 	}
-	if snapshot.PokegentID != pgid || snapshot.SourceProvider != "codex" || snapshot.SourceSessionID != codexSessionID {
+	if snapshot.RunID != pgid || snapshot.SourceProvider != "codex" || snapshot.SourceSessionID != codexSessionID {
 		t.Fatalf("bad snapshot identity: %+v", snapshot)
 	}
 	if snapshot.SourceTranscriptPath != transcriptPath || snapshot.CWD != cwd {

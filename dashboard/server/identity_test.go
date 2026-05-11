@@ -8,9 +8,9 @@ import (
 func TestResolveSessionID(t *testing.T) {
 	// Build a mock server with agents
 	agents := []AgentState{
-		{SessionID: "aaaa1111-full-uuid-here", PokegentID: "bbbb2222-pokegent-uuid-here", DisplayName: "Agent A"},
-		{SessionID: "cccc3333-full-uuid-here", PokegentID: "dddd4444-pokegent-uuid-here", DisplayName: "Agent B"},
-		{SessionID: "eeee5555-full-uuid-here", PokegentID: "eeee5555-full-uuid-here", DisplayName: "Agent C (same IDs)"},
+		{SessionID: "aaaa1111-full-uuid-here", RunID: "bbbb2222-pokegent-uuid-here", DisplayName: "Agent A"},
+		{SessionID: "cccc3333-full-uuid-here", RunID: "dddd4444-pokegent-uuid-here", DisplayName: "Agent B"},
+		{SessionID: "eeee5555-full-uuid-here", RunID: "eeee5555-full-uuid-here", DisplayName: "Agent C (same IDs)"},
 	}
 
 	// resolveSessionID is on *Server, so we test the resolution logic directly
@@ -23,8 +23,8 @@ func TestResolveSessionID(t *testing.T) {
 		}
 		// Pass 2: pokegent_id
 		for _, a := range agents {
-			if a.PokegentID != "" && a.PokegentID != a.SessionID {
-				if a.PokegentID == id || (len(id) < len(a.PokegentID) && a.PokegentID[:len(id)] == id) {
+			if a.RunID != "" && a.RunID != a.SessionID {
+				if a.RunID == id || (len(id) < len(a.RunID) && a.RunID[:len(id)] == id) {
 					return a.SessionID
 				}
 			}
@@ -57,25 +57,25 @@ func TestResolveSessionID(t *testing.T) {
 	}
 }
 
-// TestResolveToPokegentID tests reverse resolution (find the pokegent ID).
-func TestResolveToPokegentID(t *testing.T) {
+// TestResolveToRunID tests reverse resolution (find the pokegent ID).
+func TestResolveToRunID(t *testing.T) {
 	agents := []AgentState{
-		{SessionID: "aaaa1111-full-uuid", PokegentID: "bbbb2222-pokegent-uuid", DisplayName: "Agent A"},
-		{SessionID: "cccc3333-full-uuid", PokegentID: "cccc3333-full-uuid", DisplayName: "Agent B (same)"},
+		{SessionID: "aaaa1111-full-uuid", RunID: "bbbb2222-pokegent-uuid", DisplayName: "Agent A"},
+		{SessionID: "cccc3333-full-uuid", RunID: "cccc3333-full-uuid", DisplayName: "Agent B (same)"},
 	}
 
 	resolveToPokegent := func(id string) string {
 		// Check by pokegent_id first
 		for _, a := range agents {
-			if a.PokegentID != "" && (a.PokegentID == id || (len(id) < len(a.PokegentID) && a.PokegentID[:len(id)] == id)) {
-				return a.PokegentID
+			if a.RunID != "" && (a.RunID == id || (len(id) < len(a.RunID) && a.RunID[:len(id)] == id)) {
+				return a.RunID
 			}
 		}
 		// Check by session_id → return pokegent_id
 		for _, a := range agents {
 			if a.SessionID == id || (len(id) < len(a.SessionID) && a.SessionID[:len(id)] == id) {
-				if a.PokegentID != "" {
-					return a.PokegentID
+				if a.RunID != "" {
+					return a.RunID
 				}
 				return a.SessionID
 			}
@@ -108,14 +108,14 @@ func TestResolveToPokegentID(t *testing.T) {
 // (clone scenario) are resolved correctly by pokegent_id.
 func TestCloneSafety(t *testing.T) {
 	agents := []AgentState{
-		{SessionID: "shared-session-id", PokegentID: "original-pokegent-id", DisplayName: "Original"},
-		{SessionID: "shared-session-id", PokegentID: "clone-pokegent-id", DisplayName: "Clone"},
+		{SessionID: "shared-session-id", RunID: "original-pokegent-id", DisplayName: "Original"},
+		{SessionID: "shared-session-id", RunID: "clone-pokegent-id", DisplayName: "Clone"},
 	}
 
 	// Resolution by pokegent_id should find the right one
 	resolveByLabel := func(pokegentID string) string {
 		for _, a := range agents {
-			if a.PokegentID == pokegentID {
+			if a.RunID == pokegentID {
 				return a.DisplayName
 			}
 		}

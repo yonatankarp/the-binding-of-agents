@@ -102,7 +102,7 @@ func (s *Server) handleDevACPConnections(w http.ResponseWriter, _ *http.Request)
 		busySince := sess.smBusySince
 		sess.smMu.Unlock()
 		out = append(out, map[string]any{
-			"pokegent_id":   sess.PokegentID,
+			"run_id":        sess.RunID,
 			"acp_id":        sess.ACPID,
 			"profile":       sess.Profile,
 			"cwd":           sess.Cwd,
@@ -120,7 +120,7 @@ func (s *Server) handleDevACPConnections(w http.ResponseWriter, _ *http.Request)
 
 func (s *Server) handleDevACPClose(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	pgid := s.resolveToPokegentID(id)
+	pgid := s.resolveToRunID(id)
 	if pgid == "" {
 		pgid = id
 	}
@@ -129,12 +129,12 @@ func (s *Server) handleDevACPClose(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.chatMgr.Close(pgid)
-	writeJSON(w, map[string]any{"ok": true, "pokegent_id": pgid})
+	writeJSON(w, map[string]any{"ok": true, "run_id": pgid})
 }
 
 func (s *Server) handleDevACPForceIdle(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	pgid := s.resolveToPokegentID(id)
+	pgid := s.resolveToRunID(id)
 	if pgid == "" {
 		pgid = id
 	}
@@ -144,7 +144,7 @@ func (s *Server) handleDevACPForceIdle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sess.ForceIdle()
-	writeJSON(w, map[string]any{"ok": true, "pokegent_id": pgid})
+	writeJSON(w, map[string]any{"ok": true, "run_id": pgid})
 }
 
 func tailLines(path string, limit int) ([]string, error) {

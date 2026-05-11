@@ -62,7 +62,7 @@ func (s *Server) handleMigrateInterface(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	pgid := s.resolveToPokegentID(idHint)
+	pgid := s.resolveToRunID(idHint)
 	agent := s.state.GetAgent(pgid)
 	if agent == nil {
 		http.Error(w, "agent not found: "+idHint, http.StatusNotFound)
@@ -115,14 +115,14 @@ func (s *Server) handleMigrateInterface(w http.ResponseWriter, r *http.Request) 
 
 	s.eventBus.Publish("state_update", s.state.GetAgents())
 	writeJSON(w, map[string]any{
-		"pokegent_id": pgid,
-		"interface":   body.To,
-		"session_id":  agent.SessionID,
+		"run_id":     pgid,
+		"interface":  body.To,
+		"session_id": agent.SessionID,
 	})
 }
 
 func (s *Server) migrateToChat(ctx context.Context, agent *AgentState, jsonlPath string) error {
-	pgid := agent.PokegentID
+	pgid := agent.RunID
 	if pgid == "" {
 		pgid = agent.SessionID
 	}
@@ -159,7 +159,7 @@ func (s *Server) migrateToChat(ctx context.Context, agent *AgentState, jsonlPath
 	// chat supervisor patches in subprocess pid via patchRunningFileChat).
 	rs := store.RunningSession{
 		Profile:     agent.ProfileName,
-		PokegentID:  pgid,
+		RunID:       pgid,
 		SessionID:   agent.SessionID, // preserve so the JSONL keeps matching
 		DisplayName: agent.DisplayName,
 		Sprite:      agent.Sprite,
@@ -180,7 +180,7 @@ func (s *Server) migrateToChat(ctx context.Context, agent *AgentState, jsonlPath
 	launchCtx, cancel := context.WithTimeout(ctx, 90*time.Second)
 	defer cancel()
 	if _, err := s.chatMgr.Launch(launchCtx, ChatLaunchOptions{
-		PokegentID:         pgid,
+		RunID:              pgid,
 		Profile:            agent.ProfileName,
 		Cwd:                cwd,
 		SystemPromptAppend: systemPrompt,
@@ -209,10 +209,10 @@ func (s *Server) migrateToChat(ctx context.Context, agent *AgentState, jsonlPath
 	}
 
 	// Chat backend confirmed alive. Now safe to tear down the iTerm tab and
-	// flip identity over to chat. pokegent.sh's exit cleanup checks the
+	// flip identity over to chat. boa.sh's exit cleanup checks the
 	// running file's `pid` field against its own $$ before deleting, so it
 	// won't wipe the chat backend's freshly-written file (chat's pid is the
-	// ACP subprocess, not the shell). See pokegent.sh:1109-1124.
+	// ACP subprocess, not the shell). See boa.sh:1109-1124.
 	if agent.ITermSessionID != "" || agent.TTY != "" {
 		_ = s.terminal.CloseSession(agent.ITermSessionID, agent.TTY)
 	}
@@ -220,14 +220,14 @@ func (s *Server) migrateToChat(ctx context.Context, agent *AgentState, jsonlPath
 		id.Interface = "chat"
 	})
 
-	// Belt-and-suspenders for pre-fix pokegent.sh agents (launched before
-	// the ownership check at pokegent.sh:1109-1124 was added). Those old
+	// Belt-and-suspenders for pre-fix boa.sh agents (launched before
+	// the ownership check at boa.sh:1109-1124 was added). Those old
 	// shells unconditionally `rm -f $running_file` on exit, which races
 	// against the chat backend's freshly-written file. We rewrite at
-	// T+1.5s to restore it. For agents on the new pokegent.sh, the
+	// T+1.5s to restore it. For agents on the new boa.sh, the
 	// ownership check protects the file and this rewrite is a no-op.
 	// Safe to remove once all in-flight agents have cycled to the new
-	// pokegent.sh.
+	// boa.sh.
 	go func() {
 		time.Sleep(1500 * time.Millisecond)
 		s.chatMgr.repatchRunningFile(pgid)
@@ -237,7 +237,7 @@ func (s *Server) migrateToChat(ctx context.Context, agent *AgentState, jsonlPath
 }
 
 func (s *Server) migrateToITerm2(agent *AgentState) error {
-	pgid := agent.PokegentID
+	pgid := agent.RunID
 	if pgid == "" {
 		pgid = agent.SessionID
 	}
@@ -274,7 +274,7 @@ func (s *Server) migrateToITerm2(agent *AgentState) error {
 		})
 		rs := store.RunningSession{
 			Profile:              agent.ProfileName,
-			PokegentID:           pgid,
+			RunID:                pgid,
 			DisplayName:          agent.DisplayName,
 			Sprite:               agent.Sprite,
 			TaskGroup:            agent.TaskGroup,
@@ -291,7 +291,7 @@ func (s *Server) migrateToITerm2(agent *AgentState) error {
 		if err := s.terminal.LaunchProfile(LaunchOptions{
 			Profile:            agent.ProfileName,
 			TaskGroup:          agent.TaskGroup,
-			PokegentID:         pgid,
+			RunID:              pgid,
 			HandoffContextPath: handoffPath,
 		}); err != nil {
 			if oldData != nil && oldPath != "" {
@@ -325,11 +325,11 @@ func (s *Server) migrateToITerm2(agent *AgentState) error {
 	})
 
 	// Pre-write running file (placeholder pid=0) with interface=iterm2 so
-	// the dashboard sees the agent immediately on the new backend; pokegent.sh
+	// the dashboard sees the agent immediately on the new backend; boa.sh
 	// will atomically overwrite with real values once it starts.
 	rs := store.RunningSession{
 		Profile:     agent.ProfileName,
-		PokegentID:  pgid,
+		RunID:       pgid,
 		SessionID:   agent.SessionID,
 		DisplayName: agent.DisplayName,
 		Sprite:      agent.Sprite,
@@ -343,8 +343,8 @@ func (s *Server) migrateToITerm2(agent *AgentState) error {
 	}
 
 	// Resume in iTerm2 with the same Claude session_id and pokegent_id.
-	// pokegent.sh handles --resume + --pokegent-id correctly (both flags
-	// already exist, see pokegent.sh:568-575 and resume flow).
+	// boa.sh handles --resume + --pokegent-id correctly (both flags
+	// already exist, see boa.sh:568-575 and resume flow).
 	if err := s.terminal.ResumePokegent(agent.ProfileName, agent.SessionID, pgid, ""); err != nil {
 		return fmt.Errorf("resume in iterm2: %w", err)
 	}

@@ -30,7 +30,7 @@ A graph appears at the end of this document under "Parallel Dispatch Playbook".
 **Go backend** (identifier renames only):
 - `dashboard/server/models.go` - `PokegentID` -> `RunID`, `PokegentSummary` -> `RunSummary`
 - `dashboard/server/*.go` (all files) - `~/.pokegents/` -> `~/.the-binding-of-agents/`; route prefixes
-- `pokegent.sh` -> renamed to `boa.sh`
+- `boa.sh` -> renamed to `boa.sh`
 - `install.sh` - paths and binary name
 - `go.mod` - module path
 - `scripts/fetch-pokesprite-assets.sh` - deleted
@@ -116,7 +116,7 @@ git add -A
 git status | head -30
 ```
 
-Verify the staged file list contains `dashboard/server/...`, `dashboard/web/...`, `pokegent.sh`, `install.sh`, etc. Then commit:
+Verify the staged file list contains `dashboard/server/...`, `dashboard/web/...`, `boa.sh`, `install.sh`, etc. Then commit:
 ```bash
 git commit -m "$(cat <<'EOF'
 Import pokegents upstream as fork baseline
@@ -343,7 +343,7 @@ Expected: commit succeeds.
 **Files (per architecture report):**
 - Modify: `dashboard/server/models.go` (lines 18-93)
 - Modify: `dashboard/server/*.go` (every Go file referencing PokegentID, /api/pokegents/, ~/.pokegents/)
-- Modify: `pokegent.sh` -> rename to `boa.sh`
+- Modify: `boa.sh` -> rename to `boa.sh`
 - Modify: `install.sh` (binary name and paths)
 
 The four renames in this task:
@@ -351,7 +351,7 @@ The four renames in this task:
 2. `PokegentSummary` -> `RunSummary` (struct type)
 3. `/api/pokegents/*` -> `/api/runs/*` (route prefix)
 4. `~/.pokegents/` -> `~/.the-binding-of-agents/` (storage dir)
-5. `pokegent.sh` -> `boa.sh` (launcher script)
+5. `boa.sh` -> `boa.sh` (launcher script)
 
 - [ ] **Step 1: Survey hit counts before changes**
 
@@ -410,11 +410,11 @@ grep -rn '\.pokegents' --include='*.go' --include='*.sh' .
 
 Expected: zero hits.
 
-- [ ] **Step 6: Rename launcher pokegent.sh -> boa.sh and fix internal references**
+- [ ] **Step 6: Rename launcher boa.sh -> boa.sh and fix internal references**
 
 ```bash
 cd ~/Projects/the-binding-of-agents
-git mv pokegent.sh boa.sh 2>/dev/null || mv pokegent.sh boa.sh
+git mv boa.sh boa.sh 2>/dev/null || mv boa.sh boa.sh
 grep -rl 'pokegent\.sh' --include='*.sh' --include='*.go' --include='*.md' . | xargs sed -i '' 's/pokegent\.sh/boa.sh/g'
 grep -rn 'pokegent\.sh' .
 ```
@@ -471,7 +471,7 @@ Rename Go identifiers: PokegentID -> RunID, routes, storage dir
 - PokegentSummary -> RunSummary
 - /api/pokegents/* -> /api/runs/*
 - ~/.pokegents/ -> ~/.the-binding-of-agents/
-- pokegent.sh -> boa.sh
+- boa.sh -> boa.sh
 
 Pure identifier rename, no logic changes. go build + go test pass.
 

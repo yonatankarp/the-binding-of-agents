@@ -19,7 +19,7 @@ const conversationSnapshotSchemaVersion = 1
 // context to continue coherently.
 type ConversationSnapshot struct {
 	SchemaVersion        int              `json:"schema_version"`
-	PokegentID           string           `json:"pokegent_id"`
+	RunID                string           `json:"run_id"`
 	SourceProvider       string           `json:"source_provider"`
 	SourceBackendKey     string           `json:"source_backend_key,omitempty"`
 	SourceSessionID      string           `json:"source_session_id,omitempty"`
@@ -75,7 +75,7 @@ func (s *Server) snapshotPath(pokegentID string) string {
 }
 
 func (s *Server) writeConversationSnapshot(snapshot ConversationSnapshot) error {
-	if snapshot.PokegentID == "" {
+	if snapshot.RunID == "" {
 		return fmt.Errorf("pokegent_id required")
 	}
 	dir := filepath.Join(s.dataDir, "snapshots")
@@ -86,7 +86,7 @@ func (s *Server) writeConversationSnapshot(snapshot ConversationSnapshot) error 
 	if err != nil {
 		return err
 	}
-	path := s.snapshotPath(snapshot.PokegentID)
+	path := s.snapshotPath(snapshot.RunID)
 	tmp := path + ".tmp"
 	if err := os.WriteFile(tmp, data, 0o644); err != nil {
 		return err
@@ -165,7 +165,7 @@ func (s *Server) buildConversationSnapshotFromTranscript(pokegentID, backendKey,
 
 	snapshot := ConversationSnapshot{
 		SchemaVersion:        conversationSnapshotSchemaVersion,
-		PokegentID:           pokegentID,
+		RunID:                pokegentID,
 		SourceProvider:       provider,
 		SourceBackendKey:     backendKey,
 		SourceSessionID:      sessionID,

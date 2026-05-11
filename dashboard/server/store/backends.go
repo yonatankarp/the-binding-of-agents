@@ -102,14 +102,14 @@ func (b BackendConfig) ResolvedEnvForModel(modelID string) map[string]string {
 	return b.Env
 }
 
-// backendsFile is the JSON shape of ~/.pokegents/backends.json.
+// backendsFile is the JSON shape of ~/.the-binding-of-agents/backends.json.
 type backendsFile struct {
 	Version      int                      `json:"version,omitempty"`
 	Instructions []string                 `json:"instructions,omitempty"`
 	Backends     map[string]BackendConfig `json:"backends"`
 }
 
-// BackendStore reads/writes ~/.pokegents/backends.json.
+// BackendStore reads/writes ~/.the-binding-of-agents/backends.json.
 type BackendStore struct {
 	mu   sync.RWMutex
 	path string

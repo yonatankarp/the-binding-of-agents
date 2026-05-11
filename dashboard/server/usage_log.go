@@ -24,12 +24,12 @@ func NewUsageLogger(dataDir string) *UsageLogger {
 }
 
 type UsageEntry struct {
-	Timestamp    string `json:"ts"`
-	Event        string `json:"event"`
-	PokegentID   string `json:"pgid"`
-	AgentName    string `json:"agent"`
-	Model        string `json:"model,omitempty"`
-	Profile      string `json:"profile,omitempty"`
+	Timestamp string `json:"ts"`
+	Event     string `json:"event"`
+	RunID     string `json:"pgid"`
+	AgentName string `json:"agent"`
+	Model     string `json:"model,omitempty"`
+	Profile   string `json:"profile,omitempty"`
 
 	// turn_end fields
 	Prompt       string `json:"prompt,omitempty"`
@@ -99,7 +99,7 @@ func (l *UsageLogger) Log(e UsageEntry) {
 func (l *UsageLogger) LogTurnEnd(pgid, agentName, profile, model, prompt string, turnID uint64, tokensBefore, tokensAfter int, duration time.Duration, turnErr error) {
 	e := UsageEntry{
 		Event:        "turn_end",
-		PokegentID:   pgid,
+		RunID:        pgid,
 		AgentName:    agentName,
 		Model:        model,
 		Profile:      profile,
@@ -120,7 +120,7 @@ func (l *UsageLogger) LogTurnEnd(pgid, agentName, profile, model, prompt string,
 func (l *UsageLogger) LogUsageUpdate(pgid, agentName string, used, window int, costUSD float64) {
 	l.Log(UsageEntry{
 		Event:         "usage_update",
-		PokegentID:    pgid,
+		RunID:         pgid,
 		AgentName:     agentName,
 		ContextUsed:   used,
 		ContextWindow: window,
@@ -140,7 +140,7 @@ func (l *UsageLogger) LogResultMeta(pgid, agentName string, params json.RawMessa
 	}
 	l.Log(UsageEntry{
 		Event:         "result_meta",
-		PokegentID:    pgid,
+		RunID:         pgid,
 		AgentName:     agentName,
 		DurationMs:    int64(meta.DurationMs),
 		DurationApiMs: meta.DurationApiMs,
@@ -152,7 +152,7 @@ func (l *UsageLogger) LogResultMeta(pgid, agentName string, params json.RawMessa
 func (l *UsageLogger) LogMCPCall(pgid, agentName, toolName, target string) {
 	l.Log(UsageEntry{
 		Event:      "mcp_call",
-		PokegentID: pgid,
+		RunID:      pgid,
 		AgentName:  agentName,
 		ToolName:   toolName,
 		ToolTarget: target,

@@ -38,7 +38,7 @@ const STATUS_LABEL: Record<BgShellStatus, string> = {
 
 export function ChatStatusBar({ agent, shells, children }: ChatStatusBarProps) {
   // Profile label: prefer an explicit role+project combination, fall back
-  // to profile_name. Mirrors the resolution logic in pokegent.sh launch.
+  // to profile_name. Mirrors the resolution logic in boa.sh launch.
   const profileLabel = (() => {
     if (agent.role && agent.project) return `${agent.role} · ${agent.project}`
     if (agent.project) return agent.project

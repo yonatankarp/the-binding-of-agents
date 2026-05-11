@@ -56,7 +56,7 @@ func TestRepairCodexTranscriptMissingCustomToolOutputs(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(data)
-	if !strings.Contains(text, `"custom_tool_call_output"`) || !strings.Contains(text, "call_missing") || !strings.Contains(text, "pokegents repaired transcript") {
+	if !strings.Contains(text, `"custom_tool_call_output"`) || !strings.Contains(text, "call_missing") || !strings.Contains(text, "boa repaired transcript") {
 		t.Fatalf("repaired transcript missing synthetic output:\n%s", text)
 	}
 	backups, err := filepath.Glob(path + ".bak.missing-tool-output.*")

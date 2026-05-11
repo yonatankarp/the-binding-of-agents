@@ -98,7 +98,7 @@ Every pokegents agent-tracking feature is preserved 1:1. Confirmation table:
 | `PokegentSummary` | `RunSummary` | TS interface in `types.ts` |
 | `~/.pokegents/` | `~/.the-binding-of-agents/` | Storage dir |
 | `/api/pokegents/*` | `/api/runs/*` | All Pokemon-flavored routes |
-| `pokegent.sh` | `boa.sh` | Shell launcher script |
+| `boa.sh` | `boa.sh` | Shell launcher script |
 
 `AgentState` keeps its name (it is an agent-management concept, not Pokemon).
 

@@ -242,7 +242,7 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
       return
     }
 
-    // Wait for pokegent.sh to overwrite the placeholder with real session info,
+    // Wait for boa.sh to overwrite the placeholder with real session info,
     // then apply user's name + sprite. Keyed by pokegent_id from launch response —
     // no more polling-by-exclusion.
     const pokegentId = resp.pokegent_id

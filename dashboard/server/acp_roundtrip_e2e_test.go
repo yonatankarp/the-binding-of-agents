@@ -29,7 +29,7 @@ import (
 //	POKEGENTS_E2E_REAL_ACP=1 OPENAI_API_KEY=... go test ./server -run TestRealACPRoundTripMigration -count=1 -timeout=8m
 //
 // Isolation: the test does not bind dashboard ports and does not use the real
-// ~/.pokegents, ~/.codex, or ~/.claude paths. The only intentionally inherited
+// ~/.the-binding-of-agents, ~/.codex, or ~/.claude paths. The only intentionally inherited
 // values are OPENAI_API_KEY and, when set, ANTHROPIC_API_KEY. If ANTHROPIC_API_KEY
 // is unset, the Claude ACP subprocess is allowed to use the same Claude Code
 // subscription auth you use in the terminal. Claude turns default to a full
@@ -66,7 +66,7 @@ func TestRealACPRoundTripMigration(t *testing.T) {
 	}
 
 	home := t.TempDir()
-	dataDir := filepath.Join(home, ".pokegents")
+	dataDir := filepath.Join(home, ".the-binding-of-agents")
 	claudeProjectDir := filepath.Join(home, ".claude", "projects")
 	codexHome := filepath.Join(home, ".codex")
 	cwd := filepath.Join(home, "work")
@@ -209,7 +209,7 @@ func optionalClaudeEnv(originalHome string) map[string]string {
 func launchE2EChatAgent(t *testing.T, s *Server, backend, claudeModel string) string {
 	t.Helper()
 	body := fmt.Sprintf(`{"profile":"reviewer","name":"E2E Roundtrip","interface":"chat","agent_backend":%q,"model":%q,"effort":"low"}`, backend, claudeModel)
-	req := httptest.NewRequest(http.MethodPost, "/api/pokegents/launch", bytes.NewBufferString(body))
+	req := httptest.NewRequest(http.MethodPost, "/api/runs/launch", bytes.NewBufferString(body))
 	rec := httptest.NewRecorder()
 	s.handleUnifiedLaunch(rec, req)
 	if rec.Code != http.StatusOK {
@@ -219,10 +219,10 @@ func launchE2EChatAgent(t *testing.T, s *Server, backend, claudeModel string) st
 	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("decode launch response: %v", err)
 	}
-	if resp.PokegentID == "" {
+	if resp.RunID == "" {
 		t.Fatalf("launch response missing pokegent_id: %s", rec.Body.String())
 	}
-	return resp.PokegentID
+	return resp.RunID
 }
 
 func switchBackend(t *testing.T, s *Server, pgid, backend string) {
@@ -246,7 +246,7 @@ func waitForBackend(t *testing.T, s *Server, pgid, backend string, timeout time.
 	for time.Now().Before(deadline) {
 		if sess := s.chatMgr.Get(pgid); sess != nil {
 			if err := s.state.LoadAll(); err == nil {
-				if rs, err := s.fileStore.Running.GetByPokegentID(pgid); err == nil &&
+				if rs, err := s.fileStore.Running.GetByRunID(pgid); err == nil &&
 					rs.AgentBackend == backend && rs.SessionID != "" && sess.ACPID == rs.SessionID {
 					return
 				}
@@ -272,7 +272,7 @@ func sendAndWaitForSummary(t *testing.T, s *Server, pgid, prompt, want string, t
 	for time.Now().Before(deadline) {
 		waitChatIdle(t, sess, 500*time.Millisecond)
 		_ = s.state.LoadAll()
-		if rs, err := s.fileStore.Running.GetByPokegentID(pgid); err == nil {
+		if rs, err := s.fileStore.Running.GetByRunID(pgid); err == nil {
 			path := rs.TranscriptPath
 			if path == "" && rs.SessionID != "" {
 				path = store.FindTranscriptPath(rs.SessionID, s.state.claudeProjectDir)
@@ -348,7 +348,7 @@ func waitForClaudeTranscriptDiscoverable(t *testing.T, s *Server, pgid string, t
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		_ = s.state.LoadAll()
-		if rs, err := s.fileStore.Running.GetByPokegentID(pgid); err == nil && rs.SessionID != "" {
+		if rs, err := s.fileStore.Running.GetByRunID(pgid); err == nil && rs.SessionID != "" {
 			if path := store.FindTranscriptPath(rs.SessionID, s.state.claudeProjectDir); path != "" {
 				return path
 			}
