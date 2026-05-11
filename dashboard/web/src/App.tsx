@@ -9,19 +9,19 @@ import { AgentCard, GROUP_COLORS } from './components/AgentCard'
 import { GridContainer } from './components/GridContainer'
 import { GroupContainer } from './components/GroupContainer'
 import { SessionBrowser } from './components/SessionBrowser'
-import { TownView } from './components/TownView'
+import { BasementView } from './components/BasementView'
 import { ChatPanel } from './components/ChatPanel'
 import { useChatWebSockets } from './hooks/useChatWebSocket'
-import { hashString } from './components/CreatureIcon'
+import { hashString } from './components/CharacterIcon'
 import { useMessageAnimations, DeliveryOverlay } from './components/MessageAnimations'
 import { useSettings } from './hooks/useSettings'
 import { SettingsPanel } from './components/settings/SettingsPanel'
 import { OnboardingModal } from './components/onboarding/OnboardingModal'
 import { LaunchModal } from './components/LaunchModal'
-import { PokeballAnimationLayer, usePokeballAnimations } from './components/PokeballAnimation'
+import { DoorAnimationLayer, useDoorAnimations } from './components/DoorAnimation'
 import { AgentMenu } from './components/AgentMenu'
 import { PixelSprite } from './components/PixelSprite'
-import { SpritePicker } from './components/SpritePicker'
+import { CharacterPicker } from './components/CharacterPicker'
 import { capsFor, useRuntimeCapabilities } from './utils/runtimes'
 import { formatToolActivityText } from './utils/toolAdapters'
 
@@ -283,7 +283,7 @@ export default function App() {
   const [showLauncher, setShowLauncher] = useState(false)
   const [menuAgent, setMenuAgent] = useState<AgentState | null>(null)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-  const [spritePickerAgent, setSpritePickerAgent] = useState<AgentState | null>(null)
+  const [spritePickerAgent, setCharacterPickerAgent] = useState<AgentState | null>(null)
   const allCaps = useRuntimeCapabilities()
   const chatConnections = useChatWebSockets(agents, chatAgentId)
   useEffect(() => {
@@ -470,7 +470,7 @@ export default function App() {
     } catch { return {} }
   })
   const [groupPageIndex, setGroupPageIndex] = useState<Record<string, number>>({})
-  const { animations, triggerRecall, triggerDeploy, onComplete: onAnimComplete } = usePokeballAnimations()
+  const { animations, triggerRecall, triggerDeploy, onComplete: onAnimComplete } = useDoorAnimations()
   const bubbleRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const [profiles, setProfiles] = useState<ProfileInfo[]>([])
   const [projects, setProjects] = useState<ProjectInfo[]>([])
@@ -890,7 +890,7 @@ export default function App() {
                   style={{ padding: 'var(--card-padding, 16px)' }}
                   data-no-drag-children="false"
                 >
-                  <TownView
+                  <BasementView
                     agents={agents}
                     onSelect={(a) => focusAgent(stableId(a))}
                     selectedId={null}
@@ -1098,7 +1098,7 @@ export default function App() {
       </div>{/* end ROOT flex container */}
 
       <DeliveryOverlay deliveries={deliveries} />
-      <PokeballAnimationLayer animations={animations} onComplete={onAnimComplete} />
+      <DoorAnimationLayer animations={animations} onComplete={onAnimComplete} />
       {showBrowser && <SessionBrowser
         onClose={() => setShowBrowser(false)}
         activePokegentIds={new Set(agents.map(a => stableId(a)))}
@@ -1144,7 +1144,7 @@ export default function App() {
             }
           }}
           onChangeSprite={() => {
-            setSpritePickerAgent(menuAgent)
+            setCharacterPickerAgent(menuAgent)
             setMenuAgent(null)
           }}
           projects={projects}
@@ -1154,13 +1154,13 @@ export default function App() {
         document.body
       )}
       {spritePickerAgent && createPortal(
-        <SpritePicker
+        <CharacterPicker
           currentSprite={spritePickerAgent.sprite || 'isaac'}
           onSelect={async (sprite) => {
             await setSprite(spritePickerAgent.session_id, sprite)
-            setSpritePickerAgent(null)
+            setCharacterPickerAgent(null)
           }}
-          onClose={() => setSpritePickerAgent(null)}
+          onClose={() => setCharacterPickerAgent(null)}
         />,
         document.body
       )}

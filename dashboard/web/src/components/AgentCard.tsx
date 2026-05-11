@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { AgentState } from '../types'
-import { CreatureIcon, hashString } from './CreatureIcon'
+import { CharacterIcon, hashString } from './CharacterIcon'
 import { focusAgent, setSprite, sendPrompt, restartBackend, ProjectInfo, RoleInfo } from '../api'
-import { SpritePicker } from './SpritePicker'
+import { CharacterPicker } from './CharacterPicker'
 import { BusyBubble, DoneBubble, ReadingIndicator } from './MessageAnimations'
 import { useSpriteAnimation } from './spriteAnimations'
 import { PromptInput } from './PromptInput'
@@ -162,7 +162,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
   const rename = useAgentRename(agent.run_id || agent.session_id, title)
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-  const [showSpritePicker, setShowSpritePicker] = useState(false)
+  const [showCharacterPicker, setShowCharacterPicker] = useState(false)
   const [flashDismissed, setFlashDismissed] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const renameInputRef = useRef<HTMLInputElement>(null)
@@ -344,7 +344,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
         <div className={`flex items-center ${compact ? 'gap-1.5 mb-1' : 'gap-2 mb-2'} shrink-0`}>
           {/* Click sprite → change sprite */}
           <div
-            onClick={(e) => { e.stopPropagation(); setShowSpritePicker(true) }}
+            onClick={(e) => { e.stopPropagation(); setShowCharacterPicker(true) }}
             className="cursor-pointer hover:brightness-125 relative overflow-visible"
             style={{ width: iconSize, height: iconSize }}
           >
@@ -353,7 +353,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
             {/* Animated sprite + bubbles */}
             <SpriteAnimWrapper state={showDoneFlash && !isIdle && ageSeconds < 60 ? 'celebrating' : agent.state} compact={compact}>
               <div style={{ opacity: hideSprite ? 0 : 1, transition: 'opacity 0.15s' }}>
-                <CreatureIcon sessionId={agent.session_id} size={iconSize} noGlow={compact} doneFlash={false} spriteOverride={spriteOverride} noBg />
+                <CharacterIcon sessionId={agent.session_id} size={iconSize} noGlow={compact} doneFlash={false} spriteOverride={spriteOverride} noBg />
               </div>
               {!compact && <BusyBubble isBusy={isBusy} />}
               {!compact && <DoneBubble isDone={isDone} />}
@@ -452,7 +452,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
           capabilities={caps}
           onClose={() => setMenuOpen(false)}
           onRename={() => { setMenuOpen(false); rename.startRename() }}
-          onChangeSprite={() => { setMenuOpen(false); setShowSpritePicker(true) }}
+          onChangeSprite={() => { setMenuOpen(false); setShowCharacterPicker(true) }}
           onCollapse={onCollapse}
           projects={projects}
           roles={roles}
@@ -463,11 +463,11 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
       )}
 
       {/* Sprite picker */}
-      {showSpritePicker && createPortal(
-        <SpritePicker
+      {showCharacterPicker && createPortal(
+        <CharacterPicker
           currentSprite={agent.sprite || 'isaac'}
           onSelect={async (sprite) => { await setSprite(agent.session_id, sprite) }}
-          onClose={() => setShowSpritePicker(false)}
+          onClose={() => setShowCharacterPicker(false)}
         />,
         document.body
       )}

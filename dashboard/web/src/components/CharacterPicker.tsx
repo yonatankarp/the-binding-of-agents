@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import { ISAAC_CHARACTERS } from './sprites'
 import { PixelSprite } from './PixelSprite'
 
-interface SpritePickerProps {
+interface CharacterPickerProps {
   currentSprite: string
   onSelect: (sprite: string) => void
   onClose: () => void
 }
 
-export function SpritePicker({ currentSprite, onSelect, onClose }: SpritePickerProps) {
+export function CharacterPicker({ currentSprite, onSelect, onClose }: CharacterPickerProps) {
   const [search, setSearch] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 

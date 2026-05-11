@@ -12,7 +12,7 @@ interface PixelSpriteProps {
   /**
    * Visual display scale used only for transparent-bounds centering. Usually
    * this is the same as `scale`; pass explicit axes when the image is sized by
-   * CSS width/height instead of transform scale (TownView minimap).
+   * CSS width/height instead of transform scale (BasementView minimap).
    */
   centerScaleX?: number
   centerScaleY?: number

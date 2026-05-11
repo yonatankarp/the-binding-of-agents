@@ -5,7 +5,7 @@ import { ProjectInfo, RoleInfo, BackendInfo, launchPokegent, setSprite, renameAg
 import { AgentState } from '../types'
 import { ISAAC_CHARACTERS } from './sprites'
 import { PixelSprite } from './PixelSprite'
-import { SpritePicker } from './SpritePicker'
+import { CharacterPicker } from './CharacterPicker'
 
 interface LaunchModalProps {
   projects: ProjectInfo[]
@@ -144,7 +144,7 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
   const [selectedProject, setSelectedProject] = useState('current')
   const [name, setName] = useState(() => pokemonDisplayName(randomSprite))
   const [sprite, setSelectedSprite] = useState('')
-  const [showSpritePicker, setShowSpritePicker] = useState(false)
+  const [showCharacterPicker, setShowCharacterPicker] = useState(false)
   const [launching, setLaunching] = useState(false)
   const [backends, setBackends] = useState<BackendInfo[]>([])
   const [backendKind, setBackendKind] = useState<'claude' | 'codex'>('claude')
@@ -300,7 +300,7 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
           <div>
             <label className="text-s theme-font-display theme-text-muted pixel-shadow block mb-1">Sprite</label>
             <button
-              onClick={() => setShowSpritePicker(true)}
+              onClick={() => setShowCharacterPicker(true)}
               className="gba-dialog-dark px-2 py-1 hover:brightness-110 focus:border-accent-blue transition-colors flex items-center gap-1"
             >
               <div className="w-5 h-5 flex items-center justify-center overflow-visible">
@@ -379,11 +379,11 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
         </div>
       </div>
 
-      {showSpritePicker && createPortal(
-        <SpritePicker
+      {showCharacterPicker && createPortal(
+        <CharacterPicker
           currentSprite={displaySprite}
-          onSelect={(s) => { setSelectedSprite(s); setShowSpritePicker(false) }}
-          onClose={() => setShowSpritePicker(false)}
+          onSelect={(s) => { setSelectedSprite(s); setShowCharacterPicker(false) }}
+          onClose={() => setShowCharacterPicker(false)}
         />,
         document.body
       )}

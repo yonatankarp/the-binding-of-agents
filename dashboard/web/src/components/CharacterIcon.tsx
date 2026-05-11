@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { SpritePicker } from './SpritePicker'
+import { CharacterPicker } from './CharacterPicker'
 import { setSprite } from '../api'
 import { PixelSprite } from './PixelSprite'
 import { tinySpriteScaleFor, useSpriteNaturalSize } from '../utils/spriteSizing'
@@ -14,7 +14,7 @@ export function hashString(s: string): number {
   return Math.abs(hash)
 }
 
-interface CreatureIconProps {
+interface CharacterIconProps {
   sessionId: string
   size?: number
   noGlow?: boolean
@@ -24,7 +24,7 @@ interface CreatureIconProps {
   noBg?: boolean
 }
 
-export function CreatureIcon({ sessionId, size = 40, noGlow, doneFlash, spriteOverride, editable, noBg }: CreatureIconProps) {
+export function CharacterIcon({ sessionId, size = 40, noGlow, doneFlash, spriteOverride, editable, noBg }: CharacterIconProps) {
   const sprite = spriteOverride || 'isaac'
   const [showPicker, setShowPicker] = useState(false)
   const naturalSize = useSpriteNaturalSize(sprite)
@@ -50,7 +50,7 @@ export function CreatureIcon({ sessionId, size = 40, noGlow, doneFlash, spriteOv
         />
       </div>
       {showPicker && createPortal(
-        <SpritePicker
+        <CharacterPicker
           currentSprite={sprite}
           onSelect={handleSelect}
           onClose={() => setShowPicker(false)}
