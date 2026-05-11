@@ -23,11 +23,11 @@ html, body, #root {
   --theme-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --theme-font-body: 'Upheaval TT BRK', system-ui, sans-serif;
   --theme-scanline-bg: repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
-  --theme-type-xs: 12px;
-  --theme-type-s: 18px;
-  --theme-type-m: 22px;
-  --theme-type-l: 26px;
-  --theme-type-xl: 30px;
+  --theme-type-xs: 11px;
+  --theme-type-s: 14px;
+  --theme-type-m: 16px;
+  --theme-type-l: 20px;
+  --theme-type-xl: 26px;
   --theme-app-bg: #1a1410;
   --theme-app-bg-rgb: 26 20 16;
   --theme-app-text: #e8d9b8;
@@ -690,11 +690,11 @@ body.theme-classic ::-webkit-scrollbar-thumb:hover { background: var(--theme-pan
 
 html[data-theme="vscode"],
 html[data-theme="vscode-light"] {
-  --theme-type-xs: 13px;
-  --theme-type-s: 15px;
-  --theme-type-m: 17px;
-  --theme-type-l: 21px;
-  --theme-type-xl: 25px;
+  --theme-type-xs: 12px;
+  --theme-type-s: 13px;
+  --theme-type-m: 15px;
+  --theme-type-l: 18px;
+  --theme-type-xl: 22px;
 }
 
 
