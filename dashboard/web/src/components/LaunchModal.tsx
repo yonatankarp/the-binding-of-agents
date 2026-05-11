@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { GameModal } from './GameModal'
 import { ProjectInfo, RoleInfo, BackendInfo, launchPokegent, setSprite, renameAgent, fetchSessions, fetchBackends, fetchSetupStatus } from '../api'
 import { AgentState } from '../types'
-import { POKEMON_SPRITES } from './sprites'
+import { ISAAC_CHARACTERS } from './sprites'
 import { PixelSprite } from './PixelSprite'
 import { SpritePicker } from './SpritePicker'
 
@@ -139,7 +139,7 @@ function modelOptionsForBackend(backend?: BackendInfo): { key: string; label: st
 }
 
 export function LaunchModal({ projects, roles, agents: _agents, onClose }: LaunchModalProps) {
-  const [randomSprite] = useState(() => POKEMON_SPRITES[Math.floor(Math.random() * POKEMON_SPRITES.length)])
+  const [randomSprite] = useState(() => ISAAC_CHARACTERS[Math.floor(Math.random() * ISAAC_CHARACTERS.length)])
   const [selectedRole, setSelectedRole] = useState('implementer')
   const [selectedProject, setSelectedProject] = useState('current')
   const [name, setName] = useState(() => pokemonDisplayName(randomSprite))
