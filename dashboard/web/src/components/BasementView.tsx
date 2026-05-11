@@ -1082,8 +1082,8 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
           // render a cropped sub-region of an image — naturally clipped to
           // element bounds, no img/overflow shenanigans.
           backgroundImage: `url(/basement-floor.png?v=tboi-room)`,
-          backgroundPosition: `-${CROP_LEFT}px -${CROP_TOP}px`,
-          backgroundSize: `${SOURCE_W}px ${SOURCE_H}px`,
+          backgroundPosition: 'center',
+          backgroundSize: '100% 100%',
           backgroundRepeat: 'no-repeat',
           overflow: 'hidden',
         }}
