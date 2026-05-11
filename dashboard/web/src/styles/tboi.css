@@ -140,7 +140,7 @@ html, body, #root {
   --theme-bestiary-action-secondary-bg: #b89a64;
   --theme-bestiary-action-secondary-border: #6a4a28;
   --agent-card-output-font-size: 16px;
-  --chat-panel-output-font-size: 18px;
+  --chat-panel-output-font-size: 14px;
   --output-font-size: var(--agent-card-output-font-size);
 }
 

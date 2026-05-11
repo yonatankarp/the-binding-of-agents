@@ -281,12 +281,12 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
         className="px-3 py-2 border-b theme-border-subtle shrink-0"
         onContextMenu={(e) => { e.preventDefault(); setMenuPos({ x: e.clientX, y: e.clientY }); setMenuOpen(true) }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" style={{ minHeight: 56, paddingBottom: 8 }}>
           {/* Sprite with background box + animations */}
           <div
             onClick={() => setShowCharacterPicker(true)}
             className="cursor-pointer hover:brightness-125 relative shrink-0 overflow-visible"
-            style={{ width: 32, height: 32 }}
+            style={{ width: 32, height: 32, marginBottom: 8 }}
           >
             <div className="absolute inset-0 theme-bg-panel-muted rounded-lg" />
             <div className={`relative ${useSpriteAnimation(agent.state || 'idle', true)}`}>
@@ -465,7 +465,6 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
               )
             })()}
           </div>
-          <ChatPanelSprite sprite={agent.sprite} state={agent.state} />
         </>}
         {panelView === 'files' && <FilesView entries={entries} showTimestamps={showTimestamps} scrollRef={filesScrollRef} />}
         {panelView === 'commands' && <CommandsView entries={entries} showTimestamps={showTimestamps} scrollRef={commandsScrollRef} />}
