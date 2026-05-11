@@ -716,7 +716,7 @@ export default function App() {
       {(
         <div className="flex items-center shrink-0 mb-2">
           <div className="flex items-center gap-3 pl-2">
-            <h1 className="text-m theme-font-display theme-text-primary pixel-shadow">POKéGENTS</h1>
+            <h1 className="text-m theme-font-display theme-text-primary pixel-shadow">the binding of agents</h1>
             <span className="text-s theme-font-display theme-text-muted">
               {agents.length - collapsedAgents.length} active{collapsedAgents.length > 0 && <>, {collapsedAgents.length} idle</>}
               <span className={`ml-1.5 ${connected ? 'text-accent-green' : 'text-accent-red'}`}>●</span>
@@ -831,7 +831,7 @@ export default function App() {
               onClick={() => setShowBrowser(true)}
               className="gba-button text-s theme-font-display px-3 py-1.5 transition-colors"
             >
-              PC BOX
+              THE BESTIARY
             </button>
             <button
               onClick={() => setShowSettings(true)}
@@ -1072,7 +1072,7 @@ export default function App() {
              return <ChatPanel agent={chatAgent} connection={conn} onClose={() => setChatAgentId(null)} />
            }
            return (
-             <div className="h-full w-full flex items-center justify-center gba-card" style={{ borderRadius: 8, background: 'linear-gradient(180deg, #3a78b0 0%, #2e6498 30%, #1f4878 100%)' }}>
+             <div className="h-full w-full flex items-center justify-center gba-card" style={{ borderRadius: 8, background: 'linear-gradient(180deg, var(--theme-bg-secondary, #2a1f18) 0%, var(--theme-bg-tertiary, #0e0a08) 100%)' }}>
                <div className="text-center theme-text-faint">
                  <div className="text-s theme-font-display pixel-shadow">No agent selected</div>
                  <div className="text-s theme-font-display mt-1">Click a chat agent to open</div>

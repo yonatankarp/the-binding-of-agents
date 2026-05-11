@@ -96,7 +96,7 @@ export function OnboardingModal({ status, onClose, onRefresh }: OnboardingModalP
   }
 
   return (
-    <GameModal title="Pokégents Setup" onClose={onClose} width="min(760px, 96vw)" height="min(640px, 92vh)" zIndex={80} scanlines={false}>
+    <GameModal title="the binding of agents" onClose={onClose} width="min(760px, 96vw)" height="min(640px, 92vh)" zIndex={80} scanlines={false}>
       <div
         className="flex min-h-0 flex-1 flex-col overflow-hidden"
         style={{

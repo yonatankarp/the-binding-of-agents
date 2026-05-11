@@ -23,11 +23,11 @@ html, body, #root {
   --theme-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --theme-font-body: 'Upheaval TT BRK', system-ui, sans-serif;
   --theme-scanline-bg: repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
-  --theme-type-xs: 6px;
-  --theme-type-s: 8px;
-  --theme-type-m: 10px;
-  --theme-type-l: 12px;
-  --theme-type-xl: 14px;
+  --theme-type-xs: 12px;
+  --theme-type-s: 18px;
+  --theme-type-m: 22px;
+  --theme-type-l: 20px;
+  --theme-type-xl: 24px;
   --theme-app-bg: #1a1410;
   --theme-app-bg-rgb: 26 20 16;
   --theme-app-text: #e8d9b8;
@@ -117,27 +117,30 @@ html, body, #root {
   --theme-modal-frame-shine: #3a2d22;
   --theme-modal-title-bg: #3a2d22;
   --theme-modal-title-text-shadow: 1px 1px 0 #0e0a08;
-  --theme-bestiary-shell-bg: #0e0a08;
-  --theme-bestiary-panel-bg: var(--theme-card-bg);
-  --theme-bestiary-panel-border: #3a2d22;
-  --theme-bestiary-header-bg: #3a2d22;
-  --theme-bestiary-grid-light: #2a1f18;
-  --theme-bestiary-grid-dark: #1a1410;
-  --theme-bestiary-cell-bg: rgba(0,0,0,0.20);
-  --theme-bestiary-cell-hover: rgba(200,184,90,0.20);
-  --theme-bestiary-cell-selected: rgba(138,26,24,0.40);
-  --theme-bestiary-cell-border: rgba(0,0,0,0.30);
-  --theme-bestiary-cell-hover-border: rgba(200,184,90,0.55);
+  /* The Bestiary — TBOI aged-parchment book aesthetic.
+     Shell stays dark (book leather cover); panel + cells are cream pages
+     with ink-brown text. Blood-red highlights for hover/selection. */
+  --theme-bestiary-shell-bg: #1a1208;
+  --theme-bestiary-panel-bg: #d8c89a;
+  --theme-bestiary-panel-border: #3a2418;
+  --theme-bestiary-header-bg: #b89a64;
+  --theme-bestiary-grid-light: #d8c89a;
+  --theme-bestiary-grid-dark: #c4b074;
+  --theme-bestiary-cell-bg: rgba(58,36,24,0.06);
+  --theme-bestiary-cell-hover: rgba(138,26,24,0.18);
+  --theme-bestiary-cell-selected: rgba(138,26,24,0.35);
+  --theme-bestiary-cell-border: rgba(58,36,24,0.25);
+  --theme-bestiary-cell-hover-border: rgba(138,26,24,0.55);
   --theme-bestiary-cell-selected-border: rgba(138,26,24,0.85);
-  --theme-bestiary-info-header-bg: rgba(58,45,34,0.6);
-  --theme-bestiary-info-text: #e8d9b8;
-  --theme-bestiary-name-text: #c8b85a;
+  --theme-bestiary-info-header-bg: rgba(58,36,24,0.12);
+  --theme-bestiary-info-text: #2a1812;
+  --theme-bestiary-name-text: #5a1a18;
   --theme-bestiary-action-primary-bg: #8a1a18;
-  --theme-bestiary-action-primary-border: #a82a28;
-  --theme-bestiary-action-secondary-bg: #3a2d22;
-  --theme-bestiary-action-secondary-border: #5a4636;
-  --agent-card-output-font-size: 10px;
-  --chat-panel-output-font-size: 13px;
+  --theme-bestiary-action-primary-border: #5a0a08;
+  --theme-bestiary-action-secondary-bg: #b89a64;
+  --theme-bestiary-action-secondary-border: #6a4a28;
+  --agent-card-output-font-size: 16px;
+  --chat-panel-output-font-size: 18px;
   --output-font-size: var(--agent-card-output-font-size);
 }
 
@@ -685,11 +688,11 @@ body.theme-classic ::-webkit-scrollbar-thumb:hover { background: var(--theme-pan
 
 html[data-theme="vscode"],
 html[data-theme="vscode-light"] {
-  --theme-type-xs: 7px;
-  --theme-type-s: 9px;
-  --theme-type-m: 11px;
-  --theme-type-l: 13px;
-  --theme-type-xl: 15px;
+  --theme-type-xs: 13px;
+  --theme-type-s: 15px;
+  --theme-type-m: 17px;
+  --theme-type-l: 21px;
+  --theme-type-xl: 25px;
 }
 
 

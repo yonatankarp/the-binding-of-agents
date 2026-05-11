@@ -230,7 +230,7 @@ export function SettingsPanel({ settings, defaults, setupStatus, onChange, onRes
                 <Slider label="Card padding" value={settings.cardPadding} min={0} max={24} step={1} unit="px" onChange={v => onChange({ cardPadding: v })} />
               </Section>
               <Section title="World">
-                <Toggle label="Show town card" checked={settings.showTownCard} onChange={v => onChange({ showTownCard: v })} />
+                <Toggle label="Show basement view" checked={settings.showTownCard} onChange={v => onChange({ showTownCard: v })} />
               </Section>
               <Section title="Reset">
                 <SettingRow label="Layout defaults" hint="Restore layout density, card spacing, and card padding. Other settings stay unchanged.">
@@ -379,7 +379,7 @@ export function SettingsPanel({ settings, defaults, setupStatus, onChange, onRes
               <Section title="Debug">
                 {onOpenBasementEditor && (
                   <button onClick={onOpenBasementEditor} className="inline-flex gba-button text-s theme-font-display uppercase pixel-shadow px-3 py-2 transition-colors">
-                    SHOW TOWN EDITOR
+                    SHOW BASEMENT EDITOR
                   </button>
                 )}
                 {onTestMessaging && (

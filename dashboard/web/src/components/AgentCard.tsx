@@ -206,7 +206,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
     setMenuOpen(true)
   }
 
-  const iconSize = compact ? 20 : 32
+  const iconSize = compact ? 24 : 64
   const textSize = 'text-m'
   const headerTags = compact ? [] : [
     agentState.backgroundTasks > 0 ? (
@@ -381,6 +381,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
                 <h3
                   className={`${compact ? 'text-xs' : 'text-s'} theme-font-display theme-text-primary truncate cursor-pointer hover:text-accent-yellow pixel-shadow min-w-0`}
                   onClick={(e) => { e.stopPropagation(); rename.startRename() }}
+                  title={title}
                 >
                   {title}
                 </h3>
