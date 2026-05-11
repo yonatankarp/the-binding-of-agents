@@ -104,7 +104,7 @@ func (ss *SearchService) SetPokegentResolver(fn func(sessionID string) string) {
 
 // NewSearchService creates a search service backed by SQLite FTS5.
 func NewSearchService(dbPath, claudeProjectDir string, profiles store.ProfileStore, matcher ProfileMatcher) (*SearchService, error) {
-	db, err := sql.Open("sqlite", dbPath+"?_journal_mode=WAL")
+	db, err := sql.Open("sqlite", dbPath+"?_pragma=journal_mode(WAL)")
 	if err != nil {
 		return nil, err
 	}
