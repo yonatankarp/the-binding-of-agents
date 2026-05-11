@@ -917,21 +917,21 @@ func (s *Server) handleSetGridLayout(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, map[string]bool{"ok": true})
 }
 
-// Town walkable-mask persistence — stores the user's hand-tuned collision grid
-// at ~/.the-binding-of-agents/town-mask.json. The frontend's debug-mode click-to-toggle
-// PUTs here. The file is human-readable so the source `TOWN_MASK` constant in
-// TownView.tsx can be updated by hand once the user is happy with the layout.
+// Basement walkable-mask persistence — stores the user's hand-tuned collision grid
+// at ~/.the-binding-of-agents/basement-floor-mask.json. The frontend's debug-mode click-to-toggle
+// PUTs here. The file is human-readable so the source mask constant in
+// BasementView.tsx can be updated by hand once the user is happy with the layout.
 func (s *Server) townMaskPath() string {
-	return filepath.Join(s.state.dataDir, "town-mask.json")
+	return filepath.Join(s.state.dataDir, "basement-floor-mask.json")
 }
 
 func (s *Server) handleGetTownMask(w http.ResponseWriter, r *http.Request) {
 	data, err := os.ReadFile(s.townMaskPath())
 	if err != nil {
-		// New installs should use the checked-in town config rather than an
+		// New installs should use the checked-in basement config rather than an
 		// all-walkable generated mask. User saves still override this file at
-		// ~/.the-binding-of-agents/town-mask.json.
-		defaultPath := filepath.Join(resolvePokegentsRoot(), "dashboard", "defaults", "town-mask.json")
+		// ~/.the-binding-of-agents/basement-floor-mask.json.
+		defaultPath := filepath.Join(resolvePokegentsRoot(), "dashboard", "defaults", "basement-floor-mask.json")
 		data, err = os.ReadFile(defaultPath)
 		if err != nil {
 			// 204 = "no saved/default mask, frontend should use its hardcoded default"

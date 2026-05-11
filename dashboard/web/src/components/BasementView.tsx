@@ -11,7 +11,7 @@ import { capsFor, useRuntimeCapabilities } from '../utils/runtimes'
 import { PixelSprite } from './PixelSprite'
 
 // ── Grid geometry ──────────────────────────────────────────
-// Source town.png is 544×480. Town geometry is user-tunable from Dev
+// Source basement-floor.png is 544×480. Basement geometry is user-tunable from Dev
 // Settings; keep module-level vars so the existing pathfinding helpers read
 // the current cell/crop without threading geometry through every call.
 const SOURCE_W = 544
@@ -1081,7 +1081,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
           // background-image with negative position is the most robust way to
           // render a cropped sub-region of an image — naturally clipped to
           // element bounds, no img/overflow shenanigans.
-          backgroundImage: `url(/town.png)`,
+          backgroundImage: `url(/basement-floor.png)`,
           backgroundPosition: `-${CROP_LEFT}px -${CROP_TOP}px`,
           backgroundSize: `${SOURCE_W}px ${SOURCE_H}px`,
           backgroundRepeat: 'no-repeat',
