@@ -2554,7 +2554,7 @@ func (s *Server) relaunchIfIdle(sessionID string) string {
 	// Pass --pokegent-id to preserve identity (sprite, grid position, task group, mailbox)
 	// across role/project changes
 	pokegentID := agent.RunID
-	cmd := fmt.Sprintf("pokegent %s -r %s", target, sessionID)
+	cmd := fmt.Sprintf("boa %s -r %s", target, sessionID)
 	if pokegentID != "" {
 		cmd += fmt.Sprintf(" --pokegent-id %s", pokegentID)
 	}
