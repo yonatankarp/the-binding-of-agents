@@ -151,7 +151,7 @@ function SwitchRuntimeModal({ agent, onClose, onAssignStatus }: {
           label="Interface"
           value={iface}
           options={[
-            { key: 'chat', label: 'Pokegent Chat' },
+            { key: 'chat', label: 'Agent Chat' },
             { key: 'iterm2', label: 'Terminal (iTerm2)' },
           ]}
           onChange={key => setIface(key as 'chat' | 'iterm2')}

@@ -33,7 +33,7 @@ const SLASH_COMMANDS: { cmd: string; desc: string }[] = [
 // the runtime registry on the backend dispatches based on agent.interface.
 
 export interface PromptInputProps {
-  /** Pokegent ID for the upload endpoint. */
+  /** Run ID for the upload endpoint. */
   sessionId: string
   /** Sends the prompt. Caller decides which API to call. */
   onSend: (text: string) => void | Promise<void>

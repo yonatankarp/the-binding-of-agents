@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { GameModal } from './GameModal'
-import { ProjectInfo, RoleInfo, BackendInfo, launchPokegent, setSprite, renameAgent, fetchSessions, fetchBackends, fetchSetupStatus } from '../api'
+import { ProjectInfo, RoleInfo, BackendInfo, launchRun, setSprite, renameAgent, fetchSessions, fetchBackends, fetchSetupStatus } from '../api'
 import { AgentState } from '../types'
 import { ISAAC_CHARACTERS } from './sprites'
 import { PixelSprite } from './PixelSprite'
@@ -224,7 +224,7 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
       // Unified launch — server mints run_id and pre-writes the running
       // file before invoking the launcher. Returns the run_id we can use
       // to apply sprite/name overrides without polling-by-exclusion.
-      resp = await launchPokegent({
+      resp = await launchRun({
         role: selectedRole || undefined,
         project: selectedProject || undefined,
         name: wantName || undefined,
@@ -327,7 +327,7 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
           label="Interface"
           value={iface}
           options={[
-            { key: 'chat', label: 'Pokegent Chat' },
+            { key: 'chat', label: 'Agent Chat' },
             { key: 'terminal', label: 'Terminal' },
           ]}
           onChange={key => setIface(key as 'terminal' | 'chat')}

@@ -39,11 +39,11 @@ function statusColor(state: string): string {
 }
 
 function statusLabel(state: string): string {
-  if (state === 'busy') return 'ATK'
+  if (state === 'busy') return 'FIGHT'
   if (state === 'needs_input') return 'WAIT'
-  if (state === 'error') return 'PSN'
+  if (state === 'error') return 'HURT'
   // Phase 2: done collapsed into idle — no separate done label
-  return 'SLP'
+  return 'REST'
 }
 
 function formatTime(lastUpdated?: string): string {

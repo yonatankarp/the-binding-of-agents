@@ -137,7 +137,7 @@ export function OnboardingModal({ status, onClose, onRefresh }: OnboardingModalP
           <main className="min-h-0 overflow-auto pr-1 space-y-4">
             {step.id === 'welcome' && (
               <Card title="SMART DEFAULTS">
-                <p>Pokegents creates its own data/config defaults automatically. You should only need to pick where agents run and which provider to use first.</p>
+                <p>The Binding of Agents creates its own data/config defaults automatically. You should only need to pick where agents run and which provider to use first.</p>
                 <div className="rounded-md border theme-border-subtle theme-bg-panel-muted p-3 space-y-2">
                   <p>Launch surface: <span className="theme-text-primary uppercase">{defaultInterface === 'chat' ? 'dashboard chat' : 'terminal'}</span></p>
                   <p>Default backend: <span className="theme-text-primary uppercase">{defaultBackend}</span></p>
@@ -153,7 +153,7 @@ export function OnboardingModal({ status, onClose, onRefresh }: OnboardingModalP
 
             {step.id === 'auth' && (
               <Card title="AGENT AUTH">
-                <p>Authenticate the providers you want to use. Claude Code subscription auth and Codex config are provider-owned; Pokegents just detects them and opens the right files/help.</p>
+                <p>Authenticate the providers you want to use. Claude Code subscription auth and Codex config are provider-owned; The Binding of Agents just detects them and opens the right files/help.</p>
                 <div className="rounded-md border theme-border-subtle theme-bg-panel-muted p-3 space-y-1.5">
                   <p>Claude CLI: <span className="theme-text-primary">{statusText(status?.claude_cli)}</span></p>
                   <p>Claude auth: <span className="theme-text-primary">{statusText(status?.claude_auth)}</span></p>
@@ -183,7 +183,7 @@ export function OnboardingModal({ status, onClose, onRefresh }: OnboardingModalP
 
             {step.id === 'done' && (
               <Card title="DONE">
-                <p>You can start using Pokegents now. If something looks broken later, use Settings → Dev/Repair for hooks, MCP messaging, logs, and server lifecycle.</p>
+                <p>You can start using The Binding of Agents now. If something looks broken later, use Settings → Dev/Repair for hooks, MCP messaging, logs, and server lifecycle.</p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   <Pill ok={dataOk} label="Data/config" />
                   <Pill ok={authOk} label="Auth" />

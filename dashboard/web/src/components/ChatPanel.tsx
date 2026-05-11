@@ -21,7 +21,7 @@ import { EntryRow, ThinkingIndicator, lastEntryIsCurrentAssistantMessage, inflig
 import { FilesView, CommandsView } from './PanelViews'
 import { ChatConnectionState, ChatConnectionActions } from '../hooks/useChatWebSocket'
 
-// Right-side split panel for chat-backed pokegents (`agent.interface === 'chat'`).
+// Right-side split panel for chat-backed runs (`agent.interface === 'chat'`).
 // Connection management (SSE, event processing, prompt submission) lives in
 // useChatConnections hook (called once in App.tsx) so the connection survives
 // when this panel unmounts/remounts on agent switch. This component is now a

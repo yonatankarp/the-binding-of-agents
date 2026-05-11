@@ -13,7 +13,7 @@ interface SettingsPanelProps {
   onTestMessaging?: () => void
   onGridDragging?: (dragging: boolean) => void
   onOpenOnboarding?: () => void
-  onOpenTownEditor?: () => void
+  onOpenBasementEditor?: () => void
 }
 
 type TabId = 'layout' | 'appearance' | 'shortcuts' | 'agents' | 'dev'
@@ -151,7 +151,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function SettingsPanel({ settings, defaults, setupStatus, onChange, onReset, onClose, onTestMessaging, onGridDragging, onOpenOnboarding, onOpenTownEditor }: SettingsPanelProps) {
+export function SettingsPanel({ settings, defaults, setupStatus, onChange, onReset, onClose, onTestMessaging, onGridDragging, onOpenOnboarding, onOpenBasementEditor }: SettingsPanelProps) {
   const [tab, setTab] = useState<TabId>('layout')
   const tabs = useMemo<{ id: TabId; label: string }[]>(() => [
     { id: 'layout', label: 'Layout' },
@@ -323,7 +323,7 @@ export function SettingsPanel({ settings, defaults, setupStatus, onChange, onRes
                 />
               </Section>
               <Section title="Config files">
-                <SettingRow label="Backend models" hint="Edit Pokegents backend entries: provider type, default model, effort, and env.">
+                <SettingRow label="Backend models" hint="Edit backend entries: provider type, default model, effort, and env.">
                   <button onClick={() => openSetupConfig('backends', settings.editorOpenCommand)} className="inline-flex gba-button text-s theme-font-display uppercase pixel-shadow px-3 py-2 transition-colors">
                     OPEN BACKENDS.JSON
                   </button>
@@ -339,7 +339,7 @@ export function SettingsPanel({ settings, defaults, setupStatus, onChange, onRes
                   </button>
                 </SettingRow>
                 <p className="text-l leading-relaxed theme-font-mono theme-text-faint">
-                  Prefer backends.json for Pokegents launch choices. Set model entries to exact provider model IDs; legacy aliases are only accepted for old configs.
+                  Prefer backends.json for agent launch choices. Set model entries to exact provider model IDs; legacy aliases are only accepted for old configs.
                 </p>
               </Section>
               <Section title="Setup">
@@ -377,8 +377,8 @@ export function SettingsPanel({ settings, defaults, setupStatus, onChange, onRes
                 </p>
               </Section>
               <Section title="Debug">
-                {onOpenTownEditor && (
-                  <button onClick={onOpenTownEditor} className="inline-flex gba-button text-s theme-font-display uppercase pixel-shadow px-3 py-2 transition-colors">
+                {onOpenBasementEditor && (
+                  <button onClick={onOpenBasementEditor} className="inline-flex gba-button text-s theme-font-display uppercase pixel-shadow px-3 py-2 transition-colors">
                     SHOW TOWN EDITOR
                   </button>
                 )}

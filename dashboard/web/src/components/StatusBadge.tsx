@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 
-// GBA-style status condition pills — solid bg + white text, like BRN/PSN/SLP in Pokemon
+// TBOI-style status condition pills — solid bg + white text
 const STATUS_CONFIG: Record<string, { label: string; bg: string; timeColor: string; pulse?: boolean }> = {
-  idle:        { label: 'SLP',  bg: 'var(--theme-status-idle)',  timeColor: 'theme-text-faint' },
-  busy:        { label: 'ATK',  bg: 'var(--theme-status-busy)',  timeColor: 'theme-text-muted', pulse: true },
-  done:        { label: 'OK',   bg: 'var(--theme-status-done)',  timeColor: 'theme-text-faint' },
-  needs_input: { label: 'WAIT', bg: 'var(--theme-status-needs-input)',  timeColor: 'theme-text-muted', pulse: true },
-  error:       { label: 'PSN',  bg: 'var(--theme-status-error)',  timeColor: 'theme-text-muted', pulse: true },
-  starting:    { label: 'NEW',  bg: 'var(--theme-status-starting)',  timeColor: 'theme-text-muted', pulse: true },
+  idle:        { label: 'REST',  bg: 'var(--theme-status-idle)',  timeColor: 'theme-text-faint' },
+  busy:        { label: 'FIGHT', bg: 'var(--theme-status-busy)',  timeColor: 'theme-text-muted', pulse: true },
+  done:        { label: 'CLEAR', bg: 'var(--theme-status-done)',  timeColor: 'theme-text-faint' },
+  needs_input: { label: 'WAIT',  bg: 'var(--theme-status-needs-input)',  timeColor: 'theme-text-muted', pulse: true },
+  error:       { label: 'HURT',  bg: 'var(--theme-status-error)',  timeColor: 'theme-text-muted', pulse: true },
+  starting:    { label: 'NEW',   bg: 'var(--theme-status-starting)',  timeColor: 'theme-text-muted', pulse: true },
 }
 
 function formatDuration(seconds: number): string {

@@ -8,28 +8,28 @@ export async function fetchSessions(): Promise<AgentState[]> {
   return res.json()
 }
 
-// ── PC box (pokegent-centric) ───────────────────────────────
-export async function fetchPokegents(limit = 100): Promise<RunSummary[]> {
+// ── The Bestiary (run-centric) ───────────────────────────────
+export async function fetchRuns(limit = 100): Promise<RunSummary[]> {
   const res = await fetch(`${BASE}/runs/pc-box?limit=${limit}`)
   if (!res.ok) return []
   const data = await res.json()
   return data.runs || []
 }
 
-export async function searchPokegents(query: string, limit = 50): Promise<{ runs: RunSummary[]; total: number }> {
+export async function searchRuns(query: string, limit = 50): Promise<{ runs: RunSummary[]; total: number }> {
   const params = new URLSearchParams({ q: query, limit: String(limit) })
   const res = await fetch(`${BASE}/runs/search?${params}`)
   if (!res.ok) return { runs: [], total: 0 }
   return res.json()
 }
 
-export async function fetchPokegent(runId: string): Promise<RunSummary | null> {
+export async function fetchRun(runId: string): Promise<RunSummary | null> {
   const res = await fetch(`${BASE}/runs/${runId}`)
   if (!res.ok) return null
   return res.json()
 }
 
-export async function revivePokegent(runId: string, compact?: 'yes' | 'no'): Promise<boolean> {
+export async function reviveRun(runId: string, compact?: 'yes' | 'no'): Promise<boolean> {
   const params = compact ? `?compact=${compact}` : ''
   const res = await fetch(`${BASE}/runs/${runId}/revive${params}`, { method: 'POST' })
   return res.ok
@@ -149,7 +149,7 @@ export async function releaseTaskGroup(groupName: string): Promise<{ ok: boolean
  *  Single endpoint that mints a run_id server-side, pre-writes the running
  *  file, and dispatches by `interface` / launch surface.
  */
-export interface LaunchPokegentRequest {
+export interface LaunchRunRequest {
   profile?: string
   role?: string
   project?: string
@@ -163,13 +163,13 @@ export interface LaunchPokegentRequest {
   agent_backend?: string
 }
 
-export interface LaunchPokegentResponse {
+export interface LaunchRunResponse {
   run_id: string
   profile: string
   interface: string
 }
 
-export async function launchPokegent(req: LaunchPokegentRequest): Promise<LaunchPokegentResponse> {
+export async function launchRun(req: LaunchRunRequest): Promise<LaunchRunResponse> {
   const res = await fetch(`${BASE}/runs/launch`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

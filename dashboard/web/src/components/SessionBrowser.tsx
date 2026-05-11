@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { GameModal } from './GameModal'
 import { RunSummary } from '../types'
-import { fetchPokegents, searchPokegents, revivePokegent, fetchSessionPreview } from '../api'
+import { fetchRuns, searchRuns, reviveRun, fetchSessionPreview } from '../api'
 import { PixelSprite } from './PixelSprite'
 
 interface SessionBrowserProps {
   onClose: () => void
-  activePokegentIds?: Set<string>
+  activeRunIds?: Set<string>
   onResume?: (runId: string) => void
 }
 
@@ -14,7 +14,7 @@ const GRID_COLS = 6
 const GRID_ROWS = 5
 const PER_BOX = GRID_COLS * GRID_ROWS
 
-// PC Box palette is tokenized so Classic does not inherit GBA grass/chrome.
+// Bestiary palette is tokenized so Classic does not inherit GBA grass/chrome.
 const GRASS_LIGHT  = 'var(--theme-bestiary-grid-light)'
 const GRASS_DARK   = 'var(--theme-bestiary-grid-dark)'
 const PANEL_BG     = 'var(--theme-bestiary-panel-bg)'
@@ -50,7 +50,7 @@ function PcBoxSprite({ sprite, alt = '', scale = PC_BOX_SPRITE_SCALE, shiftY = 0
 }
 
 
-export function SessionBrowser({ onClose, activePokegentIds, onResume }: SessionBrowserProps) {
+export function SessionBrowser({ onClose, activeRunIds, onResume }: SessionBrowserProps) {
   const [allResults, setAllResults]           = useState<RunSummary[]>([])
   const [filteredResults, setFilteredResults] = useState<RunSummary[]>([])
   const [query, setQuery]                     = useState('')
@@ -64,10 +64,10 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   const searchRef = useRef<HTMLInputElement>(null)
 
   const filterActive = (r: RunSummary[]) =>
-    activePokegentIds ? r.filter(p => !activePokegentIds.has(p.run_id)) : r
+    activeRunIds ? r.filter(p => !activeRunIds.has(p.run_id)) : r
 
   useEffect(() => {
-    fetchPokegents(200).then((r) => {
+    fetchRuns(200).then((r) => {
       const filtered = filterActive(r)
       setAllResults(filtered)
       setFilteredResults(filtered)
@@ -79,7 +79,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   const selected = filteredResults.find(r => r.run_id === selectedId) ?? filteredResults[0] ?? null
 
   // Fetch preview (last prompt + last message) when selection changes — keyed by
-  // the pokegent's latest transcript session_id.
+  // the run's latest transcript session_id.
   useEffect(() => {
     if (!selected?.latest_session?.session_id) { setPreview(null); return }
     let cancelled = false
@@ -96,7 +96,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
     }
     setLoading(true)
     try {
-      const resp = await searchPokegents(q, 50)
+      const resp = await searchRuns(q, 50)
       setFilteredResults(filterActive(resp.runs || []).filter(r => !revivedIds.has(r.run_id)))
     } catch { setFilteredResults([]) }
     setLoading(false)
@@ -106,7 +106,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
     setRevivingId(runId)
     setReviveResult(null)
     try {
-      const ok = await revivePokegent(runId, compact)
+      const ok = await reviveRun(runId, compact)
       if (ok) {
         setReviveResult('ok')
         onResume?.(runId)
@@ -137,14 +137,14 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   const getSprite = (p: RunSummary) => p.sprite || 'isaac'
 
   return (
-    <GameModal title="PC Box" onClose={onClose} width="min(820px, 96vw)" height="min(680px, 96vh)" scanlines={false}>
+    <GameModal title="The Bestiary" onClose={onClose} width="min(820px, 96vw)" height="min(680px, 96vh)" scanlines={false}>
         <div style={{
           background: 'var(--theme-bestiary-shell-bg)',
           borderRadius: '0 0 8px 8px', border: `2px solid ${FRAME_SHINE}`,
           display: 'flex', overflow: 'hidden', flex: 1, minHeight: 0,
         }}>
 
-          {/* ── LEFT: PKMN DATA panel ── */}
+          {/* ── LEFT: RUN DATA panel ── */}
           <div style={{
             width: 220, flexShrink: 0, background: PANEL_BG,
             borderRight: `3px solid ${PANEL_BORDER}`,
@@ -164,8 +164,8 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
             </div>
 
             {selected ? (
-              <PkmnDataPanel
-                pokegent={selected}
+              <RunDataPanel
+                run={selected}
                 sprite={getSprite(selected)}
                 preview={preview}
                 revivingId={revivingId}
@@ -246,13 +246,13 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
               gridTemplateRows: `repeat(${GRID_ROWS}, minmax(0, 1fr))`,
               gap: 4,
             }}>
-              {boxSlots.map((pokegent, i) => (
+              {boxSlots.map((run, i) => (
                 <GridCell
                   key={i}
-                  pokegent={pokegent}
-                  sprite={pokegent ? getSprite(pokegent) : null}
-                  isSelected={pokegent?.run_id === selected?.run_id}
-                  onClick={() => pokegent && setSelectedId(pokegent.run_id)}
+                  run={run}
+                  sprite={run ? getSprite(run) : null}
+                  isSelected={run?.run_id === selected?.run_id}
+                  onClick={() => run && setSelectedId(run.run_id)}
                 />
               ))}
             </div>
@@ -280,26 +280,26 @@ function PcBoxArrow({ direction }: { direction: 'left' | 'right' }) {
   )
 }
 
-function GridCell({ pokegent, sprite, isSelected, onClick }: {
-  pokegent: RunSummary | null
+function GridCell({ run, sprite, isSelected, onClick }: {
+  run: RunSummary | null
   sprite: string | null
   isSelected: boolean
   onClick: () => void
 }) {
   const [hovered, setHovered] = useState(false)
-  const label = pokegent ? (pokegent.display_name || pokegent.profile_name || pokegent.run_id.slice(0, 8)) : ''
+  const label = run ? (run.display_name || run.profile_name || run.run_id.slice(0, 8)) : ''
   return (
     <div
       onClick={onClick}
-      onMouseEnter={() => pokegent && setHovered(true)}
+      onMouseEnter={() => run && setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        minHeight: 0, borderRadius: 4, cursor: pokegent ? 'pointer' : 'default',
-        background: isSelected ? CELL_SEL : hovered && pokegent ? CELL_HOVER : CELL_BG,
+        minHeight: 0, borderRadius: 4, cursor: run ? 'pointer' : 'default',
+        background: isSelected ? CELL_SEL : hovered && run ? CELL_HOVER : CELL_BG,
         border: isSelected
           ? `2px solid ${CELL_SELECTED_BORDER}`
-          : hovered && pokegent
+          : hovered && run
             ? `2px solid ${CELL_HOVER_BORDER}`
             : `2px solid ${CELL_BORDER}`,
         boxShadow: isSelected ? 'var(--theme-shadow-panel)' : 'var(--theme-shadow-panel)',
@@ -309,7 +309,7 @@ function GridCell({ pokegent, sprite, isSelected, onClick }: {
       {sprite && (
         <PcBoxSprite sprite={sprite} shiftY={-7} />
       )}
-      {pokegent && (
+      {run && (
         <div
           title={label}
           style={{
@@ -379,17 +379,17 @@ function MetaPill({ label }: { label?: string }) {
   )
 }
 
-function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, onRevive }: {
-  pokegent: RunSummary
+function RunDataPanel({ run, sprite, preview, revivingId, reviveResult, onRevive }: {
+  run: RunSummary
   sprite: string
   preview: { user_prompt: string; last_summary: string } | null
   revivingId: string | null
   reviveResult: 'ok' | 'fail' | null
   onRevive: (id: string, compact?: 'yes' | 'no') => void
 }) {
-  const isReviving = revivingId === pokegent.run_id
-  const name = pokegent.display_name || pokegent.run_id.slice(0, 8)
-  const [r, g, b] = pokegent.project_color || [100, 100, 100]
+  const isReviving = revivingId === run.run_id
+  const name = run.display_name || run.run_id.slice(0, 8)
+  const [r, g, b] = run.project_color || [100, 100, 100]
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '10px 10px', gap: 7, overflow: 'hidden' }}>
@@ -405,20 +405,20 @@ function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, on
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, flexShrink: 0 }}>
-        <MetaPill label={pokegent.interface === 'chat' ? 'Chat' : 'iTerm2'} />
-        <MetaPill label={backendLabel(pokegent.agent_backend)} />
+        <MetaPill label={run.interface === 'chat' ? 'Chat' : 'iTerm2'} />
+        <MetaPill label={backendLabel(run.agent_backend)} />
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, flexShrink: 0 }}>
-        {pokegent.role && (
+        {run.role && (
           <span
             className="text-xs theme-font-display theme-text-primary rounded-sm px-1.5 py-px pixel-shadow shrink-0 uppercase"
             style={{ background: 'var(--theme-panel-muted-bg)', border: '1px solid rgba(255,255,255,0.2)' }}
           >
-            {pokegent.role_emoji ? `${pokegent.role_emoji} ${pokegent.role}` : pokegent.role}
+            {run.role_emoji ? `${run.role_emoji} ${run.role}` : run.role}
           </span>
         )}
-        {(pokegent.project || pokegent.profile_name) && (
+        {(run.project || run.profile_name) && (
           <span
             className="text-xs theme-font-display theme-text-primary rounded-sm px-1.5 py-px pixel-shadow shrink-0 uppercase"
             style={{
@@ -426,10 +426,10 @@ function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, on
               border: `1px solid rgba(${r}, ${g}, ${b}, 0.8)`,
             }}
           >
-            {pokegent.project || pokegent.profile_name}
+            {run.project || run.profile_name}
           </span>
         )}
-        {pokegent.task_group && (
+        {run.task_group && (
           <span
             className="text-xs theme-font-display theme-text-secondary rounded-sm px-1.5 py-px pixel-shadow shrink-0 uppercase"
             style={{
@@ -437,25 +437,25 @@ function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, on
               border: '1px solid var(--theme-accent-purple)',
             }}
           >
-            {pokegent.task_group}
+            {run.task_group}
           </span>
         )}
-        {pokegent.conversation_count > 1 && (
+        {run.conversation_count > 1 && (
           <span
             className="text-xs theme-font-display theme-text-secondary rounded-sm px-1.5 py-px pixel-shadow shrink-0"
             style={{
               background: 'var(--theme-panel-subtle-bg)',
               border: '1px solid var(--theme-panel-divider)',
             }}
-            title="Conversations under this pokegent"
+            title="Conversations under this run"
           >
-            {pokegent.conversation_count}×
+            {run.conversation_count}×
           </span>
         )}
       </div>
 
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
-        <InfoBox label="Last prompt" text={preview?.user_prompt || pokegent.latest_session?.snippet || pokegent.latest_session?.first_user_msg} />
+        <InfoBox label="Last prompt" text={preview?.user_prompt || run.latest_session?.snippet || run.latest_session?.first_user_msg} />
         <InfoBox label="Last message" text={preview?.last_summary} />
       </div>
 
@@ -478,7 +478,7 @@ function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, on
         </div>
       ) : (
         <button
-          onClick={() => onRevive(pokegent.run_id)}
+          onClick={() => onRevive(run.run_id)}
           style={{
             width: '100%', padding: '8px 0', borderRadius: 5, border: '2px solid var(--theme-bestiary-action-primary-border)',
             background: 'var(--theme-bestiary-action-primary-bg)',

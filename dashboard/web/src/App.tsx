@@ -95,12 +95,12 @@ function livePreviewFromChat(agent: AgentState, entries: Entry[], wsBusy?: boole
 }
 
 const STATUS_PILLS: Record<string, { label: string; bg: string; pulse?: boolean }> = {
-  idle:        { label: 'SLP',  bg: '#788890' },
-  done:        { label: 'OK',   bg: '#58a868' },
-  busy:        { label: 'ATK',  bg: '#e87848', pulse: true },
-  needs_input: { label: 'WAIT', bg: '#d84848', pulse: true },
-  error:       { label: 'PSN',  bg: '#a858a8', pulse: true },
-  starting:    { label: 'NEW',  bg: '#5898c8', pulse: true },
+  idle:        { label: 'REST',  bg: '#788890' },
+  done:        { label: 'CLEAR', bg: '#58a868' },
+  busy:        { label: 'FIGHT', bg: '#e87848', pulse: true },
+  needs_input: { label: 'WAIT',  bg: '#d84848', pulse: true },
+  error:       { label: 'HURT',  bg: '#a858a8', pulse: true },
+  starting:    { label: 'NEW',   bg: '#5898c8', pulse: true },
 }
 
 function formatInactive(lastUpdated?: string): string {
@@ -272,7 +272,7 @@ export default function App() {
   const [agents, setAgents] = useState<AgentState[]>([])
   const [showBrowser, setShowBrowser] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
-  const [showTownEditor, setShowTownEditor] = useState(false)
+  const [showBasementEditor, setShowBasementEditor] = useState(false)
   const [setupStatus, setSetupStatus] = useState<SetupStatus | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [serverRestarting, setServerRestarting] = useState(false)
@@ -283,7 +283,7 @@ export default function App() {
   const [showLauncher, setShowLauncher] = useState(false)
   const [menuAgent, setMenuAgent] = useState<AgentState | null>(null)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-  const [spritePickerAgent, setCharacterPickerAgent] = useState<AgentState | null>(null)
+  const [characterPickerAgent, setCharacterPickerAgent] = useState<AgentState | null>(null)
   const allCaps = useRuntimeCapabilities()
   const chatConnections = useChatWebSockets(agents, chatAgentId)
   useEffect(() => {
@@ -436,7 +436,7 @@ export default function App() {
       if (e.key === 'Escape' && !isEditable(e.target)) {
         const anyOverlayOpen =
           showBrowser || showSettings || showLauncher || showOnboarding ||
-          showTownEditor || !!menuAgent || !!spritePickerAgent
+          showBasementEditor || !!menuAgent || !!characterPickerAgent
         if (!anyOverlayOpen) {
           e.preventDefault()
           setShowSettings(true)
@@ -455,7 +455,7 @@ export default function App() {
       window.removeEventListener('keyup', onUp)
       window.removeEventListener('blur', onBlur)
     }
-  }, [showBrowser, showSettings, showLauncher, showOnboarding, showTownEditor, menuAgent, spritePickerAgent])
+  }, [showBrowser, showSettings, showLauncher, showOnboarding, showBasementEditor, menuAgent, characterPickerAgent])
   const [messages, setMessages] = useState<AgentMessage[]>([])
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => new Set())
   const collapsedInitialized = useRef(false)
@@ -864,7 +864,7 @@ export default function App() {
           <div className="gba-dialog text-center px-8 py-6">
             <p className="text-m theme-font-display text-gba-dialog-border">No avatar in party</p>
             <p className="text-s theme-font-display text-gba-dialog-border/60 mt-3">
-              Start with <span className="text-gba-card">pokegents &lt;profile&gt;</span>
+              Start with <span className="text-gba-card">boa &lt;profile&gt;</span>
             </p>
           </div>
         </div>
@@ -894,7 +894,7 @@ export default function App() {
                     agents={agents}
                     onSelect={(a) => focusAgent(stableId(a))}
                     selectedId={null}
-                    debug={showTownEditor}
+                    debug={showBasementEditor}
                     newMessage={newMessage}
                     geometry={{
                       scale: settings.townScale,
@@ -906,8 +906,8 @@ export default function App() {
                       cropRight: settings.townCropRight,
                       cropBottom: settings.townCropBottom,
                     }}
-                    editorOpen={showTownEditor}
-                    onCloseEditor={() => setShowTownEditor(false)}
+                    editorOpen={showBasementEditor}
+                    onCloseEditor={() => setShowBasementEditor(false)}
                     onSaveGeometry={(g) => setSettings({
                       townScale: g.scale,
                       townCellSize: g.cellSize,
@@ -1101,7 +1101,7 @@ export default function App() {
       <DoorAnimationLayer animations={animations} onComplete={onAnimComplete} />
       {showBrowser && <SessionBrowser
         onClose={() => setShowBrowser(false)}
-        activePokegentIds={new Set(agents.map(a => stableId(a)))}
+        activeRunIds={new Set(agents.map(a => stableId(a)))}
         onResume={(id) => setCollapsedIds(prev => { const next = new Set(prev); next.delete(id); return next })}
       />}
       {showSettings && (
@@ -1119,10 +1119,10 @@ export default function App() {
             setShowOnboarding(true)
             refreshSetupStatus().catch(() => {})
           }}
-          onOpenTownEditor={() => {
+          onOpenBasementEditor={() => {
             setSettings({ showTownCard: true })
             setShowSettings(false)
-            setShowTownEditor(true)
+            setShowBasementEditor(true)
           }}
         />
       )}
@@ -1153,11 +1153,11 @@ export default function App() {
         />,
         document.body
       )}
-      {spritePickerAgent && createPortal(
+      {characterPickerAgent && createPortal(
         <CharacterPicker
-          currentSprite={spritePickerAgent.sprite || 'isaac'}
+          currentSprite={characterPickerAgent.sprite || 'isaac'}
           onSelect={async (sprite) => {
-            await setSprite(spritePickerAgent.session_id, sprite)
+            await setSprite(characterPickerAgent.session_id, sprite)
             setCharacterPickerAgent(null)
           }}
           onClose={() => setCharacterPickerAgent(null)}

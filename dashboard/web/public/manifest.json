@@ -1,6 +1,6 @@
 {
-  "name": "Pokegents Dashboard",
-  "short_name": "Pokegents",
+  "name": "the binding of agents",
+  "short_name": "the binding of agents",
   "description": "Monitor and manage multiple Claude Code agents",
   "start_url": "/",
   "display": "standalone",
@@ -8,7 +8,7 @@
   "theme_color": "#0a0a0f",
   "icons": [
     {
-      "src": "/sprites/pikachu.png",
+      "src": "/sprites/isaac.png",
       "sizes": "40x40",
       "type": "image/png"
     }

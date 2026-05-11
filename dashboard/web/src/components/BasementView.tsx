@@ -466,7 +466,7 @@ function normalizedGeometry(geometry?: Partial<TownGeometrySettings>): TownGeome
   }
 }
 
-function TownEditorSlider({ label, value, min, max, step, unit, onChange }: {
+function BasementEditorSlider({ label, value, min, max, step, unit, onChange }: {
   label: string
   value: number
   min: number
@@ -627,7 +627,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
   const [savedFlash, setSavedFlash] = useState(false)
   const [menuAgent, setMenuAgent] = useState<AgentState | null>(null)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-  const [spritePickerAgent, setCharacterPickerAgent] = useState<AgentState | null>(null)
+  const [characterPickerAgent, setCharacterPickerAgent] = useState<AgentState | null>(null)
   const allCaps = useRuntimeCapabilities()
 
   useEffect(() => {
@@ -1044,10 +1044,10 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
           </div>
 
           <div style={{ display: 'grid', gap: 6, marginBottom: 10 }}>
-            <TownEditorSlider label="Scale" value={draftGeometry.scale} min={0.5} max={3} step={0.05} unit="×" onChange={scale => setDraftGeometry(g => ({ ...g, scale }))} />
-            <TownEditorSlider label="Cell" value={draftGeometry.cellSize} min={8} max={32} step={1} unit="px" onChange={cellSize => setDraftGeometry(g => ({ ...g, cellSize }))} />
-            <TownEditorSlider label="Offset X" value={draftGeometry.cellOffsetX} min={-64} max={64} step={1} unit="px" onChange={cellOffsetX => setDraftGeometry(g => ({ ...g, cellOffsetX }))} />
-            <TownEditorSlider label="Offset Y" value={draftGeometry.cellOffsetY} min={-64} max={64} step={1} unit="px" onChange={cellOffsetY => setDraftGeometry(g => ({ ...g, cellOffsetY }))} />
+            <BasementEditorSlider label="Scale" value={draftGeometry.scale} min={0.5} max={3} step={0.05} unit="×" onChange={scale => setDraftGeometry(g => ({ ...g, scale }))} />
+            <BasementEditorSlider label="Cell" value={draftGeometry.cellSize} min={8} max={32} step={1} unit="px" onChange={cellSize => setDraftGeometry(g => ({ ...g, cellSize }))} />
+            <BasementEditorSlider label="Offset X" value={draftGeometry.cellOffsetX} min={-64} max={64} step={1} unit="px" onChange={cellOffsetX => setDraftGeometry(g => ({ ...g, cellOffsetX }))} />
+            <BasementEditorSlider label="Offset Y" value={draftGeometry.cellOffsetY} min={-64} max={64} step={1} unit="px" onChange={cellOffsetY => setDraftGeometry(g => ({ ...g, cellOffsetY }))} />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1231,11 +1231,11 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
         document.body
       )}
 
-      {spritePickerAgent && createPortal(
+      {characterPickerAgent && createPortal(
         <CharacterPicker
-          currentSprite={spritePickerAgent.sprite || 'isaac'}
+          currentSprite={characterPickerAgent.sprite || 'isaac'}
           onSelect={async (sprite) => {
-            await setSprite(spritePickerAgent.session_id, sprite)
+            await setSprite(characterPickerAgent.session_id, sprite)
             setCharacterPickerAgent(null)
           }}
           onClose={() => setCharacterPickerAgent(null)}
