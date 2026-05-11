@@ -34,3 +34,4 @@ dashboard/dashboard
 
 # Local Go binary build alongside the running one
 dashboard/pokegents-dashboard.new
+dist/
