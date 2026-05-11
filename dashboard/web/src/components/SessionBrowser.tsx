@@ -63,8 +63,10 @@ export function SessionBrowser({ onClose, activeRunIds, onResume }: SessionBrows
   const [preview, setPreview]                 = useState<{ user_prompt: string; last_summary: string } | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const filterActive = (r: RunSummary[]) =>
-    activeRunIds ? r.filter(p => !activeRunIds.has(p.run_id)) : r
+  // Bestiary is a catalog of ALL encountered agents (active + past), matching
+  // the TBOI in-game Bestiary metaphor. Active agents are still shown so the
+  // user can see the full roster.
+  const filterActive = (r: RunSummary[]) => r
 
   useEffect(() => {
     fetchRuns(200).then((r) => {
