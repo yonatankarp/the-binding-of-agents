@@ -275,7 +275,7 @@ HELP
 
   # dashboard
   if [[ "$1" == "dashboard" ]]; then
-    local dashboard_bin="$POKEGENTS_ROOT/dashboard/pokegents-dashboard"
+    local dashboard_bin="$POKEGENTS_ROOT/dashboard/the-binding-of-agents-dashboard"
     case "${2:-open}" in
       start)
         if [[ ! -f "$dashboard_bin" ]]; then
@@ -301,7 +301,7 @@ HELP
         echo ""
         # Build Go server
         echo "Building server..."
-        if (cd "$POKEGENTS_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o pokegents-dashboard . 2>&1); then
+        if (cd "$POKEGENTS_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o the-binding-of-agents-dashboard . 2>&1); then
           echo "  ✓ Server built"
         else
           echo "  ✗ Server build FAILED"
