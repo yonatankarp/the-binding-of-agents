@@ -46,7 +46,7 @@ function BestiarySprite({ sprite, alt = '', scale = BESTIARY_SPRITE_SCALE, shift
   scale?: number
   shiftY?: number
 }) {
-  return <PixelSprite sprite={sprite} alt={alt} scale={scale} shiftY={shiftY} shadow="panel" />
+  return <PixelSprite sprite={sprite} alt={alt} scale={scale} shiftY={shiftY} shadow="none" />
 }
 
 
@@ -393,14 +393,12 @@ function RunDataPanel({ run, sprite, preview, revivingId, reviveResult, onRevive
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '10px 10px', gap: 7, overflow: 'hidden' }}>
       <div style={{
-        background: `var(--theme-panel-subtle-bg)`,
+        background: 'var(--theme-bestiary-panel-bg)',
         border: `2px solid ${PANEL_BORDER}`, borderRadius: 6,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 8,
-        backgroundImage: 'radial-gradient(circle, var(--theme-panel-divider) 1px, transparent 1px)',
-        backgroundSize: '6px 6px', flexShrink: 0,
+        padding: 8, height: 140, flexShrink: 0, overflow: 'hidden',
       }}>
-        <BestiarySprite sprite={sprite} alt={name} scale={2.5} />
+        <BestiarySprite sprite={sprite} alt={name} scale={1.2} />
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, flexShrink: 0 }}>
