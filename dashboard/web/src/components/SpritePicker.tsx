@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { POKEMON_SPRITES } from './sprites'
+import { ISAAC_CHARACTERS } from './sprites'
 import { PixelSprite } from './PixelSprite'
 
 interface SpritePickerProps {
@@ -25,8 +25,8 @@ export function SpritePicker({ currentSprite, onSelect, onClose }: SpritePickerP
   }, [onClose])
 
   const filtered = search
-    ? POKEMON_SPRITES.filter(s => s.includes(search.toLowerCase()))
-    : [...POKEMON_SPRITES]
+    ? ISAAC_CHARACTERS.filter(s => s.includes(search.toLowerCase()))
+    : [...ISAAC_CHARACTERS]
 
   return (
     <div
