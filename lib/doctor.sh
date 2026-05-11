@@ -73,10 +73,10 @@ _pokegent_doctor() {
   # ── MCP ──
   echo "MCP messaging:"
   if command -v claude &>/dev/null; then
-    if claude mcp list 2>/dev/null | grep -q "pokegents-messaging"; then
-      _doc_ok "pokegents-messaging registered"
+    if claude mcp list 2>/dev/null | grep -q "boa-messaging"; then
+      _doc_ok "boa-messaging registered"
     else
-      _doc_fail "pokegents-messaging not registered — run: claude mcp add -s user pokegents-messaging -- node \"$POKEGENTS_ROOT/mcp/server.js\""
+      _doc_fail "boa-messaging not registered — run: claude mcp add -s user boa-messaging -- node \"$POKEGENTS_ROOT/mcp/server.js\""
     fi
   else
     _doc_warn "claude CLI not available, cannot check MCP"

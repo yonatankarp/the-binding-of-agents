@@ -1061,7 +1061,7 @@ You are one of several concurrent Claude Code agents managed by pokegents. You c
 
 **Your session ID:** ${pokegent_id:-$session_id}
 
-**Available MCP tools (pokegents-messaging):**
+**Available MCP tools (boa-messaging):**
 - \`list_agents\` — see all active agents and their status
 - \`send_message(to, content)\` — send a message to another agent (use 8-char session ID prefix from list_agents)
 - \`check_messages\` — check your inbox for messages from other agents
