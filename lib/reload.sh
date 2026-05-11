@@ -188,7 +188,7 @@ end tell" &>/dev/null
     relaunched=$((total - 1))
     echo ""
     echo "This session was skipped. To restart it:"
-    echo "  Type /exit, then run: pokegent ${POKEGENTS_PROFILE_NAME:-personal} -r ${POKEGENTS_SESSION_ID:-}"
+    echo "  Type /exit, then run: boa ${BOA_PROFILE_NAME:-${POKEGENTS_PROFILE_NAME:-personal}} -r ${BOA_SESSION_ID:-${POKEGENTS_SESSION_ID:-}}"
   fi
   echo "Relaunched $relaunched session(s). Snapshot at: $snapshot_file"
 }
