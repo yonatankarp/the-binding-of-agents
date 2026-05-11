@@ -87,7 +87,7 @@ tell application "iTerm2"
 		create tab with default profile
 		delay 1
 		tell current session
-			write text "pokegent %s --resume %s --fork-session"
+			write text "boa %s --resume %s --fork-session"
 		end tell
 	end tell
 end tell`, safeProfile, safeSID)
@@ -101,7 +101,7 @@ func (t *ITerm2Terminal) LaunchProfile(opts LaunchOptions) error {
 		safeITermProf := strings.ReplaceAll(opts.ITermProfile, `"`, `\"`)
 		createTab = fmt.Sprintf(`create tab with profile "%s"`, safeITermProf)
 	}
-	cmd := fmt.Sprintf("pokegent %s", safeProfile)
+	cmd := fmt.Sprintf("boa %s", safeProfile)
 	// --pokegent-id pins the identity (so dashboard's pre-written running file
 	// and boa.sh's later writes agree on the same pokegent_id).
 	if opts.RunID != "" {
