@@ -37,10 +37,10 @@ const scanlineStyle = {
   pointerEvents: 'none' as const,
   background: SCANLINE_BG,
 }
-const PC_BOX_SPRITE_SCALE = 2
-const PC_BOX_LABEL_ROOM_PX = 18
+const BESTIARY_SPRITE_SCALE = 2
+const BESTIARY_LABEL_ROOM_PX = 18
 
-function PcBoxSprite({ sprite, alt = '', scale = PC_BOX_SPRITE_SCALE, shiftY = 0 }: {
+function BestiarySprite({ sprite, alt = '', scale = BESTIARY_SPRITE_SCALE, shiftY = 0 }: {
   sprite: string
   alt?: string
   scale?: number
@@ -200,7 +200,7 @@ export function SessionBrowser({ onClose, activeRunIds, onResume }: SessionBrows
                   fontFamily: 'var(--theme-font-display)', fontSize: 'var(--theme-type-l)',
                   textShadow: 'var(--theme-text-shadow-pixel)', lineHeight: 1, transition: 'all 0.1s',
                 }}
-              ><PcBoxArrow direction="left" /></button>
+              ><BestiaryArrow direction="left" /></button>
               <span style={{
                 fontFamily: 'var(--theme-font-display)', fontSize: 'var(--theme-type-m)', color: 'var(--theme-text-primary)',
                 textShadow: 'var(--theme-text-shadow-pixel)',
@@ -221,7 +221,7 @@ export function SessionBrowser({ onClose, activeRunIds, onResume }: SessionBrows
                   fontFamily: 'var(--theme-font-display)', fontSize: 'var(--theme-type-l)',
                   textShadow: 'var(--theme-text-shadow-pixel)', lineHeight: 1, transition: 'all 0.1s',
                 }}
-              ><PcBoxArrow direction="right" /></button>
+              ><BestiaryArrow direction="right" /></button>
               <input
                 ref={searchRef} type="text" value={query}
                 onChange={e => handleSearch(e.target.value)} placeholder="Search agents..."
@@ -263,7 +263,7 @@ export function SessionBrowser({ onClose, activeRunIds, onResume }: SessionBrows
 }
 
 
-function PcBoxArrow({ direction }: { direction: 'left' | 'right' }) {
+function BestiaryArrow({ direction }: { direction: 'left' | 'right' }) {
   return (
     <span
       aria-hidden="true"
@@ -307,7 +307,7 @@ function GridCell({ run, sprite, isSelected, onClick }: {
       }}
     >
       {sprite && (
-        <PcBoxSprite sprite={sprite} shiftY={-7} />
+        <BestiarySprite sprite={sprite} shiftY={-7} />
       )}
       {run && (
         <div
@@ -317,7 +317,7 @@ function GridCell({ run, sprite, isSelected, onClick }: {
             left: 4,
             right: 4,
             bottom: 3,
-            height: PC_BOX_LABEL_ROOM_PX,
+            height: BESTIARY_LABEL_ROOM_PX,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -401,7 +401,7 @@ function RunDataPanel({ run, sprite, preview, revivingId, reviveResult, onRevive
         backgroundImage: 'radial-gradient(circle, var(--theme-panel-divider) 1px, transparent 1px)',
         backgroundSize: '6px 6px', flexShrink: 0,
       }}>
-        <PcBoxSprite sprite={sprite} alt={name} scale={2.5} />
+        <BestiarySprite sprite={sprite} alt={name} scale={2.5} />
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, flexShrink: 0 }}>

@@ -281,7 +281,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/sessions/{id}/meta", s.handleGetSessionMeta)
 
 	// Pokegent-centric PC box
-	s.mux.HandleFunc("GET /api/runs/pc-box", s.handleListPokegents)
+	s.mux.HandleFunc("GET /api/runs/archive", s.handleListPokegents)
 	s.mux.HandleFunc("GET /api/runs/search", s.handleSearchPokegents)
 	s.mux.HandleFunc("GET /api/runs/{id}", s.handleGetPokegent)
 	s.mux.HandleFunc("POST /api/runs/{id}/revive", s.handleRevivePokegent)

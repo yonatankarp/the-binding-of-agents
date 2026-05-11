@@ -10,7 +10,7 @@ export async function fetchSessions(): Promise<AgentState[]> {
 
 // ── The Bestiary (run-centric) ───────────────────────────────
 export async function fetchRuns(limit = 100): Promise<RunSummary[]> {
-  const res = await fetch(`${BASE}/runs/pc-box?limit=${limit}`)
+  const res = await fetch(`${BASE}/runs/archive?limit=${limit}`)
   if (!res.ok) return []
   const data = await res.json()
   return data.runs || []
