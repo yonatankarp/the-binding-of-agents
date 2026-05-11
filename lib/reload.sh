@@ -173,7 +173,7 @@ tell application \"iTerm2\"
   tell current window
     create tab with profile \"$iterm_prof\"
     tell current session of current tab
-      write text \"pokegent $profile -r $sid\"
+      write text \"boa $profile -r $sid\"
     end tell
   end tell
 end tell" &>/dev/null

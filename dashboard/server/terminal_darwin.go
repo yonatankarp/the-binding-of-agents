@@ -156,7 +156,7 @@ tell application "iTerm2"
 		create tab with default profile
 		delay 1
 		tell current session
-			write text "pokegent %s -r %s%s"%s
+			write text "boa %s -r %s%s"%s
 		end tell
 	end tell
 end tell`, safeProfile, safeSession, pgidArg, autoAnswer)
