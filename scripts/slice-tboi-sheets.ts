@@ -30,7 +30,7 @@ interface ManifestEntry {
 interface Manifest {
   version: number;
   target_size: [number, number];
-  interpolation: 'nearest' | 'bilinear' | 'cubic';
+  interpolation: 'nearest';
   output_dir: string;
   entries: ManifestEntry[];
 }
@@ -46,11 +46,7 @@ async function main() {
   await fs.mkdir(outDir, { recursive: true });
 
   const [targetW, targetH] = manifest.target_size;
-  const kernel = manifest.interpolation === 'nearest'
-    ? sharp.kernel.nearest
-    : manifest.interpolation === 'bilinear'
-      ? sharp.kernel.lanczos2
-      : sharp.kernel.lanczos3;
+  const kernel = sharp.kernel.nearest;
 
   let ok = 0;
   let failed = 0;

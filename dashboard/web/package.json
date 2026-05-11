@@ -8,7 +8,9 @@
     "build": "tsc && vite build",
     "audit:theme": "node scripts/audit-theme-tokens.mjs",
     "preview": "vite preview",
-    "audit:typography": "node scripts/audit-typography-tokens.mjs"
+    "audit:typography": "node scripts/audit-typography-tokens.mjs",
+    "slice-sprites": "NODE_PATH=\"$(pwd)/node_modules\" tsx ../../scripts/slice-tboi-sheets.ts",
+    "download-sheets": "../../scripts/download-tboi-sheets.sh"
   },
   "dependencies": {
     "prism-react-renderer": "^2.4.1",
