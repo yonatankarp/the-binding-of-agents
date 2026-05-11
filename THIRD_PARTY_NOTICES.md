@@ -1,9 +1,20 @@
 # Third-Party Notices
 
-Pokegents includes and/or interoperates with the following third-party components:
+This project incorporates third-party material. Detailed attributions follow.
 
-- `dashboard/acp-fork`: fork/adaptation of Zed Industries' Claude Agent ACP package, licensed Apache-2.0. Preserve upstream license notices when modifying or redistributing this component.
-- Go, Rust, Node, and web dependencies are listed in their respective lockfiles (`go.sum`, `Cargo.lock` when present, and `package-lock.json`). Their licenses are governed by the dependency packages.
-- Pokémon sprite assets are fetched at install/build time from [`msikma/pokesprite`](https://github.com/msikma/pokesprite) and are not committed to this repository. PokeSprite's README states that sprite images are © Nintendo/Creatures Inc./GAME FREAK Inc.; PokeSprite code/metadata are MIT-licensed.
+## Upstream code
 
-Pokegents is an unofficial, personal-use tool. It is not affiliated with, endorsed by, or sponsored by Nintendo, Creatures Inc., GAME FREAK Inc., The Pokémon Company, or the PokeSprite project. Pokémon and related names/marks belong to their respective owners.
+[pokegents](https://github.com/tRidha/pokegents) by Thariq Ridha. Licensed under MIT (inherited; see `LICENSE`).
+
+## Fonts
+
+**Upheaval TT BRK** by Brian Kent (AEnigma Fonts). Free for non-commercial use. Source: https://www.dafont.com/upheaval.font
+
+## Sprite assets
+
+Sprites are extracted from The Binding of Isaac: Rebirth and its expansions, sourced from The Spriters Resource (https://www.spriters-resource.com/pc_computer/bindingofisaacrebirth/) and used under fan-project fair-use assumption. Full per-sprite attribution will be populated when the sprite manifest is finalized in Task 8.
+
+<!-- Per-sprite table populated by Task 8. Format:
+| Slug | Source sheet URL | Contributor (Spriters Resource user) |
+|------|------------------|--------------------------------------|
+-->
