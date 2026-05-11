@@ -26,8 +26,8 @@ html, body, #root {
   --theme-type-xs: 12px;
   --theme-type-s: 18px;
   --theme-type-m: 22px;
-  --theme-type-l: 20px;
-  --theme-type-xl: 24px;
+  --theme-type-l: 26px;
+  --theme-type-xl: 30px;
   --theme-app-bg: #1a1410;
   --theme-app-bg-rgb: 26 20 16;
   --theme-app-text: #e8d9b8;
@@ -836,4 +836,40 @@ html[data-theme="vscode-light"] {
 .character-picker__close:hover {
   background: var(--theme-button-bg-hover);
   color: var(--theme-accent-soul);
+}
+
+/* ── Polish: accessibility + motion ───────────────────────────
+   1. Keyboard focus visibility — every interactive element gets a
+      visible soul-gold focus ring without relying on browser defaults
+      that components have explicitly removed via `outline-none`. Pointer
+      users don't see it (it's :focus-visible, not :focus).
+   2. Reduced motion — viewers with prefers-reduced-motion get static
+      sprites, no scanline shimmer, instant transitions.
+*/
+:focus-visible {
+  outline: 2px solid var(--theme-accent-soul);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--theme-accent-soul);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  body::before {
+    /* scanline overlay also stops shimmering */
+    animation: none !important;
+  }
 }
