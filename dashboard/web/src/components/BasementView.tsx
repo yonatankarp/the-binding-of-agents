@@ -5,7 +5,7 @@ import { useSpriteAnimation } from './spriteAnimations'
 import { BusyBubble, DoneBubble } from './MessageAnimations'
 import { deriveAgentState } from '../hooks/useAgentState'
 import { AgentMenu } from './AgentMenu'
-import { SpritePicker } from './SpritePicker'
+import { CharacterPicker } from './CharacterPicker'
 import { ProjectInfo, renameAgent, RoleInfo, setSprite } from '../api'
 import { capsFor, useRuntimeCapabilities } from '../utils/runtimes'
 import { PixelSprite } from './PixelSprite'
@@ -427,7 +427,7 @@ function isBusy(s: AgentState['state']) {
 
 // ── Component ──────────────────────────────────────────────
 
-interface TownViewProps {
+interface BasementViewProps {
   agents: AgentState[]
   onSelect: (agent: AgentState) => void
   selectedId: string | null
@@ -511,7 +511,7 @@ const IDLE_COOLDOWN_MAX = 1400
 // over every agent and made typing/clicking laggy in Chrome.
 const TICK_MS = 30
 
-export function TownView({ agents, onSelect, selectedId, debug = false, newMessage, geometry, editorOpen = false, onCloseEditor, onSaveGeometry, projects, roles, existingGroups }: TownViewProps) {
+export function BasementView({ agents, onSelect, selectedId, debug = false, newMessage, geometry, editorOpen = false, onCloseEditor, onSaveGeometry, projects, roles, existingGroups }: BasementViewProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [available, setAvailable] = useState<ViewportSize | null>(null)
   const [draftGeometry, setDraftGeometry] = useState<TownGeometrySettings>(() => normalizedGeometry(geometry))
@@ -627,7 +627,7 @@ export function TownView({ agents, onSelect, selectedId, debug = false, newMessa
   const [savedFlash, setSavedFlash] = useState(false)
   const [menuAgent, setMenuAgent] = useState<AgentState | null>(null)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-  const [spritePickerAgent, setSpritePickerAgent] = useState<AgentState | null>(null)
+  const [spritePickerAgent, setCharacterPickerAgent] = useState<AgentState | null>(null)
   const allCaps = useRuntimeCapabilities()
 
   useEffect(() => {
@@ -1221,7 +1221,7 @@ export function TownView({ agents, onSelect, selectedId, debug = false, newMessa
             }
           }}
           onChangeSprite={() => {
-            setSpritePickerAgent(menuAgent)
+            setCharacterPickerAgent(menuAgent)
             setMenuAgent(null)
           }}
           projects={projects}
@@ -1232,13 +1232,13 @@ export function TownView({ agents, onSelect, selectedId, debug = false, newMessa
       )}
 
       {spritePickerAgent && createPortal(
-        <SpritePicker
+        <CharacterPicker
           currentSprite={spritePickerAgent.sprite || 'isaac'}
           onSelect={async (sprite) => {
             await setSprite(spritePickerAgent.session_id, sprite)
-            setSpritePickerAgent(null)
+            setCharacterPickerAgent(null)
           }}
-          onClose={() => setSpritePickerAgent(null)}
+          onClose={() => setCharacterPickerAgent(null)}
         />,
         document.body
       )}

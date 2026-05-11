@@ -7,9 +7,9 @@ import { PromptInput } from './PromptInput'
 import { StateBadge, AgentLifecycleState } from './StateBadge'
 import { ChatStatusBar } from './ChatStatusBar'
 import { AgentMenu } from './AgentMenu'
-import { SpritePicker } from './SpritePicker'
+import { CharacterPicker } from './CharacterPicker'
 import { useRuntimeCapabilities, capsFor } from '../utils/runtimes'
-import { CreatureIcon } from './CreatureIcon'
+import { CharacterIcon } from './CharacterIcon'
 import { useSpriteAnimation } from './spriteAnimations'
 import { HealthBar, ProfilePill, RolePill, TaskGroupPill } from './AgentCard'
 import { BusyBubble, DoneBubble } from './MessageAnimations'
@@ -47,7 +47,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
   // UI-only state — local to this panel, not persisted across unmount
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
-  const [showSpritePicker, setShowSpritePicker] = useState(false)
+  const [showCharacterPicker, setShowCharacterPicker] = useState(false)
   const rename = useAgentRename(agent.run_id || agent.session_id, agent.display_name || '')
   const [projects, setProjects] = useState<ProjectInfo[]>([])
   const [roles, setRoles] = useState<RoleInfo[]>([])
@@ -284,13 +284,13 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
         <div className="flex items-center gap-3">
           {/* Sprite with background box + animations */}
           <div
-            onClick={() => setShowSpritePicker(true)}
+            onClick={() => setShowCharacterPicker(true)}
             className="cursor-pointer hover:brightness-125 relative shrink-0 overflow-visible"
             style={{ width: 32, height: 32 }}
           >
             <div className="absolute inset-0 theme-bg-panel-muted rounded-lg" />
             <div className={`relative ${useSpriteAnimation(agent.state || 'idle', true)}`}>
-              <CreatureIcon sessionId={agent.session_id} size={32} noGlow={false} doneFlash={false} spriteOverride={agent.sprite} noBg />
+              <CharacterIcon sessionId={agent.session_id} size={32} noGlow={false} doneFlash={false} spriteOverride={agent.sprite} noBg />
               <BusyBubble isBusy={isBusy} />
               <DoneBubble isDone={false} />
             </div>
@@ -548,15 +548,15 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
           roles={roles}
           onClose={() => setMenuOpen(false)}
           onRename={() => { setMenuOpen(false); rename.startRename() }}
-          onChangeSprite={() => { setMenuOpen(false); setShowSpritePicker(true) }}
+          onChangeSprite={() => { setMenuOpen(false); setShowCharacterPicker(true) }}
         />,
         document.body,
       )}
-      {showSpritePicker && createPortal(
-        <SpritePicker
+      {showCharacterPicker && createPortal(
+        <CharacterPicker
           currentSprite={agent.sprite || 'isaac'}
           onSelect={async (sprite) => { await setSprite(agent.session_id, sprite) }}
-          onClose={() => setShowSpritePicker(false)}
+          onClose={() => setShowCharacterPicker(false)}
         />,
         document.body,
       )}

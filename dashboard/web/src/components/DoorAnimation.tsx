@@ -26,7 +26,7 @@ interface Props {
 
 // ── Animation Layer ────────────────────────────────────────
 
-export function PokeballAnimationLayer({ animations, onComplete }: Props) {
+export function DoorAnimationLayer({ animations, onComplete }: Props) {
   return (
     <div className="fixed inset-0 pointer-events-none z-[100]">
       {animations.map(anim => (
@@ -184,7 +184,7 @@ function DeployAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete:
 
 // ── Hook ───────────────────────────────────────────────────
 
-export function usePokeballAnimations() {
+export function useDoorAnimations() {
   const [animations, setAnimations] = useState<PokeballAnim[]>([])
   const pendingCallbacks = useRef<Map<string, () => void>>(new Map())
 
