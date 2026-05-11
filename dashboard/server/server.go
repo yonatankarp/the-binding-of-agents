@@ -1046,30 +1046,14 @@ func (s *Server) handleListPokegents(w http.ResponseWriter, r *http.Request) {
 	if limit <= 0 {
 		limit = 100
 	}
-	// Oversample so alive-agent filtering doesn't undercut the visible count.
-	fetchLimit := limit + 50
-	list, err := s.searchSvc.ListPokegents(fetchLimit)
+	// Bestiary is a catalog of ALL agents (active + past), matching the TBOI
+	// in-game Bestiary metaphor. Active agents are NOT filtered.
+	list, err := s.searchSvc.ListPokegents(limit)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	alive := make(map[string]bool)
-	for _, a := range s.state.GetAgents() {
-		if a.RunID != "" {
-			alive[a.RunID] = true
-		}
-	}
-	filtered := make([]services.RunSummary, 0, len(list))
-	for _, p := range list {
-		if alive[p.RunID] {
-			continue
-		}
-		filtered = append(filtered, p)
-		if len(filtered) >= limit {
-			break
-		}
-	}
-	writeJSON(w, map[string]any{"runs": filtered})
+	writeJSON(w, map[string]any{"runs": list})
 }
 
 func (s *Server) handleSearchPokegents(w http.ResponseWriter, r *http.Request) {
