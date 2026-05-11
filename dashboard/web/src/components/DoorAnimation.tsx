@@ -85,13 +85,15 @@ function RecallAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete:
       )}
 
       {phase === 'fly' && (
-        <img
-          src="/sprites/pokeball.png"
-          alt=""
+        // Fade-fallback orb: CSS-styled div replaces the missing pokeball.png sprite.
+        // Preserves the agent-orbFly arc + rotate animation via the same CSS vars.
+        <div
+          className="agent-orb flying"
           style={{
             position: 'fixed', width: 28, height: 28,
-            imageRendering: 'pixelated',
-            filter: 'drop-shadow(0 2px 6px var(--theme-panel-muted-bg))',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle at 35% 35%, rgba(var(--theme-accent-red-rgb), 0.95), rgba(var(--theme-accent-red-rgb), 0.55) 60%, rgba(var(--theme-accent-red-rgb), 0) 100%)',
+            boxShadow: '0 0 8px 2px rgba(var(--theme-accent-red-rgb), 0.6), 0 2px 6px var(--theme-panel-muted-bg)',
             '--sx': `${cx - 14}px`, '--sy': `${cy - 14}px`,
             '--ex': `${anim.bubbleX - 14}px`, '--ey': `${anim.bubbleY - 14}px`,
             '--my': `${Math.min(cy, anim.bubbleY) - 60}px`,
@@ -128,13 +130,14 @@ function DeployAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete:
     <>
       {/* Phase 1: Agent orb flies from bubble to card center */}
       {phase === 'fly' && (
-        <img
-          src="/sprites/pokeball.png"
-          alt=""
+        // Fade-fallback orb: CSS-styled div replaces the missing pokeball.png sprite.
+        <div
+          className="agent-orb flying"
           style={{
             position: 'fixed', width: 28, height: 28,
-            imageRendering: 'pixelated',
-            filter: 'drop-shadow(0 2px 6px var(--theme-panel-muted-bg))',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle at 35% 35%, rgba(var(--theme-accent-red-rgb), 0.95), rgba(var(--theme-accent-red-rgb), 0.55) 60%, rgba(var(--theme-accent-red-rgb), 0) 100%)',
+            boxShadow: '0 0 8px 2px rgba(var(--theme-accent-red-rgb), 0.6), 0 2px 6px var(--theme-panel-muted-bg)',
             '--sx': `${anim.bubbleX - 14}px`, '--sy': `${anim.bubbleY - 14}px`,
             '--ex': `${cx - 14}px`, '--ey': `${cy - 14}px`,
             '--my': `${Math.min(cy, anim.bubbleY) - 80}px`,
@@ -148,13 +151,14 @@ function DeployAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete:
         <>
           {/* Agent orb bounces up once then fades */}
           <div style={{ position: 'fixed', left: cx, top: cy, transform: 'translate(-50%, -50%)' }}>
-            <img
-              src="/sprites/pokeball.png"
-              alt=""
+            {/* Fade-fallback orb: CSS-styled div replaces the missing pokeball.png sprite. */}
+            <div
+              className="agent-orb popping"
               style={{
                 width: 28, height: 28,
-                imageRendering: 'pixelated',
-                filter: 'drop-shadow(0 2px 6px var(--theme-panel-muted-bg))',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle at 35% 35%, rgba(var(--theme-accent-red-rgb), 0.95), rgba(var(--theme-accent-red-rgb), 0.55) 60%, rgba(var(--theme-accent-red-rgb), 0) 100%)',
+                boxShadow: '0 0 10px 3px rgba(var(--theme-accent-red-rgb), 0.7), 0 2px 6px var(--theme-panel-muted-bg)',
                 animation: 'agent-orbPopOpen 400ms ease-out forwards',
               }}
             />
