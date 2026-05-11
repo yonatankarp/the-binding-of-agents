@@ -1081,7 +1081,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
           // background-image with negative position is the most robust way to
           // render a cropped sub-region of an image — naturally clipped to
           // element bounds, no img/overflow shenanigans.
-          backgroundImage: `url(/basement-floor.png)`,
+          backgroundImage: `url(/basement-floor.png?v=tboi-room)`,
           backgroundPosition: `-${CROP_LEFT}px -${CROP_TOP}px`,
           backgroundSize: `${SOURCE_W}px ${SOURCE_H}px`,
           backgroundRepeat: 'no-repeat',
