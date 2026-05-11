@@ -14,15 +14,17 @@ builds:
     env:
       - CGO_ENABLED=0
     goos:
-      - linux
       - darwin
-      - windows
     goarch:
       - amd64
       - arm64
-    ignore:
-      - goos: windows
-        goarch: arm64
+    # Linux + Windows builds are deferred for v0.1 due to upstream pokegents
+    # portability bugs:
+    #   - dashboard/server/setup.go:713 uses shellQuote() which is darwin-only
+    #     (defined in terminal_darwin.go with //go:build darwin)
+    #   - dashboard/server/state.go:1866 uses syscall.Kill (non-Windows)
+    # When these are fixed, add `linux` and `windows` to goos and re-test the
+    # snapshot build before tagging.
     ldflags:
       - -s -w
 

@@ -29,10 +29,10 @@ boa dashboard open
 
 The dashboard binds to `http://localhost:7834` by default (configurable in `~/.the-binding-of-agents/config.json`).
 
-Supported platforms:
+Supported platforms (v0.1):
 - macOS (Apple Silicon and Intel)
-- Linux (x86_64 and ARM64)
-- Windows (x86_64)
+
+Linux and Windows builds are deferred for v0.1 due to upstream portability work that's required first. See `.goreleaser.yaml` for details. Source builds work on Linux today (with `POKEGENTS_DEV_BUILD=1 ./install.sh`); Windows source builds are not currently supported.
 
 ### Build from source
 
