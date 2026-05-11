@@ -34,7 +34,7 @@ let VISIBLE_ROWS = ROWS
 
 type ViewportSize = { w: number; h: number }
 
-const DEFAULT_TOWN_MASK_34X30: readonly string[] = [
+const DEFAULT_BASEMENT_MASK_34X30: readonly string[] = [
   '###############...################',
   '###############...################',
   '###############...################',
@@ -67,12 +67,12 @@ const DEFAULT_TOWN_MASK_34X30: readonly string[] = [
   '..#...#...........................',
 ]
 
-function defaultTownMask(): string[] {
-  if (COLS === 34 && ROWS === 30) return [...DEFAULT_TOWN_MASK_34X30]
+function defaultBasementMask(): string[] {
+  if (COLS === 34 && ROWS === 30) return [...DEFAULT_BASEMENT_MASK_34X30]
   return Array.from({ length: ROWS }, () => '.'.repeat(COLS))
 }
 
-function updateTownGeometry(settings: TownGeometrySettings) {
+function updateBasementGeometry(settings: BasementGeometrySettings) {
   const cell = Math.max(4, Math.round(settings.cellSize || 16))
   const left = Math.max(0, Math.min(SOURCE_W - cell, Math.round(settings.cropLeft || 0)))
   const top = Math.max(0, Math.min(SOURCE_H - cell, Math.round(settings.cropTop || 0)))
@@ -185,7 +185,7 @@ function computeAlphaBounds(img: HTMLImageElement): { minX: number; minY: number
 // in debug mode. Pathfinding/spawn helpers read from this rather than the
 // constant so paints take effect immediately without threading state through
 // every setInterval closure.
-let mutableMask: string[] = defaultTownMask()
+let mutableMask: string[] = defaultBasementMask()
 
 // Walkable = anything that isn't a wall. Path and busy cells all let sprites
 // pass through; only `#` blocks.
@@ -400,7 +400,7 @@ function randomWalkableCell(opts: { avoidBusy?: boolean } = {}): Cell {
 
 // ── Sprite model ───────────────────────────────────────────
 
-interface TownSprite {
+interface BasementSprite {
   id: string            // run_id / stableId
   sprite: string
   displayName: string
@@ -433,16 +433,16 @@ interface BasementViewProps {
   selectedId: string | null
   debug?: boolean
   newMessage?: AgentMessage | null
-  geometry?: Partial<TownGeometrySettings>
+  geometry?: Partial<BasementGeometrySettings>
   editorOpen?: boolean
   onCloseEditor?: () => void
-  onSaveGeometry?: (geometry: TownGeometrySettings) => void
+  onSaveGeometry?: (geometry: BasementGeometrySettings) => void
   projects?: ProjectInfo[]
   roles?: RoleInfo[]
   existingGroups?: string[]
 }
 
-interface TownGeometrySettings {
+interface BasementGeometrySettings {
   scale: number
   cellSize: number
   cellOffsetX: number
@@ -453,7 +453,7 @@ interface TownGeometrySettings {
   cropBottom: number
 }
 
-function normalizedGeometry(geometry?: Partial<TownGeometrySettings>): TownGeometrySettings {
+function normalizedGeometry(geometry?: Partial<BasementGeometrySettings>): BasementGeometrySettings {
   return {
     scale: geometry?.scale ?? 1,
     cellSize: geometry?.cellSize ?? 16,
@@ -492,7 +492,7 @@ function BasementEditorSlider({ label, value, min, max, step, unit, onChange }: 
   )
 }
 
-// Mail-carry fields (mailTarget, mailReturn) live on TownSprite.
+// Mail-carry fields (mailTarget, mailReturn) live on BasementSprite.
 // When set, the sprite sprints to the recipient and back using the normal
 // movement tick — no separate clone component needed.
 
@@ -507,25 +507,25 @@ const IDLE_COOLDOWN_MAX = 1400
 
 // Movement tick rate. Must be ≤ the smallest STEP_MS we ever schedule —
 // otherwise the loop becomes the floor and a sprite that "should" step every
-// Keep the town card cheap. 30ms was effectively a 33fps React setState loop
+// Keep the basement card cheap. 30ms was effectively a 33fps React setState loop
 // over every agent and made typing/clicking laggy in Chrome.
 const TICK_MS = 30
 
 export function BasementView({ agents, onSelect, selectedId, debug = false, newMessage, geometry, editorOpen = false, onCloseEditor, onSaveGeometry, projects, roles, existingGroups }: BasementViewProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [available, setAvailable] = useState<ViewportSize | null>(null)
-  const [draftGeometry, setDraftGeometry] = useState<TownGeometrySettings>(() => normalizedGeometry(geometry))
+  const [draftGeometry, setDraftGeometry] = useState<BasementGeometrySettings>(() => normalizedGeometry(geometry))
   const savedGeometryKey = `${geometry?.scale ?? 1}:${geometry?.cellSize ?? 16}:${geometry?.cellOffsetX ?? 0}:${geometry?.cellOffsetY ?? 0}:${geometry?.cropLeft ?? 0}:${geometry?.cropTop ?? 0}:${geometry?.cropRight ?? SOURCE_W}:${geometry?.cropBottom ?? SOURCE_H}`
   useEffect(() => {
     if (editorOpen) setDraftGeometry(normalizedGeometry(geometry))
   }, [editorOpen, savedGeometryKey])
   const effectiveGeometry = editorOpen ? draftGeometry : normalizedGeometry(geometry)
-  updateTownGeometry(effectiveGeometry)
+  updateBasementGeometry(effectiveGeometry)
   const manualScale = Math.max(0.1, effectiveGeometry.scale ?? 1)
   const fitScale = available
     ? Math.max(available.w / MAP_W, available.h / MAP_H)
     : 1
-  // Always fill the town viewport. The editor Scale is a zoom multiplier on
+  // Always fill the basement viewport. The editor Scale is a zoom multiplier on
   // top of fit-to-card, not a way to shrink below the available card space.
   const visualScale = fitScale * Math.max(1, manualScale)
   const cellOffsetX = effectiveGeometry.cellOffsetX ?? 0
@@ -537,7 +537,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
   const mapShiftX = Math.min(0, (viewportW / visualScale) - MAP_W)
   updateVisibleBounds(available, visualScale, cellOffsetX, cellOffsetY, mapShiftX)
   const geometryKey = `${CELL}:${CROP_LEFT}:${CROP_TOP}:${CROP_RIGHT}:${CROP_BOTTOM}:${visualScale}:${cellOffsetX}:${cellOffsetY}:${mapShiftX}:${VISIBLE_MIN_COL}:${VISIBLE_MIN_ROW}:${VISIBLE_MAX_COL}:${VISIBLE_MAX_ROW}`
-  const [sprites, setSprites] = useState<Record<string, TownSprite>>({})
+  const [sprites, setSprites] = useState<Record<string, BasementSprite>>({})
   const spritesRef = useRef(sprites)
   spritesRef.current = sprites
 
@@ -583,7 +583,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
           mutableMask = data.mask
           setMask(data.mask)
         } else {
-          const next = defaultTownMask()
+          const next = defaultBasementMask()
           mutableMask = next
           setMask(next)
         }
@@ -594,7 +594,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
 
   useEffect(() => {
     if (mask.length !== ROWS || mask.some(row => row.length !== COLS)) {
-      const next = defaultTownMask()
+      const next = defaultBasementMask()
       mutableMask = next
       setMask(next)
       setSprites({})
@@ -673,7 +673,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
   useEffect(() => {
     if (!maskReady) return
     setSprites(prev => {
-      const next: Record<string, TownSprite> = {}
+      const next: Record<string, BasementSprite> = {}
       const now = Date.now()
 
       for (const a of agents) {
@@ -712,7 +712,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
             target = target ? keepVisibleWalkableNonBusy(target) : null
             // Idle agents should only amble locally. Clear stale/random
             // long-distance targets from older logic or geometry changes so
-            // they don't glide across the entire town like they're busy.
+            // they don't glide across the entire basement like they're busy.
             if (target && !isBusyCell(pos) && manhattan(pos, target) > 3) {
               target = null
               resetIdleCooldown = true
@@ -769,7 +769,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
     const interval = setInterval(() => {
       setSprites(prev => {
         const now = Date.now()
-        const next: Record<string, TownSprite> = { ...prev }
+        const next: Record<string, BasementSprite> = { ...prev }
         let changed = false
 
         // Pool of painted busy cells. Busy agents pick
@@ -929,7 +929,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
   }, [geometryKey])
 
   // Measure parent viewport. This only clips what portion of the already-defined
-  // town grid is visible; it must not affect cell/crop logic or persisted mask
+  // basement grid is visible; it must not affect cell/crop logic or persisted mask
   // dimensions.
   useEffect(() => {
     const measure = () => {
@@ -938,7 +938,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
       const w = parent.clientWidth
       const h = parent.clientHeight
       if (w < 10 || h < 10) return
-      // Leave room for the town frame so it doesn't get clipped by parent overflow.
+      // Leave room for the basement frame so it doesn't get clipped by parent overflow.
       const PAD = 16
       const next = { w: Math.max(1, w - PAD), h: Math.max(1, h - PAD) }
       setAvailable(prev => (prev && prev.w === next.w && prev.h === next.h) ? prev : next)
@@ -1187,7 +1187,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
                   }}
                 />
               )}
-              <TownSpritePoke
+              <BasementSpriteRender
                 sprite={s.sprite}
                 state={s.agentState}
                 facing={s.facing}
@@ -1250,8 +1250,8 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
 // Per-sprite animator. Pulled into its own component so each sprite owns its
 // own useSpriteAnimation cycle (the hook holds setTimeout state — sharing it
 // would mean every sprite hops on the same beat). Reuses the same animation
-// registry as the agent-card preview, so card-busy and town-busy match.
-function TownSpritePoke({ sprite, state, facing, inTransit, attention, glow, busyBubble, doneBubble }: {
+// registry as the agent-card preview, so card-busy and basement-busy match.
+function BasementSpriteRender({ sprite, state, facing, inTransit, attention, glow, busyBubble, doneBubble }: {
   sprite: string
   state: AgentState['state']
   facing: 'left' | 'right'
@@ -1269,7 +1269,7 @@ function TownSpritePoke({ sprite, state, facing, inTransit, attention, glow, bus
   const centerScaleX = natural ? sz.w / natural.w : 1
   const centerScaleY = natural ? sz.h / natural.h : 1
   const visualBounds = natural?.bounds
-  // Town sprites are positioned by their feet. PixelSprite's default vertical
+  // Basement sprites are positioned by their feet. PixelSprite's default vertical
   // alpha-centering is great for cards/PC boxes, but it makes the minimap art
   // appear about a tile above its collision cell for sprites with uneven
   // transparent padding. Keep horizontal alpha-centering, and instead shift the
@@ -1372,7 +1372,7 @@ function randomCooldown(): number {
   return IDLE_COOLDOWN_MIN + Math.random() * (IDLE_COOLDOWN_MAX - IDLE_COOLDOWN_MIN)
 }
 
-function isOccupied(sprites: Record<string, TownSprite>, cell: Cell, selfId: string): boolean {
+function isOccupied(sprites: Record<string, BasementSprite>, cell: Cell, selfId: string): boolean {
   for (const id in sprites) {
     if (id === selfId) continue
     const s = sprites[id]

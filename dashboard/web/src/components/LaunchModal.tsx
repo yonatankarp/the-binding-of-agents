@@ -88,7 +88,7 @@ function GbaDropdown<T extends { key: string; label: string; color?: [number, nu
 }
 
 
-function pokemonDisplayName(sprite: string): string {
+function characterDisplayName(sprite: string): string {
   return sprite
     .split(/[-_]/g)
     .filter(Boolean)
@@ -142,7 +142,7 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
   const [randomSprite] = useState(() => ISAAC_CHARACTERS[Math.floor(Math.random() * ISAAC_CHARACTERS.length)])
   const [selectedRole, setSelectedRole] = useState('implementer')
   const [selectedProject, setSelectedProject] = useState('current')
-  const [name, setName] = useState(() => pokemonDisplayName(randomSprite))
+  const [name, setName] = useState(() => characterDisplayName(randomSprite))
   const [sprite, setSelectedSprite] = useState('')
   const [showCharacterPicker, setShowCharacterPicker] = useState(false)
   const [launching, setLaunching] = useState(false)

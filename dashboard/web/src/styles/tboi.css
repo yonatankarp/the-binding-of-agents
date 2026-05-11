@@ -87,9 +87,9 @@ html, body, #root {
   --theme-accent-purple: #6a8aa8;
   --theme-accent-purple-rgb: 106 138 168;
   --theme-border: #3a2d22;
-  --theme-state-rest: #4a6a8a;
-  --theme-state-fight: #8a1a18;
-  --theme-state-clear: #5a7a3a;
+  --theme-state-rest: var(--theme-status-idle);
+  --theme-state-fight: var(--theme-status-error);
+  --theme-state-clear: var(--theme-status-done);
   --theme-status-idle: #4a6a8a;
   --theme-status-done: #5a7a3a;
   --theme-status-busy: #c8b85a;
