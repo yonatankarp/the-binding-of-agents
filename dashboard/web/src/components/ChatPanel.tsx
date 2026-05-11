@@ -34,7 +34,7 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
-  const pokegentId = agent.pokegent_id || agent.session_id
+  const runId = agent.run_id || agent.session_id
 
   const entries = connection?.entries ?? []
   const streamReady = connection?.streamReady ?? false
@@ -48,7 +48,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
   const [showSpritePicker, setShowSpritePicker] = useState(false)
-  const rename = useAgentRename(agent.pokegent_id || agent.session_id, agent.display_name || '')
+  const rename = useAgentRename(agent.run_id || agent.session_id, agent.display_name || '')
   const [projects, setProjects] = useState<ProjectInfo[]>([])
   const [roles, setRoles] = useState<RoleInfo[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -60,7 +60,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
   const caps = capsFor(allCaps, agent.interface)
 
   // Timestamps: false | true | 'debug' (debug shows table borders)
-  const [showTimestamps, setShowTimestamps] = useState<boolean | 'debug'>(() => localStorage.getItem('pokegents-show-timestamps') !== 'false')
+  const [showTimestamps, setShowTimestamps] = useState<boolean | 'debug'>(() => localStorage.getItem('boa-show-timestamps') !== 'false')
 
   // Debug panel
   const [debugOpen, setDebugOpen] = useState(false)
@@ -90,7 +90,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
     setBackendDeadGraceElapsed(false)
     const t = setTimeout(() => setBackendDeadGraceElapsed(true), 8000)
     return () => clearTimeout(t)
-  }, [backendDeadRaw, reconfiguring, pokegentId])
+  }, [backendDeadRaw, reconfiguring, runId])
   const backendDead = backendDeadRaw && !reconfiguring && backendDeadSince != null && backendDeadGraceElapsed
 
   const lifecycle: AgentLifecycleState = reconfiguring
@@ -107,13 +107,13 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
           ? 'needs_input'
           : 'idle'
 
-  // Scroll all views to bottom on panel open (pokegentId change) or tab switch.
+  // Scroll all views to bottom on panel open (runId change) or tab switch.
   useEffect(() => {
     requestAnimationFrame(() => {
       const ref = panelView === 'chat' ? scrollRef : panelView === 'files' ? filesScrollRef : commandsScrollRef
       if (ref.current) ref.current.scrollTop = ref.current.scrollHeight
     })
-  }, [panelView, pokegentId])
+  }, [panelView, runId])
 
   // Lazy-load projects/roles for the AgentMenu submenus.
   useEffect(() => {
@@ -135,7 +135,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
     stickToBottomRef.current = true
     setPanelView('chat')
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-  }, [pokegentId])
+  }, [runId])
   function handleScroll() {
     const el = scrollRef.current
     if (!el) return
@@ -193,7 +193,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
     setGlowFlash(true)
     const timer = setTimeout(() => setGlowFlash(false), 500)
     return () => clearTimeout(timer)
-  }, [pokegentId, flashKey])
+  }, [runId, flashKey])
   useEffect(() => {
     const handler = () => {
       setPanelView('chat')
@@ -347,7 +347,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
             onToggleTimestamps={() => {
               const next = !showTimestamps
               setShowTimestamps(next)
-              localStorage.setItem('pokegents-show-timestamps', String(next))
+              localStorage.setItem('boa-show-timestamps', String(next))
             }}
           />
         </div>
@@ -365,7 +365,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
             onClick={async () => {
               setRestartPending(true)
               try {
-                await restartBackend(pokegentId)
+                await restartBackend(runId)
                 connection?.appendSystemEntry('Restarting backend…')
               } catch (err) {
                 connection?.appendSystemEntry(`Backend restart failed: ${err instanceof Error ? err.message : String(err)}`)
@@ -516,7 +516,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
       {/* Input — shared component handles auto-grow, Enter/Shift+Enter,
           and image paste (works for both runtimes via /api/sessions/{id}/image). */}
       <PromptInput
-        sessionId={pokegentId}
+        sessionId={runId}
         onSend={submitText}
         variant="chat"
         showSendButton
@@ -563,7 +563,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
       {debugOpen && createPortal(
         <DebugModal
           agent={agent}
-          pokegentId={pokegentId}
+          runId={runId}
           streamReady={streamReady}
           queuedMessages={queuedMessages}
           bgShells={bgShells}

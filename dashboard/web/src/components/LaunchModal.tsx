@@ -151,13 +151,13 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
   const [selectedModel, setSelectedModel] = useState('')
   const [iface, setIface] = useState<'terminal' | 'chat'>(() => {
     try {
-      const stored = localStorage.getItem('pokegents-launch-interface')
+      const stored = localStorage.getItem('boa-launch-interface')
       return stored === 'terminal' || stored === 'iterm2' ? 'terminal' : 'chat'
     }
     catch { return 'chat' }
   })
   useEffect(() => {
-    try { localStorage.setItem('pokegents-launch-interface', iface) } catch { /* ignore */ }
+    try { localStorage.setItem('boa-launch-interface', iface) } catch { /* ignore */ }
   }, [iface])
 
   // Fetch setup defaults + backends on mount
@@ -221,8 +221,8 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
 
     let resp
     try {
-      // Unified launch — server mints pokegent_id and pre-writes the running
-      // file before invoking the launcher. Returns the pokegent_id we can use
+      // Unified launch — server mints run_id and pre-writes the running
+      // file before invoking the launcher. Returns the run_id we can use
       // to apply sprite/name overrides without polling-by-exclusion.
       resp = await launchPokegent({
         role: selectedRole || undefined,
@@ -243,17 +243,17 @@ export function LaunchModal({ projects, roles, agents: _agents, onClose }: Launc
     }
 
     // Wait for boa.sh to overwrite the placeholder with real session info,
-    // then apply user's name + sprite. Keyed by pokegent_id from launch response —
+    // then apply user's name + sprite. Keyed by run_id from launch response —
     // no more polling-by-exclusion.
-    const pokegentId = resp.pokegent_id
+    const runId = resp.run_id
     {
       for (let i = 0; i < 40; i++) {
         await new Promise(r => setTimeout(r, 500))
         const fresh = await fetchSessions()
-        const newAgent = fresh.find(a => a.pokegent_id === pokegentId && a.session_id && a.is_alive)
+        const newAgent = fresh.find(a => a.run_id === runId && a.session_id && a.is_alive)
         if (newAgent) {
           if (wantSprite) await setSprite(newAgent.session_id, wantSprite)
-          if (wantName) await renameAgent(newAgent.pokegent_id || newAgent.session_id, wantName)
+          if (wantName) await renameAgent(newAgent.run_id || newAgent.session_id, wantName)
           break
         }
       }

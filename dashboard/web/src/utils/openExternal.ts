@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'pokegents-settings'
+const STORAGE_KEY = 'boa-settings'
 
 type OpenKind = 'file' | 'url'
 

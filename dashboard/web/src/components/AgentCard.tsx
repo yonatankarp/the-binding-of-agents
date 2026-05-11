@@ -159,7 +159,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
     ? null
     : (preview && preview.phase !== 'empty' ? (preview.text || null) : (isBusy ? agent.last_trace : agent.last_summary))
 
-  const rename = useAgentRename(agent.pokegent_id || agent.session_id, title)
+  const rename = useAgentRename(agent.run_id || agent.session_id, title)
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })
   const [showSpritePicker, setShowSpritePicker] = useState(false)
@@ -176,7 +176,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
     }
     const t = setTimeout(() => setBackendDeadGraceElapsed(true), 8000)
     return () => clearTimeout(t)
-  }, [backendDeadRaw, agent.state, isConnecting, agent.pokegent_id, agent.session_id])
+  }, [backendDeadRaw, agent.state, isConnecting, agent.run_id, agent.session_id])
 
   const backendDead = backendDeadRaw && agent.state !== 'reconfiguring' && !isConnecting && backendDeadGraceElapsed
 
@@ -197,7 +197,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
   const acknowledgeDone = () => {
     if (!showDoneFlash) return
     setFlashDismissed(true)
-    fetch(`/api/sessions/${agent.pokegent_id || agent.session_id}/acknowledge`, { method: 'POST' })
+    fetch(`/api/sessions/${agent.run_id || agent.session_id}/acknowledge`, { method: 'POST' })
   }
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -281,7 +281,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
                   setRestartPending(true)
                   setToast('Restarting backend…')
                   try {
-                    await restartBackend(agent.pokegent_id || agent.session_id)
+                    await restartBackend(agent.run_id || agent.session_id)
                   } catch (err) {
                     setToast(`Restart failed: ${err instanceof Error ? err.message : String(err)}`)
                     setRestartPending(false)
@@ -430,8 +430,8 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
         {/* Quick command input */}
         {showInput && (
           <PromptInput
-            sessionId={agent.pokegent_id || agent.session_id}
-            onSend={quickSendPrompt ?? ((text) => sendPrompt(agent.pokegent_id || agent.session_id, text))}
+            sessionId={agent.run_id || agent.session_id}
+            onSend={quickSendPrompt ?? ((text) => sendPrompt(agent.run_id || agent.session_id, text))}
             variant="card"
             maxHeight={compact ? 72 : 120}
             maxLines={8}
@@ -519,10 +519,10 @@ function ActivityBox({ agent, isBusy, isDone, isError, isCompacting, outputText,
           // flow uses. iTerm2 agents fall through to focusAgent as before.
           if (agent.interface === 'chat') {
             window.dispatchEvent(new CustomEvent('open-chat-panel', {
-              detail: { pokegentId: agent.pokegent_id || agent.session_id },
+              detail: { runId: agent.run_id || agent.session_id },
             }))
           } else {
-            focusAgent(agent.pokegent_id || agent.session_id)
+            focusAgent(agent.run_id || agent.session_id)
           }
         }}
       >

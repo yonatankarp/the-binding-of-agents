@@ -56,9 +56,9 @@ const DEFAULTS: DashboardSettings = {
   townCropBottom: 480,
 }
 
-const STORAGE_KEY = 'pokegents-settings'
+const STORAGE_KEY = 'boa-settings'
 
-const TOWN_CARD_DISABLE_MIGRATION_KEY = 'pokegents-migrated-town-card-off-v1'
+const TOWN_CARD_DISABLE_MIGRATION_KEY = 'boa-migrated-town-card-off-v1'
 
 function load(): DashboardSettings {
   try {

@@ -277,7 +277,7 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [serverRestarting, setServerRestarting] = useState(false)
   const [chatAgentId, setChatAgentId] = useState<string | null>(() => {
-    try { return localStorage.getItem('pokegents-chat-agent') || null } catch { return null }
+    try { return localStorage.getItem('boa-chat-agent') || null } catch { return null }
   })
   const [shortcutOverlay, setShortcutOverlay] = useState(false)
   const [showLauncher, setShowLauncher] = useState(false)
@@ -288,8 +288,8 @@ export default function App() {
   const chatConnections = useChatWebSockets(agents, chatAgentId)
   useEffect(() => {
     try {
-      if (chatAgentId) localStorage.setItem('pokegents-chat-agent', chatAgentId)
-      else localStorage.removeItem('pokegents-chat-agent')
+      if (chatAgentId) localStorage.setItem('boa-chat-agent', chatAgentId)
+      else localStorage.removeItem('boa-chat-agent')
     } catch { /* ignore */ }
   }, [chatAgentId])
   // Auto-open ChatPanel when an agent is migrated to chat — fired by AgentCard.
@@ -310,13 +310,13 @@ export default function App() {
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { pokegentId?: string }
-      if (!detail?.pokegentId) return
-      if (chatAgentIdRef.current === detail.pokegentId) {
+      const detail = (e as CustomEvent).detail as { runId?: string }
+      if (!detail?.runId) return
+      if (chatAgentIdRef.current === detail.runId) {
         // Same agent re-clicked — ping the panel to flash.
         window.dispatchEvent(new Event('chat-panel-ping'))
       } else {
-        setChatAgentId(detail.pokegentId)
+        setChatAgentId(detail.runId)
       }
     }
     window.addEventListener('open-chat-panel', handler)
@@ -331,7 +331,7 @@ export default function App() {
   useEffect(() => {
     if (!chatAgentId || agents.length === 0) return
     const target = agents.find(a =>
-      (a.pokegent_id && a.pokegent_id === chatAgentId) ||
+      (a.run_id && a.run_id === chatAgentId) ||
       a.session_id === chatAgentId,
     )
     if (target && target.interface !== 'chat') setChatAgentId(null)
@@ -340,13 +340,13 @@ export default function App() {
   // Persisted to localStorage so the user's preferred width survives reloads.
   const [chatPanelWidth, setChatPanelWidth] = useState<number>(() => {
     try {
-      const v = parseInt(localStorage.getItem('pokegents-chat-panel-width') || '', 10)
+      const v = parseInt(localStorage.getItem('boa-chat-panel-width') || '', 10)
       if (Number.isFinite(v) && v >= 280 && v <= 1400) return v
     } catch { /* ignore */ }
     return 520
   })
   useEffect(() => {
-    try { localStorage.setItem('pokegents-chat-panel-width', String(chatPanelWidth)) } catch { /* ignore */ }
+    try { localStorage.setItem('boa-chat-panel-width', String(chatPanelWidth)) } catch { /* ignore */ }
   }, [chatPanelWidth])
   const dragWidthRef = useRef<{ startX: number; startWidth: number } | null>(null)
   const onChatDividerPointerDown = (e: React.PointerEvent) => {
@@ -461,7 +461,7 @@ export default function App() {
   const collapsedInitialized = useRef(false)
   const [groupViewModes, setGroupViewModes] = useState<Record<string, 'collapsed' | 'single' | 'expanded'>>(() => {
     try {
-      const raw = JSON.parse(localStorage.getItem('pokegents-group-view-modes') || '{}')
+      const raw = JSON.parse(localStorage.getItem('boa-group-view-modes') || '{}')
       const out: Record<string, 'collapsed' | 'single' | 'expanded'> = {}
       for (const [k, v] of Object.entries(raw)) {
         out[k] = v === 'collapsed' ? 'collapsed' : v === 'expanded' ? 'expanded' : v === 'single' ? 'single' : 'expanded'
@@ -482,7 +482,7 @@ export default function App() {
     if (collapsedInitialized.current || agents.length === 0) return
     collapsedInitialized.current = true
     try {
-      const saved: string[] = JSON.parse(localStorage.getItem('pokegents-collapsed') || '[]')
+      const saved: string[] = JSON.parse(localStorage.getItem('boa-collapsed') || '[]')
       const validIds = new Set(agents.map(a => stableId(a)))
       const restored = saved.filter(id => validIds.has(id))
       if (restored.length > 0) {
@@ -494,12 +494,12 @@ export default function App() {
   // Persist collapsed state (skip the initial empty set)
   useEffect(() => {
     if (!collapsedInitialized.current) return
-    localStorage.setItem('pokegents-collapsed', JSON.stringify([...collapsedIds]))
+    localStorage.setItem('boa-collapsed', JSON.stringify([...collapsedIds]))
   }, [collapsedIds])
 
   // Persist group view modes
   useEffect(() => {
-    localStorage.setItem('pokegents-group-view-modes', JSON.stringify(groupViewModes))
+    localStorage.setItem('boa-group-view-modes', JSON.stringify(groupViewModes))
   }, [groupViewModes])
 
   // Auto-collapse new groups on first appearance (seed existing groups on first load)
@@ -522,11 +522,11 @@ export default function App() {
 
   // Track manually expanded agents so auto-collapse doesn't immediately re-collapse them
   const manualExpandRef = useRef<Set<string>>(
-    (() => { try { return new Set<string>(JSON.parse(localStorage.getItem('pokegents-manual-expand') || '[]')) } catch { return new Set<string>() } })()
+    (() => { try { return new Set<string>(JSON.parse(localStorage.getItem('boa-manual-expand') || '[]')) } catch { return new Set<string>() } })()
   )
 
   const persistManualExpand = () => {
-    localStorage.setItem('pokegents-manual-expand', JSON.stringify([...manualExpandRef.current]))
+    localStorage.setItem('boa-manual-expand', JSON.stringify([...manualExpandRef.current]))
   }
 
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -612,7 +612,7 @@ export default function App() {
       for (const a of list) {
         if (a.ephemeral) continue
         result.push(a)
-        const children = ephByParent[a.session_id] || ephByParent[a.pokegent_id || ''] || []
+        const children = ephByParent[a.session_id] || ephByParent[a.run_id || ''] || []
         result.push(...children)
       }
       // Append orphaned ephemerals at the end
@@ -679,10 +679,10 @@ export default function App() {
     for (const a of agents) {
       if (a.sprite) {
         m[a.session_id] = a.sprite
-        if (a.pokegent_id) m[a.pokegent_id] = a.sprite
+        if (a.run_id) m[a.run_id] = a.sprite
       }
     }
-    return (id: string) => m[id] || 'pokeball'
+    return (id: string) => m[id] || 'isaac'
   }, [agents])
 
   const { deliveries, hiddenSprites, readingAgents, triggerTestDelivery } = useMessageAnimations(messages, cardRefs, getSpriteForId)
@@ -700,7 +700,7 @@ export default function App() {
   }, [showBrowser])
 
 
-  // Agent lookup for rendering cards in GridContainer — keyed by stableId (pokegent_id)
+  // Agent lookup for rendering cards in GridContainer — keyed by stableId (run_id)
   // and also by session_id for backward compat with grid layouts saved before migration
   const agentMap = useMemo(() => {
     const m: Record<string, AgentState> = {}
@@ -742,7 +742,7 @@ export default function App() {
             const members = grouped[groupName] || []
             const coord = members.find(m => m.role?.toLowerCase().includes('coordinator'))
             const primaryAgent = coord || members[0]
-            const sprite = primaryAgent ? getSpriteForId(primaryAgent.session_id) : 'pokeball'
+            const sprite = primaryAgent ? getSpriteForId(primaryAgent.session_id) : 'isaac'
             return (
               <CollapsedGroupBubble
                 key={`group:${groupName}`}
@@ -943,7 +943,7 @@ export default function App() {
                   onSetViewMode={(mode) => {
                     setGroupViewModes(prev => {
                       const next = { ...prev, [groupName]: mode === 'collapsed' ? 'collapsed' as const : mode === 'expanded' ? 'expanded' as const : 'single' as const }
-                      localStorage.setItem('pokegents-group-view-modes', JSON.stringify(next))
+                      localStorage.setItem('boa-group-view-modes', JSON.stringify(next))
                       return next
                     })
                   }}
@@ -951,7 +951,7 @@ export default function App() {
                   onMinimize={() => {
                     const coord = members.find(m => m.role?.toLowerCase().includes('coordinator'))
                     const primaryAgent = coord || members[0]
-                    const groupSprite = primaryAgent ? getSpriteForId(primaryAgent.session_id) : 'pokeball'
+                    const groupSprite = primaryAgent ? getSpriteForId(primaryAgent.session_id) : 'isaac'
                     const cardRect = gridEngine.gridRectToPixels(rect)
                     const spriteCx = cardRect.left + cardRect.width / 2
                     const spriteCy = cardRect.top + 40
@@ -1080,7 +1080,7 @@ export default function App() {
          {(() => {
            const chatAgent = chatAgentId ? agentMap[chatAgentId] : null
            if (chatAgent) {
-             const conn = chatConnections.getConnection(chatAgent.pokegent_id || chatAgent.session_id)
+             const conn = chatConnections.getConnection(chatAgent.run_id || chatAgent.session_id)
              return <ChatPanel agent={chatAgent} connection={conn} onClose={() => setChatAgentId(null)} />
            }
            return (
@@ -1140,7 +1140,7 @@ export default function App() {
             const next = window.prompt('Rename agent', current)
             const trimmed = next?.trim()
             if (trimmed && trimmed !== current) {
-              await renameAgent(menuAgent.pokegent_id || menuAgent.session_id, trimmed)
+              await renameAgent(menuAgent.run_id || menuAgent.session_id, trimmed)
             }
           }}
           onChangeSprite={() => {
@@ -1155,7 +1155,7 @@ export default function App() {
       )}
       {spritePickerAgent && createPortal(
         <SpritePicker
-          currentSprite={spritePickerAgent.sprite || 'pokeball'}
+          currentSprite={spritePickerAgent.sprite || 'isaac'}
           onSelect={async (sprite) => {
             await setSprite(spritePickerAgent.session_id, sprite)
             setSpritePickerAgent(null)

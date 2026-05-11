@@ -70,7 +70,7 @@ export function PromptInput({
   isBusy,
   enableSlashCommands,
 }: PromptInputProps) {
-  const draftKey = `pokegents-draft-${sessionId}`
+  const draftKey = `boa-draft-${sessionId}`
   const [value, setValue] = useState(() => sessionStorage.getItem(draftKey) || '')
   const [sending, setSending] = useState(false)
   const ref = useRef<HTMLTextAreaElement>(null)

@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { GameModal } from './GameModal'
-import { PokegentSummary } from '../types'
+import { RunSummary } from '../types'
 import { fetchPokegents, searchPokegents, revivePokegent, fetchSessionPreview } from '../api'
 import { PixelSprite } from './PixelSprite'
 
 interface SessionBrowserProps {
   onClose: () => void
   activePokegentIds?: Set<string>
-  onResume?: (pokegentId: string) => void
+  onResume?: (runId: string) => void
 }
 
 const GRID_COLS = 6
@@ -51,8 +51,8 @@ function PcBoxSprite({ sprite, alt = '', scale = PC_BOX_SPRITE_SCALE, shiftY = 0
 
 
 export function SessionBrowser({ onClose, activePokegentIds, onResume }: SessionBrowserProps) {
-  const [allResults, setAllResults]           = useState<PokegentSummary[]>([])
-  const [filteredResults, setFilteredResults] = useState<PokegentSummary[]>([])
+  const [allResults, setAllResults]           = useState<RunSummary[]>([])
+  const [filteredResults, setFilteredResults] = useState<RunSummary[]>([])
   const [query, setQuery]                     = useState('')
   const [loading, setLoading]                 = useState(false)
   const [selectedId, setSelectedId]           = useState<string | null>(null)
@@ -63,20 +63,20 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   const [preview, setPreview]                 = useState<{ user_prompt: string; last_summary: string } | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const filterActive = (r: PokegentSummary[]) =>
-    activePokegentIds ? r.filter(p => !activePokegentIds.has(p.pokegent_id)) : r
+  const filterActive = (r: RunSummary[]) =>
+    activePokegentIds ? r.filter(p => !activePokegentIds.has(p.run_id)) : r
 
   useEffect(() => {
     fetchPokegents(200).then((r) => {
       const filtered = filterActive(r)
       setAllResults(filtered)
       setFilteredResults(filtered)
-      if (filtered.length > 0) setSelectedId(filtered[0].pokegent_id)
+      if (filtered.length > 0) setSelectedId(filtered[0].run_id)
     })
   }, [])
 
 
-  const selected = filteredResults.find(r => r.pokegent_id === selectedId) ?? filteredResults[0] ?? null
+  const selected = filteredResults.find(r => r.run_id === selectedId) ?? filteredResults[0] ?? null
 
   // Fetch preview (last prompt + last message) when selection changes — keyed by
   // the pokegent's latest transcript session_id.
@@ -91,33 +91,33 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   const handleSearch = useCallback(async (q: string) => {
     setQuery(q)
     if (!q.trim()) {
-      setFilteredResults(allResults.filter(r => !revivedIds.has(r.pokegent_id)))
+      setFilteredResults(allResults.filter(r => !revivedIds.has(r.run_id)))
       return
     }
     setLoading(true)
     try {
       const resp = await searchPokegents(q, 50)
-      setFilteredResults(filterActive(resp.pokegents || []).filter(r => !revivedIds.has(r.pokegent_id)))
+      setFilteredResults(filterActive(resp.runs || []).filter(r => !revivedIds.has(r.run_id)))
     } catch { setFilteredResults([]) }
     setLoading(false)
   }, [allResults, revivedIds])
 
-  const handleRevive = async (pokegentId: string, compact?: 'yes' | 'no') => {
-    setRevivingId(pokegentId)
+  const handleRevive = async (runId: string, compact?: 'yes' | 'no') => {
+    setRevivingId(runId)
     setReviveResult(null)
     try {
-      const ok = await revivePokegent(pokegentId, compact)
+      const ok = await revivePokegent(runId, compact)
       if (ok) {
         setReviveResult('ok')
-        onResume?.(pokegentId)
+        onResume?.(runId)
         setTimeout(() => {
-          setRevivedIds(prev => new Set([...prev, pokegentId]))
-          setFilteredResults(prev => prev.filter(r => r.pokegent_id !== pokegentId))
-          setAllResults(prev => prev.filter(r => r.pokegent_id !== pokegentId))
+          setRevivedIds(prev => new Set([...prev, runId]))
+          setFilteredResults(prev => prev.filter(r => r.run_id !== runId))
+          setAllResults(prev => prev.filter(r => r.run_id !== runId))
           setRevivingId(null)
           setReviveResult(null)
-          const remaining = filteredResults.filter(r => r.pokegent_id !== pokegentId)
-          setSelectedId(remaining[0]?.pokegent_id ?? null)
+          const remaining = filteredResults.filter(r => r.run_id !== runId)
+          setSelectedId(remaining[0]?.run_id ?? null)
         }, 1500)
       } else {
         setReviveResult('fail')
@@ -134,7 +134,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   const safePage  = Math.min(boxPage, boxCount - 1)
   const boxSlots  = Array.from({ length: PER_BOX }, (_, i) => displayList[safePage * PER_BOX + i] ?? null)
 
-  const getSprite = (p: PokegentSummary) => p.sprite || 'pokeball'
+  const getSprite = (p: RunSummary) => p.sprite || 'pokeball'
 
   return (
     <GameModal title="PC Box" onClose={onClose} width="min(820px, 96vw)" height="min(680px, 96vh)" scanlines={false}>
@@ -159,7 +159,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
               display: 'flex', alignItems: 'center',
             }}>
               <span style={{ fontFamily: 'var(--theme-font-display)', fontSize: 'var(--theme-type-m)', color: 'var(--theme-text-primary)', textShadow: 'var(--theme-text-shadow-pixel)', letterSpacing: 0.5, lineHeight: 1.5 }}>
-                {selected ? (selected.display_name || selected.pokegent_id.slice(0, 8)) : 'No data'}
+                {selected ? (selected.display_name || selected.run_id.slice(0, 8)) : 'No data'}
               </span>
             </div>
 
@@ -251,8 +251,8 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
                   key={i}
                   pokegent={pokegent}
                   sprite={pokegent ? getSprite(pokegent) : null}
-                  isSelected={pokegent?.pokegent_id === selected?.pokegent_id}
-                  onClick={() => pokegent && setSelectedId(pokegent.pokegent_id)}
+                  isSelected={pokegent?.run_id === selected?.run_id}
+                  onClick={() => pokegent && setSelectedId(pokegent.run_id)}
                 />
               ))}
             </div>
@@ -281,13 +281,13 @@ function PcBoxArrow({ direction }: { direction: 'left' | 'right' }) {
 }
 
 function GridCell({ pokegent, sprite, isSelected, onClick }: {
-  pokegent: PokegentSummary | null
+  pokegent: RunSummary | null
   sprite: string | null
   isSelected: boolean
   onClick: () => void
 }) {
   const [hovered, setHovered] = useState(false)
-  const label = pokegent ? (pokegent.display_name || pokegent.profile_name || pokegent.pokegent_id.slice(0, 8)) : ''
+  const label = pokegent ? (pokegent.display_name || pokegent.profile_name || pokegent.run_id.slice(0, 8)) : ''
   return (
     <div
       onClick={onClick}
@@ -380,15 +380,15 @@ function MetaPill({ label }: { label?: string }) {
 }
 
 function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, onRevive }: {
-  pokegent: PokegentSummary
+  pokegent: RunSummary
   sprite: string
   preview: { user_prompt: string; last_summary: string } | null
   revivingId: string | null
   reviveResult: 'ok' | 'fail' | null
   onRevive: (id: string, compact?: 'yes' | 'no') => void
 }) {
-  const isReviving = revivingId === pokegent.pokegent_id
-  const name = pokegent.display_name || pokegent.pokegent_id.slice(0, 8)
+  const isReviving = revivingId === pokegent.run_id
+  const name = pokegent.display_name || pokegent.run_id.slice(0, 8)
   const [r, g, b] = pokegent.project_color || [100, 100, 100]
 
   return (
@@ -478,7 +478,7 @@ function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, on
         </div>
       ) : (
         <button
-          onClick={() => onRevive(pokegent.pokegent_id)}
+          onClick={() => onRevive(pokegent.run_id)}
           style={{
             width: '100%', padding: '8px 0', borderRadius: 5, border: '2px solid var(--theme-pc-box-action-primary-border)',
             background: 'var(--theme-pc-box-action-primary-bg)',

@@ -83,14 +83,14 @@ export function useSSE() {
       touch()
       try {
         const patch = JSON.parse(e.data) as Partial<AgentState> & {
-          pokegent_id: string
+          run_id: string
           state: string
           busy_since: string
           background_tasks: number
         }
         setAgents(prev => {
           const idx = prev.findIndex(a =>
-            a.pokegent_id === patch.pokegent_id || a.session_id === patch.pokegent_id
+            a.run_id === patch.run_id || a.session_id === patch.run_id
           )
           if (idx < 0) return prev
           const updated = [...prev]

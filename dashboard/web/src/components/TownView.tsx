@@ -401,7 +401,7 @@ function randomWalkableCell(opts: { avoidBusy?: boolean } = {}): Cell {
 // ── Sprite model ───────────────────────────────────────────
 
 interface TownSprite {
-  id: string            // pokegent_id / stableId
+  id: string            // run_id / stableId
   sprite: string
   displayName: string
   agentState: AgentState['state']  // 'idle', 'busy', etc.
@@ -1217,7 +1217,7 @@ export function TownView({ agents, onSelect, selectedId, debug = false, newMessa
             const next = window.prompt('Rename agent', current)
             const trimmed = next?.trim()
             if (trimmed && trimmed !== current) {
-              await renameAgent(menuAgent.pokegent_id || menuAgent.session_id, trimmed)
+              await renameAgent(menuAgent.run_id || menuAgent.session_id, trimmed)
             }
           }}
           onChangeSprite={() => {

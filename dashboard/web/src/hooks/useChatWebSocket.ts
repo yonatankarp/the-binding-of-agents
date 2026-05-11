@@ -334,7 +334,7 @@ function createWsInternals(sessionId: string): WsAgentInternals {
 // ─── The hook ─────────────────────────────────────────────
 
 export function useChatWebSockets(agents: AgentState[], activeChatId?: string | null): {
-  getConnection: (pokegentId: string) => (ChatConnectionState & ChatConnectionActions) | null
+  getConnection: (runId: string) => (ChatConnectionState & ChatConnectionActions) | null
 } {
   const connectionsRef = useRef<Map<string, WsAgentInternals>>(new Map())
   const activeChatIdRef = useRef<string | null | undefined>(activeChatId)
@@ -342,37 +342,37 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
   const [, forceRender] = useState(0)
   function notify() { forceRender(n => n + 1) }
 
-  const addDebugLog = useCallback((pokegentId: string, msg: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const addDebugLog = useCallback((runId: string, msg: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     conn.debugLog = [...conn.debugLog.slice(-99), `${new Date().toLocaleTimeString()} ${msg}`]
   }, [])
 
-  const setEntries = useCallback((pokegentId: string, updater: (prev: Entry[]) => Entry[]) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const setEntries = useCallback((runId: string, updater: (prev: Entry[]) => Entry[]) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     conn.entries = updater(conn.entries)
     notify()
   }, [])
 
-  const setBgShells = useCallback((pokegentId: string, updater: (prev: Map<string, BgShell>) => Map<string, BgShell>) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const setBgShells = useCallback((runId: string, updater: (prev: Map<string, BgShell>) => Map<string, BgShell>) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     conn.bgShells = updater(conn.bgShells)
     notify()
-    scheduleBgCleanup(pokegentId)
+    scheduleBgCleanup(runId)
   }, [])
 
-  const appendEntry = useCallback((pokegentId: string, e: Entry) => {
-    setEntries(pokegentId, prev => [...prev, { ...e, ts: e.ts || Date.now() }])
+  const appendEntry = useCallback((runId: string, e: Entry) => {
+    setEntries(runId, prev => [...prev, { ...e, ts: e.ts || Date.now() }])
   }, [setEntries])
 
-  const mergeTranscriptTools = useCallback((pokegentId: string, tail = 80) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const mergeTranscriptTools = useCallback((runId: string, tail = 80) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn?.sessionId) return
     const requestedSessionId = conn.sessionId
     fetchTranscript(requestedSessionId, tail).then(page => {
-      const conn = connectionsRef.current.get(pokegentId)
+      const conn = connectionsRef.current.get(runId)
       if (!conn || conn.sessionId !== requestedSessionId) return
       const seeded = entriesFromTranscript(page.entries || []).filter((e): e is Extract<Entry, { kind: 'tool' }> => e.kind === 'tool')
       if (seeded.length === 0) return
@@ -386,20 +386,20 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
     }).catch(() => {})
   }, [])
 
-  const scheduleTranscriptToolPoll = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const scheduleTranscriptToolPoll = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn || conn.transcriptPollTimer || !conn.sessionId) return
     conn.transcriptPollTimer = setTimeout(() => {
       conn.transcriptPollTimer = null
-      const cur = connectionsRef.current.get(pokegentId)
+      const cur = connectionsRef.current.get(runId)
       if (!cur || cur.lastKnownState !== 'busy') return
-      mergeTranscriptTools(pokegentId)
-      scheduleTranscriptToolPoll(pokegentId)
+      mergeTranscriptTools(runId)
+      scheduleTranscriptToolPoll(runId)
     }, 2500)
   }, [mergeTranscriptTools])
 
-  const stopTranscriptToolPoll = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const stopTranscriptToolPoll = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     if (conn.transcriptPollTimer) {
       clearTimeout(conn.transcriptPollTimer)
@@ -407,8 +407,8 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
     }
   }, [])
 
-  const updateDeliveryState = useCallback((pokegentId: string, nonce: string, state: DeliveryState) => {
-    setEntries(pokegentId, prev => prev.map(e =>
+  const updateDeliveryState = useCallback((runId: string, nonce: string, state: DeliveryState) => {
+    setEntries(runId, prev => prev.map(e =>
       e.kind === 'user' && e.nonce === nonce
         ? { ...e, deliveryState: state }
         : e
@@ -417,8 +417,8 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
   // ── Background shell auto-cleanup ──
 
-  const scheduleBgCleanup = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const scheduleBgCleanup = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     if (conn.bgCleanupTimer) clearTimeout(conn.bgCleanupTimer)
 
@@ -441,24 +441,24 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
     })
     if (earliest !== Infinity) {
       const wait = Math.max(100, 5000 - (Date.now() - earliest))
-      conn.bgCleanupTimer = setTimeout(() => scheduleBgCleanup(pokegentId), wait)
+      conn.bgCleanupTimer = setTimeout(() => scheduleBgCleanup(runId), wait)
     }
   }, [])
 
   // ── Reconfigure timeout ──
 
-  const scheduleReconfigTimeout = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const scheduleReconfigTimeout = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn || !conn.reconfiguring || !conn.reconfigure) return
     if (conn.reconfigTimer) clearTimeout(conn.reconfigTimer)
     const rc = conn.reconfigure
     const wait = Math.max(0, rc.endsAt - Date.now())
     conn.reconfigTimer = setTimeout(() => {
-      const c = connectionsRef.current.get(pokegentId)
+      const c = connectionsRef.current.get(runId)
       if (!c || c.reconfigure !== rc) return
       c.reconfigure = null
       c.reconfiguring = false
-      appendEntry(pokegentId, {
+      appendEntry(runId, {
         kind: 'system',
         id: `e-${crypto.randomUUID()}`,
         text: 'Reconfigure timeout — agent did not reconnect. Try /cancel and re-issue.',
@@ -468,8 +468,8 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
   // ── applyUpdate: the ACP event reducer ──
 
-  const applyUpdate = useCallback((pokegentId: string, u: SessionUpdate) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const applyUpdate = useCallback((runId: string, u: SessionUpdate) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
 
     const next = [...conn.entries]
@@ -477,7 +477,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
     const markBusy = () => {
       conn.lastKnownState = 'busy'
       conn.busySince = conn.busySince || new Date().toISOString()
-      scheduleTranscriptToolPoll(pokegentId)
+      scheduleTranscriptToolPoll(runId)
     }
 
     switch (u.sessionUpdate) {
@@ -541,7 +541,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         next.push({ kind: 'tool', id: tc.toolCallId, data: tc, ts: Date.now() })
         conn.entries = next
         notify()
-        scheduleBgCleanup(pokegentId)
+        scheduleBgCleanup(runId)
         return
       }
       case 'tool_call_update': {
@@ -638,7 +638,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         }
         conn.entries = next
         notify()
-        scheduleBgCleanup(pokegentId)
+        scheduleBgCleanup(runId)
         return
       }
       case 'session_info_update': {
@@ -656,8 +656,8 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
   // ── WebSocket send helper ──
 
-  const wsSend = useCallback((pokegentId: string, data: unknown): boolean => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const wsSend = useCallback((runId: string, data: unknown): boolean => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn?.ws || conn.ws.readyState !== WebSocket.OPEN) return false
     conn.ws.send(JSON.stringify(data))
     return true
@@ -665,26 +665,26 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
   // ── Queue drain: send one queued message if idle ──
 
-  const drainOne = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const drainOne = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn || (conn.lastKnownState !== 'idle' && conn.lastKnownState !== 'done') || conn.queuedMessages.length === 0) return
     const [next, ...rest] = conn.queuedMessages
     conn.queuedMessages = rest
     conn.lastKnownState = 'busy'
     notify()
     const nonce = crypto.randomUUID()
-    appendEntry(pokegentId, { kind: 'user', id: `u-${crypto.randomUUID()}`, text: next, nonce, deliveryState: 'sending', ts: Date.now() })
-    wsSend(pokegentId, makeRequest('session/prompt', {
+    appendEntry(runId, { kind: 'user', id: `u-${crypto.randomUUID()}`, text: next, nonce, deliveryState: 'sending', ts: Date.now() })
+    wsSend(runId, makeRequest('session/prompt', {
       sessionId: conn.sessionId,
       prompt: [{ type: 'text', text: next }],
     }))
-    updateDeliveryState(pokegentId, nonce, 'confirmed')
+    updateDeliveryState(runId, nonce, 'confirmed')
   }, [appendEntry, updateDeliveryState, wsSend])
 
   // ── Route a raw JSON-RPC frame from the WebSocket ──
 
-  const handleFrame = useCallback((pokegentId: string, frame: JsonRpcFrame) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const handleFrame = useCallback((runId: string, frame: JsonRpcFrame) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
 
     // JSON-RPC request from ACP (e.g. session/request_permission)
@@ -696,7 +696,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         } | undefined
         const requestId = frame.id
         const options = params?.options || []
-        setEntries(pokegentId, prev => {
+        setEntries(runId, prev => {
           if (prev.some(e => e.kind === 'permission' && e.requestId === requestId)) return prev
           return [...prev, {
             kind: 'permission',
@@ -716,7 +716,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       if (conn.pendingCompactRequests.has(frame.id)) {
         conn.pendingCompactRequests.delete(frame.id)
         if (frame.error) {
-          appendEntry(pokegentId, {
+          appendEntry(runId, {
             kind: 'system',
             id: `s-${crypto.randomUUID()}`,
             text: `Compaction failed: ${frame.error.message || 'unknown error'}`,
@@ -724,7 +724,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         } else if (conn.sessionId) {
           const requestedSessionId = conn.sessionId
           fetchTranscript(requestedSessionId, TRANSCRIPT_TAIL).then(page => {
-            const current = connectionsRef.current.get(pokegentId)
+            const current = connectionsRef.current.get(runId)
             if (!current || current.sessionId !== requestedSessionId) return
             const seeded = entriesFromTranscript(page.entries || [])
             if (seeded.length > 0) {
@@ -741,7 +741,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
             }
             notify()
           }).catch(() => {
-            appendEntry(pokegentId, {
+            appendEntry(runId, {
               kind: 'user',
               id: `compact-${crypto.randomUUID()}`,
               text: 'Context compacted.',
@@ -749,7 +749,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
             })
           })
         } else if (!hasCompactionEntry(conn.entries)) {
-          appendEntry(pokegentId, {
+          appendEntry(runId, {
             kind: 'user',
             id: `compact-${crypto.randomUUID()}`,
             text: 'Context compacted.',
@@ -768,7 +768,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       if (frame.method === 'session/update') {
         const update = params?.update as SessionUpdate | undefined
         if (update) {
-          applyUpdate(pokegentId, update)
+          applyUpdate(runId, update)
         }
         return
       }
@@ -778,29 +778,29 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         const state = (raw === 'running' || raw === 'processing' || raw === 'waiting' || raw === 'busy') ? 'busy' : raw === 'done' ? 'done' : 'idle'
         conn.lastKnownState = state
         conn.busySince = state === 'busy' ? (conn.busySince || new Date().toISOString()) : null
-        if (state === 'busy') scheduleTranscriptToolPoll(pokegentId)
+        if (state === 'busy') scheduleTranscriptToolPoll(runId)
         else {
-          stopTranscriptToolPoll(pokegentId)
-          mergeTranscriptTools(pokegentId)
+          stopTranscriptToolPoll(runId)
+          mergeTranscriptTools(runId)
         }
         notify()
-        if (state === 'idle' || state === 'done') drainOne(pokegentId)
+        if (state === 'idle' || state === 'done') drainOne(runId)
         return
       }
 
-      if (frame.method === 'pokegents/system_message') {
+      if (frame.method === 'boa/system_message') {
         const text = (params?.text as string) || ''
         if (text) {
-          appendEntry(pokegentId, { kind: 'system', id: `sys-${crypto.randomUUID()}`, text })
+          appendEntry(runId, { kind: 'system', id: `sys-${crypto.randomUUID()}`, text })
         }
         return
       }
 
-      if (frame.method === 'pokegents/refetch_transcript') {
+      if (frame.method === 'boa/refetch_transcript') {
         if (conn.sessionId) {
           const requestedSessionId = conn.sessionId
           fetchTranscript(requestedSessionId, TRANSCRIPT_TAIL).then(page => {
-            const current = connectionsRef.current.get(pokegentId)
+            const current = connectionsRef.current.get(runId)
             if (!current || current.sessionId !== requestedSessionId) return
             const seeded = entriesFromTranscript(page.entries || [])
             if (seeded.length > 0) {
@@ -815,7 +815,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       if (frame.method === 'claude/task_started') {
         const d = params as { taskId: string; description?: string; workflowName?: string; taskType?: string } | undefined
         if (!d?.taskId) return
-        setBgShells(pokegentId, prev => {
+        setBgShells(runId, prev => {
           if (prev.has(d.taskId)) return prev
           const out = new Map(prev)
           out.set(d.taskId, { taskId: d.taskId, command: d.description || d.workflowName || 'background task', startedAt: Date.now(), status: 'running', type: d.taskType === 'local_bash' ? 'shell' : 'agent' })
@@ -827,7 +827,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       if (frame.method === 'claude/task_notification') {
         const d = params as { taskId: string; status: string; summary?: string } | undefined
         if (!d?.taskId) return
-        setBgShells(pokegentId, prev => {
+        setBgShells(runId, prev => {
           const cur = prev.get(d.taskId)
           if (!cur) return prev
           const out = new Map(prev)
@@ -841,7 +841,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       if (frame.method === 'claude/task_progress') {
         const d = params as { taskId: string; summary?: string; description?: string } | undefined
         if (!d?.taskId) return
-        setBgShells(pokegentId, prev => {
+        setBgShells(runId, prev => {
           const cur = prev.get(d.taskId)
           if (!cur) return prev
           const out = new Map(prev)
@@ -854,7 +854,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       if (frame.method === 'claude/api_retry') {
         const d = params as { attempt: number; maxRetries: number; error?: string; retryDelayMs?: number } | undefined
         if (d) {
-          appendEntry(pokegentId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: `API retry ${d.attempt}/${d.maxRetries} (${d.error || 'unknown'}) — waiting ${Math.round((d.retryDelayMs || 0) / 1000)}s` })
+          appendEntry(runId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: `API retry ${d.attempt}/${d.maxRetries} (${d.error || 'unknown'}) — waiting ${Math.round((d.retryDelayMs || 0) / 1000)}s` })
         }
         return
       }
@@ -869,7 +869,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
             const resetsMs = new Date(info.resetsAt).getTime() - Date.now()
             resetStr = resetsMs > 0 ? ` — resets in ${Math.ceil(resetsMs / 60000)}m` : ' — resets soon'
           }
-          appendEntry(pokegentId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: `Rate limit ${info.status === 'rejected' ? 'hit' : 'warning'} ${pct}${resetStr}` })
+          appendEntry(runId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: `Rate limit ${info.status === 'rejected' ? 'hit' : 'warning'} ${pct}${resetStr}` })
         }
         return
       }
@@ -881,21 +881,21 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
   // ── WebSocket connection management per agent ──
 
-  const connectWs = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const connectWs = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     if (conn.ws && conn.ws.readyState <= WebSocket.OPEN) return
 
     if (conn.reconnectTimer) { clearTimeout(conn.reconnectTimer); conn.reconnectTimer = null }
 
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const url = `${proto}//${location.host}/api/chat/${pokegentId}/ws`
+    const url = `${proto}//${location.host}/api/chat/${runId}/ws`
     const ws = new WebSocket(url)
     conn.ws = ws
 
     ws.onopen = () => {
       conn.reconnectCount = 0
-      addDebugLog(pokegentId, 'ws: connected')
+      addDebugLog(runId, 'ws: connected')
     }
 
     ws.onmessage = (event) => {
@@ -909,29 +909,29 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         conn.lastKnownState = bootstrap.state || 'idle'
         conn.streamReady = true
         notify()
-        addDebugLog(pokegentId, `ws: bootstrap session=${bootstrap.session_id?.slice(0, 8)} state=${bootstrap.state}`)
+        addDebugLog(runId, `ws: bootstrap session=${bootstrap.session_id?.slice(0, 8)} state=${bootstrap.state}`)
         return
       }
 
-      handleFrameRef.current(pokegentId, data as JsonRpcFrame)
+      handleFrameRef.current(runId, data as JsonRpcFrame)
     }
 
     ws.onclose = () => {
       conn.ws = null
       conn.streamReady = false
       notify()
-      addDebugLog(pokegentId, 'ws: disconnected')
-      scheduleReconnect(pokegentId)
+      addDebugLog(runId, 'ws: disconnected')
+      scheduleReconnect(runId)
     }
 
     ws.onerror = () => {
       // onclose will fire after onerror
-      addDebugLog(pokegentId, 'ws: error')
+      addDebugLog(runId, 'ws: error')
     }
   }, [addDebugLog])
 
-  const scheduleReconnect = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const scheduleReconnect = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     if (conn.reconnectTimer) return
 
@@ -940,7 +940,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
     conn.reconnectTimer = setTimeout(() => {
       conn.reconnectTimer = null
-      const c = connectionsRef.current.get(pokegentId)
+      const c = connectionsRef.current.get(runId)
       if (!c) return
 
       // Reseed from transcript before reconnecting
@@ -948,7 +948,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         const requestedSessionId = c.sessionId
         fetchTranscript(requestedSessionId, TRANSCRIPT_TAIL).then(page => {
           const seeded = entriesFromTranscript(page.entries || [])
-          const cur = connectionsRef.current.get(pokegentId)
+          const cur = connectionsRef.current.get(runId)
           if (cur && cur.sessionId === requestedSessionId && seeded.length > 0) {
             replaceEntriesFromTranscript(cur, seeded)
             notify()
@@ -956,12 +956,12 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
         }).catch(() => {})
       }
 
-      connectWs(pokegentId)
+      connectWs(runId)
     }, delay)
   }, [connectWs])
 
-  const disconnectWs = useCallback((pokegentId: string) => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const disconnectWs = useCallback((runId: string) => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return
     if (conn.reconnectTimer) { clearTimeout(conn.reconnectTimer); conn.reconnectTimer = null }
     if (conn.ws) {
@@ -986,10 +986,10 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
   syncRef.current = () => {
     const activeId = activeChatIdRef.current
     const chatAgents = agentsRef.current.filter(a => a.interface === 'chat')
-    const chatIds = new Set(chatAgents.map(a => a.pokegent_id || a.session_id))
+    const chatIds = new Set(chatAgents.map(a => a.run_id || a.session_id))
 
     for (const agent of chatAgents) {
-      const id = agent.pokegent_id || agent.session_id
+      const id = agent.run_id || agent.session_id
       if (!connectionsRef.current.has(id)) {
         const internals = createWsInternals(agent.session_id)
         connectionsRef.current.set(id, internals)
@@ -1085,14 +1085,14 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
   // ── Build actions for a given agent ──
 
-  const getConnection = useCallback((pokegentId: string): (ChatConnectionState & ChatConnectionActions) | null => {
-    const conn = connectionsRef.current.get(pokegentId)
+  const getConnection = useCallback((runId: string): (ChatConnectionState & ChatConnectionActions) | null => {
+    const conn = connectionsRef.current.get(runId)
     if (!conn) return null
 
     const isBusy = conn.lastKnownState === 'busy'
-    const agent = agents.find(a => (a.pokegent_id || a.session_id) === pokegentId)
+    const agent = agents.find(a => (a.run_id || a.session_id) === runId)
     const appendCommandEntry = (commandText: string) => {
-      appendEntry(pokegentId, {
+      appendEntry(runId, {
         kind: 'user',
         id: `u-${crypto.randomUUID()}`,
         text: commandText,
@@ -1108,7 +1108,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
           case '/cancel':
             appendCommandEntry(text)
             await cancelAgent()
-            appendEntry(pokegentId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: 'Cancelled current turn.' })
+            appendEntry(runId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: 'Cancelled current turn.' })
             return
           case '/clear':
             conn.entries = []
@@ -1117,13 +1117,13 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
             return
           case '/exit':
             appendCommandEntry(text)
-            await fetch(`/api/sessions/${pokegentId}/shutdown`, { method: 'POST' })
-            appendEntry(pokegentId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: 'Shutdown signal sent.' })
+            await fetch(`/api/sessions/${runId}/shutdown`, { method: 'POST' })
+            appendEntry(runId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text: 'Shutdown signal sent.' })
             return
           case '/compact': {
             appendCommandEntry(text)
             if (!supportsCodexSlashCommands(agent)) {
-              appendEntry(pokegentId, {
+              appendEntry(runId, {
                 kind: 'system',
                 id: `s-${crypto.randomUUID()}`,
                 text:
@@ -1133,7 +1133,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
               return
             }
             if (isBusy) {
-              appendEntry(pokegentId, {
+              appendEntry(runId, {
                 kind: 'system',
                 id: `s-${crypto.randomUUID()}`,
                 text: 'Wait for the current turn to finish before compacting.',
@@ -1145,15 +1145,15 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
               prompt: [{ type: 'text', text: '/compact' }],
             })
             conn.pendingCompactRequests.add(req.id)
-            const sent = wsSend(pokegentId, req)
+            const sent = wsSend(runId, req)
             if (sent) {
               conn.lastKnownState = 'busy'
               conn.busySince = new Date().toISOString()
-              scheduleTranscriptToolPoll(pokegentId)
+              scheduleTranscriptToolPoll(runId)
               notify()
             } else {
               conn.pendingCompactRequests.delete(req.id)
-              appendEntry(pokegentId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: 'Error: WebSocket not connected' })
+              appendEntry(runId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: 'Error: WebSocket not connected' })
             }
             return
           }
@@ -1162,7 +1162,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
             appendCommandEntry(text)
             const arg = text.slice(head.length).trim()
             if (!arg) {
-              appendEntry(pokegentId, {
+              appendEntry(runId, {
                 kind: 'system',
                 id: `s-${crypto.randomUUID()}`,
                 text: head === '/model'
@@ -1172,7 +1172,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
               return
             }
             if (head === '/effort' && !['low', 'medium', 'high', 'max'].includes(arg)) {
-              appendEntry(pokegentId, {
+              appendEntry(runId, {
                 kind: 'system',
                 id: `s-${crypto.randomUUID()}`,
                 text: `/effort must be one of: low, medium, high, max — got "${arg}".`,
@@ -1187,9 +1187,9 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
             }
             conn.reconfiguring = true
             notify()
-            scheduleReconfigTimeout(pokegentId)
+            scheduleReconfigTimeout(runId)
             try {
-              const r = await fetch(`/api/sessions/${pokegentId}/runtime-config`, {
+              const r = await fetch(`/api/sessions/${runId}/runtime-config`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(head === '/model' ? { model: arg } : { effort: arg }),
@@ -1199,7 +1199,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
                 conn.reconfigure = null
                 conn.reconfiguring = false
                 notify()
-                appendEntry(pokegentId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: `Error: ${msg}` })
+                appendEntry(runId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: `Error: ${msg}` })
               } else {
                 const result = await r.json()
                 if (head === '/model' && result.model && result.model !== arg) {
@@ -1214,13 +1214,13 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
               conn.reconfigure = null
               conn.reconfiguring = false
               notify()
-              appendEntry(pokegentId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: `Error: ${String(err)}` })
+              appendEntry(runId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: `Error: ${String(err)}` })
             }
             return
           }
           case '/help':
             appendCommandEntry(text)
-            appendEntry(pokegentId, {
+            appendEntry(runId, {
               kind: 'system',
               id: `s-${crypto.randomUUID()}`,
               text:
@@ -1231,7 +1231,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
             return
           default:
             appendCommandEntry(text)
-            appendEntry(pokegentId, {
+            appendEntry(runId, {
               kind: 'system',
               id: `s-${crypto.randomUUID()}`,
               text:
@@ -1250,18 +1250,18 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       }
 
       const nonce = crypto.randomUUID()
-      appendEntry(pokegentId, { kind: 'user', id: `u-${crypto.randomUUID()}`, text, nonce, deliveryState: 'sending' })
-      const sent = wsSend(pokegentId, makeRequest('session/prompt', {
+      appendEntry(runId, { kind: 'user', id: `u-${crypto.randomUUID()}`, text, nonce, deliveryState: 'sending' })
+      const sent = wsSend(runId, makeRequest('session/prompt', {
         sessionId: conn.sessionId,
         prompt: [{ type: 'text', text }],
       }))
       if (sent) {
         conn.lastKnownState = 'busy'
         conn.busySince = new Date().toISOString()
-        updateDeliveryState(pokegentId, nonce, 'confirmed')
+        updateDeliveryState(runId, nonce, 'confirmed')
       } else {
-        updateDeliveryState(pokegentId, nonce, 'failed')
-        appendEntry(pokegentId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: 'Error: WebSocket not connected' })
+        updateDeliveryState(runId, nonce, 'failed')
+        appendEntry(runId, { kind: 'system', id: `e-${crypto.randomUUID()}`, text: 'Error: WebSocket not connected' })
       }
     }
 
@@ -1281,19 +1281,19 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
           break
         }
       }
-      wsSend(pokegentId, makeNotification('session/cancel', { sessionId: conn.sessionId }))
-      fetch(`/api/sessions/${pokegentId}/cancel`, { method: 'POST' })
+      wsSend(runId, makeNotification('session/cancel', { sessionId: conn.sessionId }))
+      fetch(`/api/sessions/${runId}/cancel`, { method: 'POST' })
         .then(() => {
           conn.lastKnownState = 'idle'
           conn.busySince = null
           notify()
-          drainOne(pokegentId)
+          drainOne(runId)
         })
         .catch(() => {})
     }
 
     const decidePermission = async (requestId: number, optionId: string, cancelled: boolean) => {
-      setEntries(pokegentId, prev => prev.map(e =>
+      setEntries(runId, prev => prev.map(e =>
         e.kind === 'permission' && e.requestId === requestId
           ? { ...e, resolved: cancelled ? 'denied' : (optionId.startsWith('reject') ? 'denied' : 'allowed') }
           : e
@@ -1301,10 +1301,10 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
       const result = cancelled
         ? { outcome: { outcome: 'cancelled' } }
         : { outcome: { outcome: 'selected', optionId } }
-      const sent = wsSend(pokegentId, makeResponse(requestId, result))
+      const sent = wsSend(runId, makeResponse(requestId, result))
       if (!sent) {
         // Revert on failure
-        setEntries(pokegentId, prev => prev.map(e =>
+        setEntries(runId, prev => prev.map(e =>
           e.kind === 'permission' && e.requestId === requestId ? { ...e, resolved: 'pending' } : e
         ))
       }
@@ -1312,8 +1312,8 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
 
     const reconnectSSE = () => {
       // In WS mode, reconnect the WebSocket
-      disconnectWs(pokegentId)
-      connectWs(pokegentId)
+      disconnectWs(runId)
+      connectWs(runId)
     }
 
     const clearEntries = () => {
@@ -1322,19 +1322,19 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
     }
 
     const appendSystemEntry = (text: string) => {
-      appendEntry(pokegentId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text })
+      appendEntry(runId, { kind: 'system', id: `s-${crypto.randomUUID()}`, text })
     }
 
     const retryMessage = async (entry: Entry) => {
       if (entry.kind !== 'user' || !entry.nonce) return
-      updateDeliveryState(pokegentId, entry.nonce, 'sending')
-      const sent = wsSend(pokegentId, makeRequest('session/prompt', { prompt: entry.text, nonce: entry.nonce }))
-      updateDeliveryState(pokegentId, entry.nonce, sent ? 'confirmed' : 'failed')
+      updateDeliveryState(runId, entry.nonce, 'sending')
+      const sent = wsSend(runId, makeRequest('session/prompt', { prompt: entry.text, nonce: entry.nonce }))
+      updateDeliveryState(runId, entry.nonce, sent ? 'confirmed' : 'failed')
     }
 
     const reloadTranscript = () => {
       if (!conn.sessionId) return
-      addDebugLog(pokegentId, 'action: reload transcript')
+      addDebugLog(runId, 'action: reload transcript')
       const requestedSessionId = conn.sessionId
       fetchTranscript(requestedSessionId, TRANSCRIPT_TAIL).then(page => {
         if (conn.sessionId !== requestedSessionId) return
@@ -1343,7 +1343,7 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
           replaceEntriesFromTranscript(conn, seeded)
           notify()
         }
-        addDebugLog(pokegentId, `transcript: ${seeded.length} entries loaded`)
+        addDebugLog(runId, `transcript: ${seeded.length} entries loaded`)
       }).catch(() => {})
     }
 
@@ -1369,19 +1369,19 @@ export function useChatWebSockets(agents: AgentState[], activeChatId?: string | 
     }
 
     const clearBgTasks = () => {
-      addDebugLog(pokegentId, 'action: cleared bg tasks')
+      addDebugLog(runId, 'action: cleared bg tasks')
       conn.bgShells = new Map()
       notify()
     }
 
     const forceIdle = async () => {
-      await fetch(`/api/sessions/${pokegentId}/debug/force-idle`, { method: 'POST' })
-      addDebugLog(pokegentId, 'action: force idle')
+      await fetch(`/api/sessions/${runId}/debug/force-idle`, { method: 'POST' })
+      addDebugLog(runId, 'action: force idle')
     }
 
     const respawnAcp = async () => {
-      addDebugLog(pokegentId, 'action: respawn ACP')
-      await fetch(`/api/sessions/${pokegentId}/restart-backend`, { method: 'POST' })
+      addDebugLog(runId, 'action: respawn ACP')
+      await fetch(`/api/sessions/${runId}/restart-backend`, { method: 'POST' })
     }
 
     return {

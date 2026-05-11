@@ -9,7 +9,7 @@ export interface CardPreview {
 
 export interface AgentState {
   session_id: string
-  pokegent_id?: string
+  run_id?: string
   profile_name: string
   display_name: string
   emoji: string
@@ -72,8 +72,8 @@ export interface TranscriptSummary {
   snippet?: string
 }
 
-export interface PokegentSummary {
-  pokegent_id: string
+export interface RunSummary {
+  run_id: string
   display_name: string
   sprite: string
   role?: string
@@ -93,9 +93,9 @@ export interface PokegentSummary {
 
 export type AgentStatus = 'running' | 'idle' | 'error' | 'permission' | 'waiting' | 'started' | 'ended'
 
-/** Stable identity for an agent — pokegent_id is the primary, session_id is the fallback. */
+/** Stable identity for an agent — run_id is the primary, session_id is the fallback. */
 export function stableId(a: AgentState): string {
-  return a.pokegent_id || a.session_id
+  return a.run_id || a.session_id
 }
 
 export interface AgentMessage {

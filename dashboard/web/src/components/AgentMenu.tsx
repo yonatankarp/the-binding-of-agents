@@ -74,7 +74,7 @@ function SwitchRuntimeModal({ agent, onClose, onAssignStatus }: {
   onClose: () => void
   onAssignStatus?: (msg: string) => void
 }) {
-  const agentId = agent.pokegent_id || agent.session_id
+  const agentId = agent.run_id || agent.session_id
   const [backends, setBackends] = useState<BackendInfo[]>([])
   const [iface, setIface] = useState<'chat' | 'iterm2'>(agent.interface as 'chat' | 'iterm2' || 'chat')
   const [backendId, setBackendId] = useState(agent.agent_backend || '')
@@ -102,7 +102,7 @@ function SwitchRuntimeModal({ agent, onClose, onAssignStatus }: {
         const result = await migrateInterface(agentId, iface)
         if (iface === 'chat') {
           window.dispatchEvent(new CustomEvent('open-chat-panel', {
-            detail: { pokegentId: result.pokegent_id },
+            detail: { runId: result.run_id },
           }))
         }
         onAssignStatus?.(`Switched to ${iface}`)
@@ -213,7 +213,7 @@ export function AgentMenu({
   const [newGroupName, setNewGroupName] = useState('')
   const newGroupRef = useRef<HTMLInputElement>(null)
   const [showSwitchModal, setShowSwitchModal] = useState(false)
-  const agentId = agent.pokegent_id || agent.session_id
+  const agentId = agent.run_id || agent.session_id
 
   const showStatus = (res: { status: string }, label: string) => {
     if (!onAssignStatus) return
@@ -250,7 +250,7 @@ export function AgentMenu({
   items.push({ label: 'Rename', icon: '✏️', action: onRename })
   items.push({ label: 'Change avatar', icon: '🔄', action: onChangeSprite })
   if (capabilities.can_clone) {
-    items.push({ label: 'Spawn clone', icon: '🧬', action: () => { spawnClone(agent.pokegent_id || agent.session_id); onClose() } })
+    items.push({ label: 'Spawn clone', icon: '🧬', action: () => { spawnClone(agent.run_id || agent.session_id); onClose() } })
   }
   if (onCollapse) {
     items.push({ label: 'Collapse', icon: '📌', action: () => { onCollapse(); onClose() } })

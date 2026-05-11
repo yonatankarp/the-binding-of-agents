@@ -1,4 +1,4 @@
-import { AgentState, PokegentSummary, AgentMessage } from './types'
+import { AgentState, RunSummary, AgentMessage } from './types'
 
 const BASE = '/api'
 
@@ -9,29 +9,29 @@ export async function fetchSessions(): Promise<AgentState[]> {
 }
 
 // ── PC box (pokegent-centric) ───────────────────────────────
-export async function fetchPokegents(limit = 100): Promise<PokegentSummary[]> {
-  const res = await fetch(`${BASE}/pokegents/pc-box?limit=${limit}`)
+export async function fetchPokegents(limit = 100): Promise<RunSummary[]> {
+  const res = await fetch(`${BASE}/runs/pc-box?limit=${limit}`)
   if (!res.ok) return []
   const data = await res.json()
-  return data.pokegents || []
+  return data.runs || []
 }
 
-export async function searchPokegents(query: string, limit = 50): Promise<{ pokegents: PokegentSummary[]; total: number }> {
+export async function searchPokegents(query: string, limit = 50): Promise<{ runs: RunSummary[]; total: number }> {
   const params = new URLSearchParams({ q: query, limit: String(limit) })
-  const res = await fetch(`${BASE}/pokegents/search?${params}`)
-  if (!res.ok) return { pokegents: [], total: 0 }
+  const res = await fetch(`${BASE}/runs/search?${params}`)
+  if (!res.ok) return { runs: [], total: 0 }
   return res.json()
 }
 
-export async function fetchPokegent(pokegentId: string): Promise<PokegentSummary | null> {
-  const res = await fetch(`${BASE}/pokegents/${pokegentId}`)
+export async function fetchPokegent(runId: string): Promise<RunSummary | null> {
+  const res = await fetch(`${BASE}/runs/${runId}`)
   if (!res.ok) return null
   return res.json()
 }
 
-export async function revivePokegent(pokegentId: string, compact?: 'yes' | 'no'): Promise<boolean> {
+export async function revivePokegent(runId: string, compact?: 'yes' | 'no'): Promise<boolean> {
   const params = compact ? `?compact=${compact}` : ''
-  const res = await fetch(`${BASE}/pokegents/${pokegentId}/revive${params}`, { method: 'POST' })
+  const res = await fetch(`${BASE}/runs/${runId}/revive${params}`, { method: 'POST' })
   return res.ok
 }
 
@@ -146,7 +146,7 @@ export async function releaseTaskGroup(groupName: string): Promise<{ ok: boolean
 }
 
 /** Unified launch — Phase 2 of pokegents-unified-launch.md.
- *  Single endpoint that mints a pokegent_id server-side, pre-writes the running
+ *  Single endpoint that mints a run_id server-side, pre-writes the running
  *  file, and dispatches by `interface` / launch surface.
  */
 export interface LaunchPokegentRequest {
@@ -158,19 +158,19 @@ export interface LaunchPokegentRequest {
   model?: string
   effort?: string
   task_group?: string
-  parent_pokegent_id?: string
+  parent_run_id?: string
   interface?: 'terminal' | 'iterm2' | 'chat'
   agent_backend?: string
 }
 
 export interface LaunchPokegentResponse {
-  pokegent_id: string
+  run_id: string
   profile: string
   interface: string
 }
 
 export async function launchPokegent(req: LaunchPokegentRequest): Promise<LaunchPokegentResponse> {
-  const res = await fetch(`${BASE}/pokegents/launch`, {
+  const res = await fetch(`${BASE}/runs/launch`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req),
@@ -179,12 +179,12 @@ export async function launchPokegent(req: LaunchPokegentRequest): Promise<Launch
   return res.json()
 }
 
-/** Phase 4: migrate an agent between runtime backends. Same pokegent_id and
+/** Phase 4: migrate an agent between runtime backends. Same run_id and
  *  Claude session_id (so the JSONL transcript continues), different process. */
 export async function migrateInterface(
   sessionId: string,
   to: 'iterm2' | 'chat',
-): Promise<{ pokegent_id: string; interface: string; session_id: string }> {
+): Promise<{ run_id: string; interface: string; session_id: string }> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/migrate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

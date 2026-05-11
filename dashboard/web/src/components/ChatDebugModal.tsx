@@ -3,12 +3,12 @@ import { AgentState } from '../types'
 import { BgShell } from '../utils/bgShells'
 
 export function DebugModal({
-  agent, pokegentId, streamReady, queuedMessages, bgShells, debugLog,
+  agent, runId, streamReady, queuedMessages, bgShells, debugLog,
   onClose, onForceIdle, onRespawnAcp, onReconnectSse, onReloadTranscript, onFlushQueue, onClearBgTasks,
   showTimestamps, onToggleDebugBorders,
 }: {
   agent: AgentState
-  pokegentId: string
+  runId: string
   streamReady: boolean
   queuedMessages: string[]
   bgShells: Map<string, BgShell>
@@ -41,7 +41,7 @@ export function DebugModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b theme-border-subtle">
-          <span className="text-l theme-font-mono theme-text-warning">Debug — {agent.display_name || pokegentId.slice(0, 8)}</span>
+          <span className="text-l theme-font-mono theme-text-warning">Debug — {agent.display_name || runId.slice(0, 8)}</span>
           <button onClick={onClose} className="theme-text-faint theme-hover-text-primary text-xl">✕</button>
         </div>
 
@@ -54,7 +54,7 @@ export function DebugModal({
               <span className="theme-text-faint">agent.detail</span><span className="truncate">{agent.detail || '—'}</span>
               <span className="theme-text-faint">isBusy</span><span className={agent.state === 'busy' ? 'text-accent-red' : 'text-accent-green'}>{String(agent.state === 'busy')}</span>
               <span className="theme-text-faint">streamReady</span><span className={streamReady ? 'text-accent-green' : 'text-accent-red'}>{String(streamReady)}</span>
-              <span className="theme-text-faint">pokegentId</span><span className="truncate">{pokegentId}</span>
+              <span className="theme-text-faint">runId</span><span className="truncate">{runId}</span>
               <span className="theme-text-faint">sessionId</span><span className="truncate">{agent.session_id || '—'}</span>
               <span className="theme-text-faint">model</span><span>{agent.model || '—'}</span>
               <span className="theme-text-faint">context</span><span>{agent.context_tokens?.toLocaleString() || '?'} / {agent.context_window?.toLocaleString() || '?'}</span>
