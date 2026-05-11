@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "target_size": [96, 96],
+  "interpolation": "nearest",
+  "output_dir": "dashboard/web/public/sprites",
+  "entries": [
+    {
+      "slug": "isaac",
+      "name": "Isaac",
+      "kind": "character",
+      "sheet": "playable-characters-repentance.png",
+      "bbox": [0, 0, 28, 40],
+      "source_url": "https://www.spriters-resource.com/pc_computer/bindingofisaacrebirth/sheet/176014/",
+      "license_note": "From The Binding of Isaac: Rebirth (c) Edmund McMillen / Nicalis. Fair-use fan-project, non-commercial."
+    },
+    {
+      "slug": "magdalene",
+      "name": "Magdalene",
+      "kind": "character",
+      "sheet": "playable-characters-repentance.png",
+      "bbox": [32, 0, 28, 40],
+      "source_url": "https://www.spriters-resource.com/pc_computer/bindingofisaacrebirth/sheet/176014/",
+      "license_note": "From The Binding of Isaac: Rebirth (c) Edmund McMillen / Nicalis. Fair-use fan-project, non-commercial."
+    },
+    {
+      "slug": "cain",
+      "name": "Cain",
+      "kind": "character",
+      "sheet": "playable-characters-repentance.png",
+      "bbox": [64, 0, 28, 40],
+      "source_url": "https://www.spriters-resource.com/pc_computer/bindingofisaacrebirth/sheet/176014/",
+      "license_note": "From The Binding of Isaac: Rebirth (c) Edmund McMillen / Nicalis. Fair-use fan-project, non-commercial."
+    },
+    {
+      "slug": "judas",
+      "name": "Judas",
+      "kind": "character",
+      "sheet": "playable-characters-repentance.png",
+      "bbox": [96, 0, 28, 40],
+      "source_url": "https://www.spriters-resource.com/pc_computer/bindingofisaacrebirth/sheet/176014/",
+      "license_note": "From The Binding of Isaac: Rebirth (c) Edmund McMillen / Nicalis. Fair-use fan-project, non-commercial."
+    },
+    {
+      "slug": "brother-bobby",
+      "name": "Brother Bobby",
+      "kind": "familiar",
+      "sheet": "familiars-rebirth.png",
+      "bbox": [0, 0, 16, 16],
+      "source_url": "https://www.spriters-resource.com/pc_computer/bindingofisaacrebirth/sheet/152314/",
+      "license_note": "From The Binding of Isaac: Rebirth (c) Edmund McMillen / Nicalis. Fair-use fan-project, non-commercial."
+    }
+  ]
+}
