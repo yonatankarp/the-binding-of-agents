@@ -120,7 +120,7 @@ html, body, #root {
   /* The Bestiary — TBOI aged-parchment book aesthetic.
      Shell stays dark (book leather cover); panel + cells are cream pages
      with ink-brown text. Blood-red highlights for hover/selection. */
-  --theme-bestiary-shell-bg: #1a1208;
+  --theme-bestiary-shell-bg: #d8c89a;
   --theme-bestiary-panel-bg: #d8c89a;
   --theme-bestiary-panel-border: #3a2418;
   --theme-bestiary-header-bg: #b89a64;
@@ -573,6 +573,8 @@ body.no-scanlines .gba-panel {
 }
 body.no-scanlines .gba-modal-scanlines::after { display: none; }
 body.no-scanlines .bestiary-local-scanlines { display: none; }
+/* Bestiary is a paper book, not a CRT — kill scanlines unconditionally. */
+.bestiary-local-scanlines { display: none !important; }
 
 /* ─── Theme semantic utility classes ───────────────────── */
 .theme-font-display { font-family: var(--theme-font-display); }

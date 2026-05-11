@@ -206,7 +206,7 @@ export function SessionBrowser({ onClose, activeRunIds, onResume }: SessionBrows
                 textShadow: 'var(--theme-text-shadow-pixel)',
                 letterSpacing: 3, minWidth: 90, textAlign: 'center',
               }}>
-                BOX {safePage + 1}
+                PAGE {safePage + 1}
               </span>
               <button
                 onClick={() => { setBoxPage(p => Math.min(boxCount - 1, p + 1)); setSelectedId(null) }}
@@ -238,13 +238,12 @@ export function SessionBrowser({ onClose, activeRunIds, onResume }: SessionBrows
             </div>
 
             <div style={{
-              flex: 1, minHeight: 0, padding: '10px 12px',
-              backgroundImage: `repeating-conic-gradient(${GRASS_LIGHT} 0% 25%, ${GRASS_DARK} 0% 50%)`,
-              backgroundSize: '14px 14px',
+              flex: 1, minHeight: 0, padding: '14px 16px',
+              background: 'var(--theme-bestiary-panel-bg)',
               display: 'grid',
               gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)`,
               gridTemplateRows: `repeat(${GRID_ROWS}, minmax(0, 1fr))`,
-              gap: 4,
+              gap: 6,
             }}>
               {boxSlots.map((run, i) => (
                 <GridCell
