@@ -554,7 +554,7 @@ export function ChatPanel({ agent, onClose, connection }: ChatPanelProps) {
       )}
       {showSpritePicker && createPortal(
         <SpritePicker
-          currentSprite={agent.sprite || 'pokeball'}
+          currentSprite={agent.sprite || 'isaac'}
           onSelect={async (sprite) => { await setSprite(agent.session_id, sprite) }}
           onClose={() => setShowSpritePicker(false)}
         />,

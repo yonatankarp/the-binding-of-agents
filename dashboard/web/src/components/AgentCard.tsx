@@ -465,7 +465,7 @@ export function AgentCard({ agent, onClick, mode, spriteOverride, isReading, hid
       {/* Sprite picker */}
       {showSpritePicker && createPortal(
         <SpritePicker
-          currentSprite={agent.sprite || 'pokeball'}
+          currentSprite={agent.sprite || 'isaac'}
           onSelect={async (sprite) => { await setSprite(agent.session_id, sprite) }}
           onClose={() => setShowSpritePicker(false)}
         />,

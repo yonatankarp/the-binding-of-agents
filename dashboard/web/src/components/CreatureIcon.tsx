@@ -25,7 +25,7 @@ interface CreatureIconProps {
 }
 
 export function CreatureIcon({ sessionId, size = 40, noGlow, doneFlash, spriteOverride, editable, noBg }: CreatureIconProps) {
-  const sprite = spriteOverride || 'pokeball'
+  const sprite = spriteOverride || 'isaac'
   const [showPicker, setShowPicker] = useState(false)
   const naturalSize = useSpriteNaturalSize(sprite)
   const baseScale = size < 32 ? size / 32 : 1

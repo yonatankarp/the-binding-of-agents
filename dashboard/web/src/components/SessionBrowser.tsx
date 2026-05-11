@@ -134,7 +134,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   const safePage  = Math.min(boxPage, boxCount - 1)
   const boxSlots  = Array.from({ length: PER_BOX }, (_, i) => displayList[safePage * PER_BOX + i] ?? null)
 
-  const getSprite = (p: RunSummary) => p.sprite || 'pokeball'
+  const getSprite = (p: RunSummary) => p.sprite || 'isaac'
 
   return (
     <GameModal title="PC Box" onClose={onClose} width="min(820px, 96vw)" height="min(680px, 96vh)" scanlines={false}>

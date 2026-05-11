@@ -726,7 +726,7 @@ export function TownView({ agents, onSelect, selectedId, debug = false, newMessa
           next[id] = {
             ...existing,
             pos,
-            sprite: a.sprite || 'pokeball',
+            sprite: a.sprite || 'isaac',
             displayName: a.display_name || a.profile_name,
             agentState: newState,
             taskGroup,
@@ -748,7 +748,7 @@ export function TownView({ agents, onSelect, selectedId, debug = false, newMessa
             : fallbackCell()
           next[id] = {
             id,
-            sprite: a.sprite || 'pokeball',
+            sprite: a.sprite || 'isaac',
             displayName: a.display_name || a.profile_name,
             agentState: newState,
             taskGroup,
@@ -1233,7 +1233,7 @@ export function TownView({ agents, onSelect, selectedId, debug = false, newMessa
 
       {spritePickerAgent && createPortal(
         <SpritePicker
-          currentSprite={spritePickerAgent.sprite || 'pokeball'}
+          currentSprite={spritePickerAgent.sprite || 'isaac'}
           onSelect={async (sprite) => {
             await setSprite(spritePickerAgent.session_id, sprite)
             setSpritePickerAgent(null)

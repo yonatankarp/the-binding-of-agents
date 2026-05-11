@@ -64,7 +64,7 @@ function sortMembers(members: AgentState[]): AgentState[] {
 }
 
 function getSprite(agent: AgentState): string {
-  return agent.sprite || 'pokeball'
+  return agent.sprite || 'isaac'
 }
 
 const HEADER_H = 24
