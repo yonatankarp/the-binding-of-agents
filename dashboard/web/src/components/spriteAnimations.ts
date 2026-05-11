@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 // Each animation has a CSS class name, duration, and optional weight (higher = more likely)
 
 export interface SpriteAnimation {
-  className: string    // CSS class to apply (defined in pokemon.css)
+  className: string    // CSS class to apply (defined in tboi.css)
   duration: number     // how long this animation plays (ms)
   weight?: number      // likelihood weight (default 1)
 }

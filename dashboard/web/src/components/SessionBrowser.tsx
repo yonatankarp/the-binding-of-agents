@@ -15,19 +15,19 @@ const GRID_ROWS = 5
 const PER_BOX = GRID_COLS * GRID_ROWS
 
 // PC Box palette is tokenized so Classic does not inherit GBA grass/chrome.
-const GRASS_LIGHT  = 'var(--theme-pc-box-grid-light)'
-const GRASS_DARK   = 'var(--theme-pc-box-grid-dark)'
-const PANEL_BG     = 'var(--theme-pc-box-panel-bg)'
-const PANEL_DARK   = 'var(--theme-pc-box-panel-border)'
-const PANEL_BORDER = 'var(--theme-pc-box-panel-border)'
-const HDR_BG       = 'var(--theme-pc-box-header-bg)'
-const CELL_HOVER   = 'var(--theme-pc-box-cell-hover)'
-const CELL_SEL     = 'var(--theme-pc-box-cell-selected)'
-const CELL_BG      = 'var(--theme-pc-box-cell-bg)'
-const CELL_BORDER  = 'var(--theme-pc-box-cell-border)'
-const CELL_HOVER_BORDER = 'var(--theme-pc-box-cell-hover-border)'
-const CELL_SELECTED_BORDER = 'var(--theme-pc-box-cell-selected-border)'
-const INFO_HEADER_BG = 'var(--theme-pc-box-info-header-bg)'
+const GRASS_LIGHT  = 'var(--theme-bestiary-grid-light)'
+const GRASS_DARK   = 'var(--theme-bestiary-grid-dark)'
+const PANEL_BG     = 'var(--theme-bestiary-panel-bg)'
+const PANEL_DARK   = 'var(--theme-bestiary-panel-border)'
+const PANEL_BORDER = 'var(--theme-bestiary-panel-border)'
+const HDR_BG       = 'var(--theme-bestiary-header-bg)'
+const CELL_HOVER   = 'var(--theme-bestiary-cell-hover)'
+const CELL_SEL     = 'var(--theme-bestiary-cell-selected)'
+const CELL_BG      = 'var(--theme-bestiary-cell-bg)'
+const CELL_BORDER  = 'var(--theme-bestiary-cell-border)'
+const CELL_HOVER_BORDER = 'var(--theme-bestiary-cell-hover-border)'
+const CELL_SELECTED_BORDER = 'var(--theme-bestiary-cell-selected-border)'
+const INFO_HEADER_BG = 'var(--theme-bestiary-info-header-bg)'
 const FRAME_SHINE  = 'var(--theme-modal-frame-shine)'
 const SCANLINE_BG = 'var(--theme-scanline-bg)'
 const scanlineStyle = {
@@ -139,7 +139,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
   return (
     <GameModal title="PC Box" onClose={onClose} width="min(820px, 96vw)" height="min(680px, 96vh)" scanlines={false}>
         <div style={{
-          background: 'var(--theme-pc-box-shell-bg)',
+          background: 'var(--theme-bestiary-shell-bg)',
           borderRadius: '0 0 8px 8px', border: `2px solid ${FRAME_SHINE}`,
           display: 'flex', overflow: 'hidden', flex: 1, minHeight: 0,
         }}>
@@ -151,7 +151,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
             display: 'flex', flexDirection: 'column',
             position: 'relative',
           }}>
-            <div className="pc-box-local-scanlines" style={scanlineStyle} />
+            <div className="bestiary-local-scanlines" style={scanlineStyle} />
             <div style={{
               background: HDR_BG,
               height: 49,
@@ -187,7 +187,7 @@ export function SessionBrowser({ onClose, activePokegentIds, onResume }: Session
               display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
               position: 'relative',
             }}>
-              <div className="pc-box-local-scanlines" style={scanlineStyle} />
+              <div className="bestiary-local-scanlines" style={scanlineStyle} />
               <button
                 onClick={() => { setBoxPage(p => Math.max(0, p - 1)); setSelectedId(null) }}
                 disabled={safePage === 0}
@@ -480,8 +480,8 @@ function PkmnDataPanel({ pokegent, sprite, preview, revivingId, reviveResult, on
         <button
           onClick={() => onRevive(pokegent.run_id)}
           style={{
-            width: '100%', padding: '8px 0', borderRadius: 5, border: '2px solid var(--theme-pc-box-action-primary-border)',
-            background: 'var(--theme-pc-box-action-primary-bg)',
+            width: '100%', padding: '8px 0', borderRadius: 5, border: '2px solid var(--theme-bestiary-action-primary-border)',
+            background: 'var(--theme-bestiary-action-primary-bg)',
             boxShadow: 'var(--theme-shadow-panel)',
             cursor: 'pointer', fontFamily: 'var(--theme-font-display)', fontSize: 'var(--theme-type-s)',
             color: 'var(--theme-text-primary)', textShadow: 'var(--theme-text-shadow-pixel)', letterSpacing: 1,

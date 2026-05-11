@@ -47,7 +47,7 @@ function validateRegistry(registry: ThemeRegistry): ThemeRegistry {
 export const themeRegistry = validateRegistry(themesJson as ThemeRegistry)
 
 export function getTheme(themeId: string): ThemeDefinition {
-  return themeRegistry.themes[themeId] || themeRegistry.themes['fire-red']
+  return themeRegistry.themes[themeId] || themeRegistry.themes['tboi-basement']
 }
 
 export function listThemes() {

@@ -13,7 +13,7 @@ export interface DashboardSettings {
   cardPadding: number         // inner padding of each card in px (between border and content)
   agentCardOutputFontSize: number // agent card output/preview font size in px
   chatPanelOutputFontSize: number // chat panel transcript font size in px
-  theme: 'fire-red' | 'classic' | 'vscode' | 'vscode-light'
+  theme: 'tboi-basement' | 'fire-red' | 'classic' | 'vscode' | 'vscode-light'
   editorOpenCommand: string    // command template; {path} is replaced with the file path
   browserOpenCommand: string   // command template; {url} is replaced with the URL
   scanlines: boolean          // show GBA scanline overlay
@@ -40,7 +40,7 @@ const DEFAULTS: DashboardSettings = {
   cardPadding: 9,
   agentCardOutputFontSize: 10,
   chatPanelOutputFontSize: 13,
-  theme: 'fire-red',
+  theme: 'tboi-basement',
   editorOpenCommand: 'code {path}',
   browserOpenCommand: 'open -a "Google Chrome" {url}',
   scanlines: true,

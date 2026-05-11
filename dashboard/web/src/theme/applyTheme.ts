@@ -34,4 +34,5 @@ export function applyTheme(theme: ThemeDefinition, themeId: string) {
 
   document.body.classList.toggle('theme-classic', themeId === 'classic')
   document.body.classList.toggle('theme-fire-red', themeId === 'fire-red')
+  document.body.classList.toggle('theme-tboi-basement', themeId === 'tboi-basement')
 }

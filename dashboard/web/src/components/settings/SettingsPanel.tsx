@@ -257,6 +257,7 @@ export function SettingsPanel({ settings, defaults, setupStatus, onChange, onRes
                   label="Colorway"
                   value={settings.theme}
                   options={[
+                    { value: 'tboi-basement', label: 'The Basement' },
                     { value: 'fire-red', label: 'Retro' },
                     { value: 'classic', label: 'Classic' },
                     { value: 'vscode', label: 'VS Code Dark' },
