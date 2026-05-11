@@ -34,35 +34,43 @@ export function CharacterPicker({ currentSprite, onSelect, onClose }: CharacterP
       onClick={onClose}
     >
       <div
-        className="gba-panel p-4 w-[360px] max-h-[420px] flex flex-col"
+        className="character-picker"
         onClick={e => e.stopPropagation()}
       >
-        <div className="gba-dialog rounded-lg mb-3">
+        <h1 className="character-picker__title">WHO AM I?</h1>
+        <div className="character-picker__search">
           <input
             ref={inputRef}
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search POKeMON..."
-            className="w-full bg-transparent px-3 py-2 text-m theme-font-mono text-gba-dialog-border placeholder:text-gba-dialog-border/30 outline-none"
+            placeholder="Filter characters..."
+            className="character-picker__search-input"
           />
         </div>
-        <div className="flex-1 overflow-auto grid grid-cols-6 gap-1">
+        <div className="character-picker__grid">
           {filtered.map(sprite => (
             <button
               key={sprite}
+              type="button"
               onClick={() => { onSelect(sprite); onClose() }}
-              className={`p-1 rounded-lg theme-bg-panel-hover flex items-center justify-center transition-colors ${
-                sprite === currentSprite ? 'theme-bg-panel-subtle ring-2 ring-accent-yellow' : ''
-              }`}
+              className={`character-picker__cell${sprite === currentSprite ? ' is-selected' : ''}`}
               title={sprite}
+              aria-label={sprite}
             >
-              <div className="w-8 h-8 flex items-center justify-center overflow-visible">
+              <div className="character-picker__portrait">
                 <PixelSprite sprite={sprite} alt={sprite} />
               </div>
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          className="character-picker__close"
+          onClick={onClose}
+        >
+          CLOSE
+        </button>
       </div>
     </div>
   )
