@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // /api/sessions/{id}/runtime-config — updates an agent's runtime config

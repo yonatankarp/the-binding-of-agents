@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // findJSONLForSession returns the path of a JSONL transcript matching

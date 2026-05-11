@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 var backendIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]*$`)

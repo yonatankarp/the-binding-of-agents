@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 func newTestMessaging(t *testing.T) (*MessagingService, string) {

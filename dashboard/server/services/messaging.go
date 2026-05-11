@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // WakeFunc tells an idle agent it has new messages waiting. The server

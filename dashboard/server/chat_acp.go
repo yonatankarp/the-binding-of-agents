@@ -37,7 +37,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // Tunables. Most are documented inline at point-of-use; collected here so

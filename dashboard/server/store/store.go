@@ -3,7 +3,7 @@
 package store
 
 import (
-	"pokegents/dashboard/server/core"
+	"github.com/yonatankarp/the-binding-of-agents/server/core"
 	"time"
 )
 

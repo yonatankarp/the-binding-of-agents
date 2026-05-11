@@ -1,6 +1,6 @@
 package server
 
-import "pokegents/dashboard/server/store"
+import "github.com/yonatankarp/the-binding-of-agents/server/store"
 
 // Type aliases — these types are defined in store/ and used throughout server/.
 // Using aliases means existing code (state.go, server.go, etc.) compiles unchanged.

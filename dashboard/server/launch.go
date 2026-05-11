@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // LaunchRequest is the body of POST /api/pokegents/launch.

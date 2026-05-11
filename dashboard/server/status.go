@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // fixupStatusFiles re-keys status files whose `session_id` field equals

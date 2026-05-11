@@ -1,4 +1,4 @@
-module pokegents/dashboard
+module github.com/yonatankarp/the-binding-of-agents
 
 go 1.26.1
 

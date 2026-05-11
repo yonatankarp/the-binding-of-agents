@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 
 	_ "github.com/mattn/go-sqlite3"
 )

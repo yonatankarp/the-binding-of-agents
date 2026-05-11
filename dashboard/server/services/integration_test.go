@@ -3,8 +3,8 @@ package services
 import (
 	"testing"
 
-	"pokegents/dashboard/server/core"
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/core"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // TestFullMessageWorkflow tests the complete send → deliver → consume pipeline.

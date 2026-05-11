@@ -3,7 +3,7 @@ package services
 import (
 	"strings"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // ActivityService provides activity log tracking and overlap detection.

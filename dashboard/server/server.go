@@ -17,8 +17,8 @@ import (
 	"syscall"
 	"time"
 
-	"pokegents/dashboard/server/services"
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/services"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // Server is the main dashboard HTTP server.

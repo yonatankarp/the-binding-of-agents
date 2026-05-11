@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 type checkStatus struct {

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // reattachChatSessions runs once at dashboard startup to recover chat-mode

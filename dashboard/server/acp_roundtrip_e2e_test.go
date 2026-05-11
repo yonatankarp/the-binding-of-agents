@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // TestRealACPRoundTripMigration is a gated, token-spending E2E. It launches

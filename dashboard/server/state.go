@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	storelib "pokegents/dashboard/server/store"
+	storelib "github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 // StateManager holds the in-memory merged view of all agent state.

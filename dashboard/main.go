@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"syscall"
 
-	"pokegents/dashboard/server"
-	"pokegents/dashboard/server/services"
-	"pokegents/dashboard/server/store"
+	"github.com/yonatankarp/the-binding-of-agents/server"
+	"github.com/yonatankarp/the-binding-of-agents/server/services"
+	"github.com/yonatankarp/the-binding-of-agents/server/store"
 )
 
 func main() {
