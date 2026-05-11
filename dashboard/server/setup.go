@@ -660,6 +660,14 @@ func (s *Server) ensureBackend(id string) error {
 			return s.backendStore.EnsureReadableDefaults()
 		}
 		return nil
+	case "openclaw-acp":
+		// OpenClaw is config-registered but lacks an ACP adapter — launches
+		// will surface an error from the chat-handler layer. Backend appears
+		// in pickers; full wire-up is a follow-up task.
+		if _, ok := s.backendStore.Get("openclaw"); !ok {
+			return s.backendStore.EnsureReadableDefaults()
+		}
+		return nil
 	default:
 		if _, ok := s.backendStore.Get(id); !ok {
 			return fmt.Errorf("unknown backend %q", id)

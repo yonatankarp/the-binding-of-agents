@@ -134,6 +134,18 @@ if [[ ! -f "$BOA_DATA/backends.json" ]]; then
         "default": { "name": "Provider default", "model": "" }
       },
       "env": {}
+    },
+    "openclaw": {
+      "name": "OpenClaw",
+      "type": "openclaw-acp",
+      "default_model": "default",
+      "models": {
+        "default":  { "name": "Provider default", "model": "" },
+        "gpt-5":    { "name": "OpenAI GPT-5", "model": "openai/gpt-5" },
+        "sonnet":   { "name": "Claude Sonnet 4.6 via OpenClaw", "model": "anthropic/claude-sonnet-4-6" },
+        "ollama":   { "name": "Local Ollama", "model": "ollama/llama3.3" }
+      },
+      "env": {}
     }
   }
 }
