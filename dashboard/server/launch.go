@@ -257,7 +257,7 @@ func (s *Server) composeMessagingPrompt() string {
 
 You are one of several concurrent coding agents managed by pokegents. You can communicate with other agents using MCP tools.
 
-**Available MCP tools (pokegents-messaging):**
+**Available MCP tools (boa-messaging):**
 - ` + "`list_agents`" + ` — see all active agents and their status
 - ` + "`send_message(to, content)`" + ` — send a message to another agent (use 8-char session ID prefix from list_agents)
 - ` + "`check_messages`" + ` — check your inbox for messages from other agents
