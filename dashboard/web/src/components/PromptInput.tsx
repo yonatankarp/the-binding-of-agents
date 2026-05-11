@@ -243,7 +243,7 @@ export function PromptInput({
           placeholder={placeholder ?? 'What will you do?'}
           disabled={disabled}
           className="w-full gba-dialog-dark text-m leading-snug theme-font-mono rounded-md px-2.5 py-1 theme-placeholder-input outline-none focus:border-accent-blue transition-colors resize-none box-border disabled:opacity-70"
-          style={{ minHeight: 22, maxHeight, fontSize: variant === 'chat' ? 'var(--chat-panel-output-font-size, 13px)' : 'var(--agent-card-output-font-size, 10px)' }}
+          style={{ minHeight: 22, maxHeight, fontSize: (variant as string) === 'chat' ? 'var(--chat-panel-output-font-size, 13px)' : 'var(--agent-card-output-font-size, 10px)' }}
         />
       </form>
     )
