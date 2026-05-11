@@ -33,7 +33,6 @@ dashboard/dashboard
 .claude/
 
 # Local Go binary build alongside the running one
-dashboard/pokegents-dashboard.new
 dist/
 
 # Built Go binary (produced by install.sh + goreleaser)

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 
 // ── Types ──────────────────────────────────────────────────
 
-export interface PokeballAnim {
+export interface OrbAnim {
   id: string
   type: 'recall' | 'deploy'
   sprite: string
@@ -20,7 +20,7 @@ export interface PokeballAnim {
 }
 
 interface Props {
-  animations: PokeballAnim[]
+  animations: OrbAnim[]
   onComplete: (id: string) => void
 }
 
@@ -36,7 +36,7 @@ export function DoorAnimationLayer({ animations, onComplete }: Props) {
   )
 }
 
-function SingleAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete: () => void }) {
+function SingleAnimation({ anim, onComplete }: { anim: OrbAnim; onComplete: () => void }) {
   if (anim.type === 'recall') return <RecallAnimation anim={anim} onComplete={onComplete} />
   return <DeployAnimation anim={anim} onComplete={onComplete} />
 }
@@ -45,7 +45,7 @@ function SingleAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete:
 // Timeline: beam(400ms) → fly(800ms) → done
 // Total: ~1200ms
 
-function RecallAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete: () => void }) {
+function RecallAnimation({ anim, onComplete }: { anim: OrbAnim; onComplete: () => void }) {
   const [phase, setPhase] = useState<'beam' | 'fly' | 'done'>('beam')
 
   useEffect(() => {
@@ -109,7 +109,7 @@ function RecallAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete:
 // Timeline: fly(800ms) → bounce+morph(800ms) → done
 // Total: ~1600ms
 
-function DeployAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete: () => void }) {
+function DeployAnimation({ anim, onComplete }: { anim: OrbAnim; onComplete: () => void }) {
   const [phase, setPhase] = useState<'fly' | 'bounce' | 'done'>('fly')
 
   useEffect(() => {
@@ -189,7 +189,7 @@ function DeployAnimation({ anim, onComplete }: { anim: PokeballAnim; onComplete:
 // ── Hook ───────────────────────────────────────────────────
 
 export function useDoorAnimations() {
-  const [animations, setAnimations] = useState<PokeballAnim[]>([])
+  const [animations, setAnimations] = useState<OrbAnim[]>([])
   const pendingCallbacks = useRef<Map<string, () => void>>(new Map())
 
   const triggerRecall = useCallback((
