@@ -51,7 +51,7 @@ export function ChatStatusBar({ agent, shells, children }: ChatStatusBarProps) {
 
 
   return (
-    <div className="shrink-0 px-3 py-1.5 border-t theme-border-subtle text-m theme-font-mono theme-text-muted select-none">
+    <div className="shrink-0 px-3 py-1.5 border-t theme-border-subtle text-xs theme-font-mono theme-text-muted select-none">
       <div className="flex items-center gap-3">
         {agent.model && (
           <span className="theme-text-muted">{agent.model}</span>
@@ -97,7 +97,7 @@ function BgShellSummary({ shells }: { shells: BgShell[] }) {
     <div className="relative mt-1" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <div className="flex items-center gap-2 px-1.5 py-0.5 cursor-default">
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${running.length > 0 ? 'bg-accent-yellow animate-pulse-soft' : 'bg-accent-green'}`} />
-        <span className="theme-text-muted text-m theme-font-mono">{label}</span>
+        <span className="theme-text-muted text-xs theme-font-mono">{label}</span>
       </div>
       {hover && (
         <div className="absolute bottom-full left-0 right-0 mb-1 bg-surface-1 border theme-border-subtle rounded-md shadow-lg p-2 space-y-1 z-50">
@@ -107,7 +107,7 @@ function BgShellSummary({ shells }: { shells: BgShell[] }) {
               : (s.endedAt && s.startedAt ? Math.max(0, Math.floor((s.endedAt - s.startedAt) / 1000)) + 's' : '')
             const typeLabel = s.type === 'agent' ? 'agent' : s.type === 'monitor' ? 'monitor' : 'shell'
             return (
-              <div key={s.taskId} className="flex items-center gap-2 text-m theme-font-mono">
+              <div key={s.taskId} className="flex items-center gap-2 text-xs theme-font-mono">
                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[s.status]}`} />
                 <span className="theme-text-faint text-s shrink-0">{typeLabel}</span>
                 <span className="theme-text-secondary truncate flex-1">{truncateCommand(s.command, 45)}</span>

@@ -293,6 +293,9 @@ function GridCell({
   }, [id])
 
   const isGroup = id.startsWith('group:')
+  // The basement-map card spans 2x2 cells so the room is large enough to
+  // walk through and other agents flow around it.
+  const isTown = id === 'town'
 
   return (
     <div
@@ -309,7 +312,9 @@ function GridCell({
         // px past the rounded corners) and the bottom-right would read as
         // square. AgentCard uses `overflow-visible` so sprite bubbles
         // can extend past the card top, so dropping the cell-level clip is safe.
-        height: cellH,
+        height: isTown ? cellH * 2 + gap : cellH,
+        gridColumn: isTown ? 'span 2' : undefined,
+        gridRow: isTown ? 'span 2' : undefined,
         minHeight: 0,
         // Hide the source card while dragging; the ghost follows the cursor.
         visibility: isDragging ? 'hidden' : 'visible',
