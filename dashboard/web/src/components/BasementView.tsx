@@ -180,7 +180,7 @@ function computeAlphaBounds(img: HTMLImageElement): { minX: number; minY: number
 // Default mask: everything walkable. The crop already removes the
 // trees/mountains border, so within the visible playable area the user paints
 // obstacles (buildings, pond) and zones with the brush toolbar in debug mode.
-// Module-level mutable copy of the mask. Hydrated from `/api/town-mask` on
+// Module-level mutable copy of the mask. Hydrated from `/api/basement-mask` on
 // mount (if a saved version exists) and mutated in place when the user paints
 // in debug mode. Pathfinding/spawn helpers read from this rather than the
 // constant so paints take effect immediately without threading state through
@@ -571,7 +571,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
   // scatter sprites onto cells the user has painted as walls.
   const [maskReady, setMaskReady] = useState(false)
   useEffect(() => {
-    fetch('/api/town-mask')
+    fetch('/api/basement-mask')
       .then(r => (r.status === 204 ? null : r.json()))
       .then(data => {
         if (
@@ -607,7 +607,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
       clearTimeout(persistTimer.current)
       persistTimer.current = null
     }
-    fetch('/api/town-mask', {
+    fetch('/api/basement-mask', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cols: COLS, rows: ROWS, mask: next }),
@@ -1008,7 +1008,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
               editorDragRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top }
             }}
           >
-            <strong style={{ color: 'var(--theme-text-primary)', fontSize: 'var(--theme-type-l)', flex: 1 }}>Town editor</strong>
+            <strong style={{ color: 'var(--theme-text-primary)', fontSize: 'var(--theme-type-l)', flex: 1 }}>Basement editor</strong>
             <button
               onClick={(e) => { e.stopPropagation(); onCloseEditor?.() }}
               style={{ color: 'var(--theme-text-secondary)', border: '1px solid var(--theme-panel-divider)', borderRadius: 3, padding: '1px 6px' }}
@@ -1062,7 +1062,7 @@ export function BasementView({ agents, onSelect, selectedId, debug = false, newM
               className="gba-button"
               style={{ fontSize: 'var(--theme-type-m)', padding: '5px 8px', flex: 1 }}
             >
-              Save town config
+              Save basement config
             </button>
             {savedFlash && <span style={{ color: 'var(--theme-accent-green)', fontSize: 'var(--theme-type-m)' }}>saved</span>}
           </div>

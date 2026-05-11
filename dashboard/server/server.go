@@ -296,8 +296,8 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/activity", s.handleGetActivity)
 	s.mux.HandleFunc("GET /api/grid-layout", s.handleGetGridLayout)
 	s.mux.HandleFunc("PUT /api/grid-layout", s.handleSetGridLayout)
-	s.mux.HandleFunc("GET /api/town-mask", s.handleGetTownMask)
-	s.mux.HandleFunc("PUT /api/town-mask", s.handleSetTownMask)
+	s.mux.HandleFunc("GET /api/basement-mask", s.handleGetBasementMask)
+	s.mux.HandleFunc("PUT /api/basement-mask", s.handleSetBasementMask)
 	s.mux.HandleFunc("GET /api/grid-profiles", s.handleListGridProfiles)
 	s.mux.HandleFunc("GET /api/grid-profiles/{name}", s.handleGetGridProfile)
 	s.mux.HandleFunc("PUT /api/grid-profiles/{name}", s.handleSetGridProfile)
@@ -921,12 +921,12 @@ func (s *Server) handleSetGridLayout(w http.ResponseWriter, r *http.Request) {
 // at ~/.the-binding-of-agents/basement-floor-mask.json. The frontend's debug-mode click-to-toggle
 // PUTs here. The file is human-readable so the source mask constant in
 // BasementView.tsx can be updated by hand once the user is happy with the layout.
-func (s *Server) townMaskPath() string {
+func (s *Server) basementMaskPath() string {
 	return filepath.Join(s.state.dataDir, "basement-floor-mask.json")
 }
 
-func (s *Server) handleGetTownMask(w http.ResponseWriter, r *http.Request) {
-	data, err := os.ReadFile(s.townMaskPath())
+func (s *Server) handleGetBasementMask(w http.ResponseWriter, r *http.Request) {
+	data, err := os.ReadFile(s.basementMaskPath())
 	if err != nil {
 		// New installs should use the checked-in basement config rather than an
 		// all-walkable generated mask. User saves still override this file at
@@ -943,13 +943,13 @@ func (s *Server) handleGetTownMask(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func (s *Server) handleSetTownMask(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleSetBasementMask(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	if err := os.WriteFile(s.townMaskPath(), data, 0644); err != nil {
+	if err := os.WriteFile(s.basementMaskPath(), data, 0644); err != nil {
 		http.Error(w, "write failed", http.StatusInternalServerError)
 		return
 	}
