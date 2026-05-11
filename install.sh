@@ -150,7 +150,7 @@ if [[ ! -x "$POKEGENTS_ROOT/dashboard/the-binding-of-agents-dashboard" || ! -d "
     log ""
     log "Building dashboard for source checkout..."
     (cd "$POKEGENTS_ROOT/dashboard" && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o the-binding-of-agents-dashboard .) && log "✓ Dashboard server built"
-    "$POKEGENTS_ROOT/scripts/fetch-pokesprite-assets.sh" && (cd "$POKEGENTS_ROOT/dashboard/web" && npm ci --silent && npm run build) && log "✓ Dashboard web built"
+    (cd "$POKEGENTS_ROOT/dashboard/web" && npm ci --silent && npm run build) && log "✓ Dashboard web built"
     (cd "$POKEGENTS_ROOT/dashboard/acp-fork" && npm ci --silent && if [[ -f tsconfig.json ]]; then npm run build; else test -f dist/index.js; fi) && log "✓ ACP adapter ready"
   else
     warn "Dashboard binary/assets are missing. Install from a release artifact, or run with POKEGENTS_DEV_BUILD=1 for source builds."
