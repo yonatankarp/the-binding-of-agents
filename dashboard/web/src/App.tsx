@@ -147,12 +147,6 @@ function CollapsedBubble({ agent, sprite, onExpand, bubbleRef, onMenu }: {
         className="relative flex items-center justify-center group" style={{ width: 32, height: 32 }}
         title={`${agent.display_name} — click to expand`}
       >
-        <img
-          src="/sprites/pokeball.png"
-          alt=""
-          className="absolute opacity-50 group-hover:opacity-80 transition-opacity"
-          style={{ imageRendering: 'pixelated', width: 32, height: 32 }}
-        />
         <PixelSprite
           sprite={sprite}
           alt=""
@@ -218,12 +212,6 @@ function CollapsedGroupBubble({ name, members, sprite, onExpand, bubbleRef }: {
         className="relative flex items-center justify-center group" style={{ width: 32, height: 32 }}
         title={`${name} — ${members.length} agents — click to open`}
       >
-        <img
-          src="/sprites/pokeball.png"
-          alt=""
-          className="absolute opacity-50 group-hover:opacity-80 transition-opacity"
-          style={{ imageRendering: 'pixelated', width: 32, height: 32 }}
-        />
         <PixelSprite
           sprite={sprite}
           alt=""
